@@ -1,8 +1,14 @@
+// babel
+import "babel-polyfill";
+import promise from 'es6-promise';
+promise.polyfill();
+
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-
+// vantComponents
+import vantComponents from './common/js/vantComponents.js';
 Vue.config.productionTip = false
 
 new Vue({

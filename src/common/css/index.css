@@ -1,0 +1,115 @@
+.mobile-index {
+	height: 100vh;
+	background: #eee;
+	overflow: hidden;
+}
+
+.content {
+	display: flex;
+	flex-flow: column;
+	width: 100%;
+	position: absolute;
+	top: 60px;
+	bottom: 0;
+
+}
+
+.container {
+	flex: 1;
+	background: #fff;
+
+}
+
+.floor {
+
+	padding: 5px 10px 0;
+	background: #fff;
+	border-top: 1px solid #ddd;
+}
+
+.floor-old {
+	height: 50px;
+	background: #ddd;
+	border-top: 1px solid #ddd;
+}
+
+.floor-old .floor-btn {
+	height: 50px;
+	border: 0;
+	font-size: 16px;
+	border-radius: 0;
+}
+
+.floor-btn-000 .van-button__text {
+	color: #595959;
+}
+
+.floor .checkbox-btn,
+.floor-old .checkbox-btn {
+	height: 50px;
+	display: block;
+	border-right: 1px solid #fff;
+}
+
+.floor .checkbox-btn .van-checkbox__icon,
+.floor-old .checkbox-btn .van-checkbox__icon {
+	text-align: center;
+	line-height: 50px;
+
+}
+
+.floor .checkbox-btn .van-checkbox__icon .van-icon,
+.floor-old .checkbox-btn .van-checkbox__icon .van-icon {
+	display: inline-block;
+}
+.child-view{
+	position: absolute;
+	width:100%;
+	top:0;
+	bottom: 0;
+	z-index: 1
+}
+.van-list {
+	height: calc(100vh - 166px);
+	overflow-x: hidden;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.van-checkbox-group {}
+
+.container-tabs .van-tab {
+	border-bottom: 1px solid #ddd;
+}
+/* slide-fade */
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+    transition: all .3s ease;
+}
+
+.slide-fade-enter,
+.slide-fade-leave-to {
+    transform: translateX(100%);
+}
+
+/* slide-fadeY */
+.slide-fadeY-enter-active,
+.slide-fadeY-leave-active {
+    transition: all .3s ease;
+}
+
+.slide-fadeY-enter,
+.slide-fadeY-leave-to {
+    transform: translateY(-100%);
+}
+
+/* slide-fadeX */
+.slide-fadeX-enter-active,
+.slide-fadeX-leave-active {
+    transition: all .3s ease;
+}
+
+.slide-fadeX-enter,
+.slide-fadeX-leave-to {
+    transform: translateX(100%);
+}
