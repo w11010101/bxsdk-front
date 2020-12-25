@@ -1,125 +1,243 @@
-let formData = {
-    code: '发票代码',
-    invoiceCode: '', //发票代码
-    codePlaceHolder: '请输入发票代码',
+export let formData = {
+    invoiceCode: {
+        label: '发票代码',
+        value: '', //发票代码
+        placeholder: '请输入发票代码',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }],
+        maxLength:12,
+        type:'number'
+    },
+    invoiceNo: {
+        label: '发票号码',
+        value: '', //发票号码
+        placeholder: '请输入发票号码',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }],
+        maxLength:8,
+        type:'number'
+    },
+    invoiceDate: {
+        label: '开票日期',
+        value: '', //开票日期
+        placeholder: '请选择开票日期',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }],
+        type: 'date'
+    },
+    invoiceDateTime: {
+        label: '开票日期时间',
+        value: '', //开票日期时间//显示用
+        placeholder: '请选择开票日期时间',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }]
+    },
+    verifyCode: {
+        label: '校验码',
+        value: '', //校验码后6位
+        placeholder: '请输入校验码后6位',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }]
+    },
+    buyerName: {
+        label: '购买方',
+        value: '', //购买方名称
+        placeholder: "请输入购买方",
+        required: false,
+        rules: [{ required: false, validator: valueValidator }],
+        readonly: true
+    },
+    goodsName: {
+        label: '货物或应税劳务',
+        value: '', //货物或应税劳务
+        placeholder: '请输入货物或应税劳务',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }],
+        maxLength:11,
+        readonly: true
+    },
+    fare: {
+        label: '票价',
+        value: '', //航空行程单 票价
+        placeholder: '最多11位数字(含小数点后2位)',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }],
+        maxLength:11,
+        reg:/\d+\.?\d{0,2}/
+    },
+    caacDevelopmentFund: {
+        label: '民航发展基金',
+        value: '', //航空行程单 民航发展基金
+        placeholder: '最多11位数字(含小数点后2位)',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }],
+        maxLength:11,
+        reg:/\d+\.?\d{0,2}/
+    },
+    fuelSurcharge: {
+        label: '燃油附加费',
+        value: '', //航空行程单 燃油附加费
+        placeholder: '最多11位数字(含小数点后2位)',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }],
+        maxLength:11,
+        reg:/\d+\.?\d{0,2}/
+    },
+    totalAmount: {
+        label: '票面金额',
+        value: '', //发票金额、金额 合计金额
+        placeholder: '最多11位数字(含小数点后2位)',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }],
+        maxLength:11,
+        reg:/\d+\.?\d{0,2}/
+    },
+    invoiceAmount: {
+        label: '金额',
+        value: '', //不含税价  金额(不含税)
+        placeholder: '最多11位数字(含小数点后2位)',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }],
+        maxLength:11,
+        reg:/\d+\.?\d{0,2}/
+    },
+    deductTaxAmount: {
+        label: '可抵扣税额',
+        value: '', //可抵扣税额
+        placeholder: '最多11位数字(含小数点后2位)',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }],
+        maxLength:11,
+        reg:/\d+\.?\d{0,2}/
+    },
+    realAmount: {
+        label: '实报金额',
+        value: '',
+        placeholder: '',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }],
+        maxLength:11,
+        reg:/\d+\.?\d{0,2}/
+    },
+    taxRate: {
+        label: '税率',
+        value: '',
+        placeholder: '请输入税率',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }]
+    },
+    taxAmount: {
+        label: '税额',
+        value: '',
+        placeholder: '请输入税额',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }],
+        maxLength:11,
+        reg:/\d+\.?\d{0,2}/
+    },
+    salerName: {
+        label: '销售方',
+        value: '', //销售方名称
+        placeholder: '请输入销售方',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }],
+        readonly: true
+    },
+    remark: {
+        label: '备注',
+        remark: '', //备注
+    },
+    reimbursementNote: {
+        label: '报销说明',
+        value: '', //报销说明
+        placeholder: '请输入报销说明',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }]
+    },
+    invoiceCount: {
+        label: '附件张数',
+        value: '', //附件张数
+        placeholder: '最多4位数字',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }]
+    },
+    departCity: {
+        label: '出发',
+        value: '', //出发城市
+        placeholder: '请输入出发城市',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }]
+    },
+    arriveCity: {
+        label: '到达',
+        value: '', //到达城市
+        placeholder: '请输入到达城市',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }]
+    },
+    trainNumber: {
+        label: '车次/班次',
+        value: '', //车次、班次
+        placeholder: '请输入车次',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }]
+    },
+    seatLevel: {
+        label: '座位等级',
+        value: '', //座位等级
+        placeholder: '请输入座位等级',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }]
+    },
+    riderValue: {
+        label: '乘坐人',
+        value: '',
+        placeholder: '请输入乘坐人',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }]
+    },
+    idNumber: {
+        label: '证件号',
+        value: '',
+        placeholder: '请输入证件号后4位',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }]
+    },
+    startDate: {
+        label: '出发时间',
+        value: '', //出发时间
+        placeholder: '请选择出发时间',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }]
+    },
+    endDate: {
+        label: '到达时间',
+        value: '', //到达时间
+        placeholder: '请输入到达时间',
+        required: false,
+        rules: [{ required: false, validator: valueValidator }]
+    },
+    sourceFile: {
+        label: '电子源文件',
+        value: '', //到达时间
+        placeholder: '无',
+        required: false,
+        readonly: true
+    },
+    files: {
+        label: '附件',
+        value: '', //到达时间
+        placeholder: '无',
+        required: false,
+        readonly: true
+    },
+}
 
-    number: '发票号码',
-    invoiceNo: '', //发票号码
-    electronicTicketNumber: "", //发票号码90
-    numberPlaceHolder: '请输入发票号码',
-
-    date: '开票日期',
-    invoiceDate: '', //开票日期
-    invoiceDateValue: '',
-    datePlaceHolder: '请选择开票日期',
-
-    dateTime: '开票日期时间',
-    invoiceDateTime: '', //开票日期时间//显示用
-    invoiceDateTimeValue: '', //传参用
-    dateTimePlaceHolder: '请选择开票日期时间',
-
-    checkCode: '校验码',
-    verifyCode: '', //校验码后6位
-    checkCodePlaceHolder: '请输入校验码后6位',
-
-    buyName: '购买方',
-    buyerName: '', //购买方名称
-    buyNamePlaceHolder: "请输入购买方",
-
-    goods: '货物或应税劳务',
-    goodsName: '', //货物或应税劳务
-    goodsPlaceHolder: '请输入货物或应税劳务',
-
-    fareLabel: '票价',
-    fare: '', //航空行程单 票价
-    farePlaceHolder: '最多11位数字(含小数点后2位)',
-
-    caacDevelopmentFundLabel: '民航发展基金',
-    caacDevelopmentFund: '', //航空行程单 民航发展基金
-    caacDevelopmentFundPlaceHolder: '最多11位数字(含小数点后2位)',
-
-    fuelSurchargeLabel: '燃油附加费',
-    fuelSurcharge: '', //航空行程单 燃油附加费
-    fuelSurchargePlaceHolder: '最多11位数字(含小数点后2位)',
-
-    taxCount: '票面金额',
-    taxCount1: '金额',
-    taxCount2: '合计金额',
-    totalAmount: '', //发票金额、金额
-    taxCountPlaceHolder: '最多11位数字(含小数点后2位)',
-    taxCountPlaceHolder1: '最多11位数字(含小数点后2位)',
-    taxCountPlaceHolder2: '最多11位数字(含小数点后2位)',
-
-    notTax: '金额',
-    notTax1: '金额(不含税)',
-    notTax2: '票面金额',
-    invoiceAmount: '', //不含税价
-    notTaxPlaceHolder: '最多11位数字(含小数点后2位)',
-
-    realAmountName: '实报金额',
-    realAmount: '',
-    realAmountPlaceHolder: '',
-
-    rate: '税率',
-    taxRate: '',
-    taxRatePlaceHolder: '请输入税率',
-
-    amount: '税额',
-    taxAmount: '',
-    taxAmountPlaceHolder: '请输入税额',
-
-    saleName: '销售方',
-    salerName: '', //销售方名称
-    saleNamePlaceHolder: '请输入销售方',
-
-    remarkName: '备注',
-    reimburseRemark: '报销说明',
-    remark: '', //备注
-    reimbursementNote: '', //报销说明
-    remarkPlaceHolder: '请输入报销说明',
-
-    photo: '图片',
-    photoValue: '', //图片src base64
-    photoUrl: '', //压缩后图片base64
-    bigPhotoSrc: '', //放大图片url
-
-    money: '金额',
-    moneyPlaceHolder: '最多11位数字(含小数点后2位)',
-    enclosure: '附件张数',
-    invoiceCount: '', //附件张数
-    enclosurePlaceHolder: '最多4位数字',
-    startCity: '出发',
-    departCity: '', //出发城市
-    startCityPlaceholder: '请输入出发城市',
-    endCity: '到达',
-    arriveCity: '', //到达城市
-    endCityPlaceholder: '请输入到达城市',
-    trainNumberName: '车次/班次',
-    trainNumber: '', //车次、班次
-    trainNumberPlaceholder: '请输入车次',
-
-    seatLevelText: '座位等级',
-    seatLevel: '', //座位等级
-    seatLevelPlaceholder: '请输入座位等级',
-
-    riderName: '乘坐人',
-    riderValue: '',
-    riderPlaceHolder: '请输入乘坐人',
-    idName: '证件号',
-    idNumber: '',
-    idPlaceHolder: '请输入证件号后4位',
-    startDateName: '出发时间',
-    startDate: '', //出发时间
-    startDateValue: '',
-    startDatePlaceHolder: '请选择出发时间',
-    endDateName: '到达时间',
-    endDate: '', //到达时间
-    endDateValue: '',
-    endDatePlaceHolder: '请输入到达时间',
-    airNumberName: '班次',
-    airNumberPlaceholder: '请输入班次',
-    checkState: '0', //查验状态
-    checkStateStr: '查验状态', //查验状态str
-    reimburseState: '',
-    reimburseStateStr: '报销状态',
+function valueValidator(value) {
+    console.log(9,'valueValidator',value)
+    // if (value) {
+    //  Toast({
+    //      message: '不能为空'
+    //  })
+    // }
 }

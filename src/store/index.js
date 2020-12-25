@@ -6,6 +6,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
 	state: {
 		invoiceType: [
+			
 			{ "invoiceTypeName": "增值税专用发票", "invoiceTypeCode": "01" },
 			{ "invoiceTypeName": "增值税普通发票", "invoiceTypeCode": "04" },
 			{ "invoiceTypeName": "增值税普通发票(电子)", "invoiceTypeCode": "10" },
@@ -13,6 +14,7 @@ export default new Vuex.Store({
 			{ "invoiceTypeName": "增值税电子普通发票(通行费)", "invoiceTypeCode": "14" },
 			{ "invoiceTypeName": "机动车销售统一发票", "invoiceTypeCode": "03" },
 			{ "invoiceTypeName": "货运运输业增值税专用发票", "invoiceTypeCode": "02" },
+
 			{ "invoiceTypeName": "出租车票", "invoiceTypeCode": "91" },
 			{ "invoiceTypeName": "火车票", "invoiceTypeCode": "92" },
 			{ "invoiceTypeName": "航空客运电子客票行程单", "invoiceTypeCode": "90" },

@@ -4,38 +4,36 @@
 		<div class="detail-header">
 			<div class='detail-header-bg'>
 				<van-row type="flex" justify="space-between">
-					<van-col span='16'>
-						<div class='select-invoice' @click='selectInvoiceFn'>{{activeInvoiceType.text}}
+					<van-col span='18'>
+						<div class='select-invoice' @click='selectInvoiceFn'>{{getInvoiceTypeText(activeInvoiceType.invoiceTypeCode)}}
 							<van-icon name="arrow-down" class='select-arrow-down' :class='{"select-arrow-down-focus":selectState}' />
 						</div>
 					</van-col>
-					<van-col span='8'>
-						<van-image width="80" height="80" lazy-load src="https://img.yzcdn.cn/vant/cat.jpeg" @click='previewImgFn' />
+					<van-col span='6'>
+						<van-image class='detail-header-img' width="60" height="60" lazy-load src="https://img.yzcdn.cn/vant/cat.jpeg" @click='previewImgFn' />
 					</van-col>
 				</van-row>
 			</div>
 		</div>
+		<!-- 查验状态 -->
+		<div class='check-status'>
+			查验结果：<span>查验成功</span>
+		</div>
 		<!-- 表单 -->
-		<div>
+		<div class='detail-form'>
 			<van-form @submit="onSubmit" :validate-first='true'>
-				<van-field v-model="formData.invoiceCode" name="发票代码" label="发票代码" placeholder="请输入发票代码" :rules="[{ required: true, }]" clearable required />
-				<van-field v-model="formData.invoiceNo" name="发票号码" label="发票号码" placeholder="请输入发票号码" :rules="[{ required: true, }]" clearable required />
-				<van-field readonly clickable name="calendar" :value="formData.invoiceDate" label="开票日期" placeholder="点击选择开票日期" @click="showCalendar = true" />
-				<FormData :showOptions='showOptions'></FormData>
+				<FormDataItem :showOptions='showOptions'></FormDataItem>
 				<!--  -->
-				<van-uploader :before-read="beforeRead" multiple />
-				<div style="margin: 16px;">
-					<van-button block type="info" native-type="submit">保存</van-button>
+				<!-- <van-uploader :before-read="beforeRead" multiple /> -->
+				<!--  -->
+				<div class='form-submit'>
+					<van-button block color='#229FFF' native-type="submit">保存</van-button>
 				</div>
 			</van-form>
 		</div>
 		<!-- 发票选择 -->
-		<van-popup v-model="selectInvoiceShow" position="bottom" :style="{ height: '40%' }">
+		<van-popup v-model="selectInvoiceShow" position="bottom" :style="{ height: '50%' }" get-container="body" >
 			<van-picker show-toolbar :columns="invoiceType" @confirm="onConfirm" @cancel="onCancel" />
-		</van-popup>
-		<!-- 开票日期 -->
-		<van-popup v-model="showCalendar" position="bottom" :style="{ height: '40%' }">
-			<van-datetime-picker v-model="currentDate" type="date" :min-date="minDate" :max-date="maxDate" @confirm='selectDateFn' />
 		</van-popup>
 		<!-- 图片浏览 -->
 		<van-image-preview v-model="previewShow" :images="images" :showIndex="false" @change="onpPreviewImgChange"></van-image-preview>
@@ -43,53 +41,54 @@
 </template>
 <script>
 import { mapState, mapMutations } from 'vuex';
-import FormData from '@/components/formData'
-import common from '@/common/js/common.js';
+import FormDataItem from '@/components/formDataItem'
+import { uploadFileFn, getInvoiceTypeText } from '@/common/js/common.js';
 
 export default {
 	name: '',
 	mixins: [],
 	components: {
-		FormData
+		FormDataItem
 	},
 	props: {},
 	data() {
 		return {
+			// 当前选择的发票类型
 			activeInvoiceType: {
-				text: "发票选择"
+				invoiceTypeCode: "01"
 			},
+			localInvoiceType: [],
 			selectState: false,
 			selectInvoiceShow: false,
-			localInvoiceType: [],
+			// 图片预览图片
 			previewShow: false,
 			images: [
 				require('../../assets/logo.png'),
 			],
-			formData: {
-				invoiceCode: "",
-				invoiceNo: "",
-				invoiceDate: "",
-			},
-			showCalendar: false,
-			minDate: new Date(2020, 0, 1),
-			maxDate: new Date(2025, 10, 1),
-			currentDate: new Date(),
 
-			showOptions: [ // 要渲染的表单字段
-				'invoiceCode',
-				'invoiceNo',
-				'buyerName',
-				'goodsName',
-				'fare',
+			// 要渲染的表单字段
+			showOptions: [
+				{ key: 'invoiceCode', required: true },
+				{ key: 'invoiceNo', required: true },
+				{ key: 'invoiceDate', required: true, type: 'date' },
+
+				{ key: 'buyerName', required: false },
+				{ key: 'goodsName', required: false },
+				{ key: 'salerName', required: false },
+				{ key: 'taxRate', required: false, unit: '%' },
+
+				{ key: 'fare', required: true },
+				{ key: 'invoiceAmount', required: true },
+				{ key: 'deductTaxAmount', required: true },
+				{ key: 'reimbursementNote', required: true },
+				{ key: 'sourceFile', required: false },
+				{ key: 'files', required: false, type: 'files' },
+
 			],
-			ZZSshowOptions: [ // 增值税发票票 要渲染的表单字段
-				'invoiceCode',
-				'invoiceNo',
-				'buyerName',
-				'goodsName',
-				'fare',
-			],
-			uploadFileList:[]
+
+			// 压缩有的图片集合
+			uploadFileList: [],
+
 		}
 	},
 	computed: {
@@ -102,18 +101,23 @@ export default {
 	},
 	created() {},
 	mounted() {
-		this.localInvoiceType = this.invoiceType.map(item => {
-			item.text = item.invoiceTypeName;
-			return item;
-		})
+		this.formatInvoiceOption()
+
 	},
 	methods: {
+		// 格式化发票类型
+		formatInvoiceOption() {
+			this.invoiceType.forEach(item => {
+				item.text = item.invoiceTypeName
+				this.localInvoiceType.push(item)
+			})
+		},
 		selectInvoiceFn() {
 			this.selectState = false;
 			this.selectInvoiceShow = true;
-			console.log(123)
 		},
 		onConfirm(item) {
+			console.log(item)
 			this.activeInvoiceType = item;
 			this.selectInvoiceShow = false;
 		},
@@ -130,91 +134,16 @@ export default {
 		onSubmit() {
 
 		},
-		// 开票日期选择
-		selectDateFn(date) {
-			console.log(date)
-			this.formData.invoiceDate = new Date(date).toLocaleDateString()
-			this.showCalendar = false;
-		},
-		// 
+		// vant上传组件
 		beforeRead(files) {
-			console.log('files = ', files);
-			console.log('common.compress = ', common.compress);
-
+			console.log(0, files)
 			let that = this;
-			// 上传
-			this.uploadFileFn(files).then(resolve => {
+			uploadFileFn(files).then(resolve => {
 				console.log(3, resolve)
 			})
 		},
-		async uploadFileFn(files) {
-			let _files = await this.forEachFiles(files);
-			console.log(1,_files)
-			let uploaded = await this.uploadFn(_files);
-			return uploaded;
-		},
-		// 循环压缩
-		forEachFiles(files){
-			return new Promise((res, reject) => {
-				
-				res(files.map(file => {
-					return this.compressFileFn(file).then(resolve => {
-						console.log(5,resolve)
-						return resolve;
-					});
-					
-					// let fr = new FileReader();
-					// fr.readAsDataURL(file);
-					// fr.onloadend = function(img) {
-					// 	let imgObj = new Image();
-					// 	imgObj.src = this.result;
-					// 	imgObj.onload = function() {
-					// 		// compress 图片压缩 
-					// 		let data = common.compress(imgObj);
-					// 		let _file = common.base64ToFile(data,file.name);
-					// 		console.log(_file);
-					// 		res(_file);
-					// 	}
-
-					// }
-
-				}));
-			})
-			
-		},
-		// 文件压缩和转换
-		compressFileFn(file) {
-			return new Promise((resolve, reject) => {
-				let fr = new FileReader();
-				fr.readAsDataURL(file);
-				fr.onloadend = function(img) {
-
-					let imgObj = new Image();
-					imgObj.src = this.result;
-					imgObj.onload = function() {
-						// compress 图片压缩 
-						let data = common.compress(imgObj);
-						let _file = common.base64ToFile(data,file.name);
-						resolve(_file);
-					}
-
-				}
-			})
-		},
-		
-		uploadFn(files) {
-			// axios
-			console.log(2, files);
-			// files.forEach(file=>{
-			// 	file.then(res=>{
-			// 		console.log(4,res)
-			// 	})
-			// })
-			return new Promise((resolve, reject) => {
-				console.log('finish')
-				resolve('finish')
-			})
-		}
+		// 发票类型转换
+		getInvoiceTypeText
 
 	},
 
@@ -239,7 +168,7 @@ export default {
 }
 
 .select-invoice {
-	font-size: 14px;
+	font-size: 16px;
 	line-height: 80px;
 	color: #595959;
 }
@@ -250,5 +179,51 @@ export default {
 
 .select-arrow-down-focus {
 	transform: rotateX(180deg);
+}
+
+.van-form {
+	height: 100%;
+	position: relative;
+}
+
+.check-status {
+	height: 30px;
+	line-height: 30px;
+	text-align: center;
+	background: #fff;
+	font-size: 14px;
+	border-bottom: 1px solid #ddd;
+	box-sizing: border-box;
+}
+
+.check-status span {}
+
+.check-status span.check-success {
+	color: #52C41A;
+}
+
+.check-status span.check-fail {
+	color: #FF3737;
+}
+
+.detail-form {
+	position: absolute;
+	width: 100%;
+	top: 140px;
+	bottom: 0;
+	left: 0;
+}
+
+.form-submit {
+	position: absolute;
+	width: 100%;
+	bottom: 0;
+
+}
+
+.detail-header-img {
+	margin: 10px;
+	border-radius: 4px;
+	overflow: hidden;
 }
 </style>

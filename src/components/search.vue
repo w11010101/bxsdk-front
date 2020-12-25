@@ -5,7 +5,9 @@
 				<van-search v-model="searchVal" placeholder="请输入搜索关键词" clearable />
 			</van-col>
 			<van-col span='3'>
-				<van-button class='search-filter-btn' icon="ellipsis" type="default" plain @click='filterShow=true'></van-button>
+				<van-button class='search-filter-btn'  type="default" plain @click='filterShow=true'>
+					<van-icon name="filter-o" size='24'/>
+				</van-button>
 			</van-col>
 			<van-popup v-model="filterShow" position="top" :get-container="getContainer">
 				<van-search v-model="searchVal" placeholder="请输入搜索关键词" clearable show-action @cancel="onCancel" />
@@ -43,6 +45,7 @@
 	</div>
 </template>
 <script>
+	import { mapState, mapMutations } from 'vuex';
 export default {
 	data() {
 		return {
@@ -53,29 +56,11 @@ export default {
 				value: 'all'
 			}],
 
-			invoiceType: [
-				{ "invoiceTypeName": "增值税专用发票", "invoiceTypeCode": "01" },
-				{ "invoiceTypeName": "增值税普通发票", "invoiceTypeCode": "04" },
-				{ "invoiceTypeName": "增值税普通发票(电子)", "invoiceTypeCode": "10" },
-				{ "invoiceTypeName": "增值税普通发票(卷式)", "invoiceTypeCode": "11" },
-				{ "invoiceTypeName": "增值税电子普通发票(通行费)", "invoiceTypeCode": "14" },
-				{ "invoiceTypeName": "机动车销售统一发票", "invoiceTypeCode": "03" },
-				{ "invoiceTypeName": "货运运输业增值税专用发票", "invoiceTypeCode": "02" },
-				{ "invoiceTypeName": "出租车票", "invoiceTypeCode": "91" },
-				{ "invoiceTypeName": "火车票", "invoiceTypeCode": "92" },
-				{ "invoiceTypeName": "航空客运电子客票行程单", "invoiceTypeCode": "90" },
-				{ "invoiceTypeName": "公路运输客票(实名）", "invoiceTypeCode": "89" },
-				{ "invoiceTypeName": "水路运输客票(实名)", "invoiceTypeCode": "88" },
-				{ "invoiceTypeName": "其他运输客票(实名)", "invoiceTypeCode": "87" },
-				{ "invoiceTypeName": "汽车票", "invoiceTypeCode": "94" },
-				{ "invoiceTypeName": "定额发票", "invoiceTypeCode": "95" },
-				{ "invoiceTypeName": "通用机打发票", "invoiceTypeCode": "97" },
-				{ "invoiceTypeName": "政府非税收收入一般缴款书", "invoiceTypeCode": "98" },
-				{ "invoiceTypeName": "其他", "invoiceTypeCode": "00" }
-			]
+			
 		}
 	},
 	computed: {
+		...mapState(['invoiceType']),
 		getYears() {
 			let year = parseInt(new Date().getFullYear());
 			for (var i = 0; i < 3; i++) {
@@ -112,14 +97,13 @@ export default {
 }
 
 .search-tools .search-filter-btn {
-	height: 50px;
-	line-height: 50px;
-}
-
-.search-tools .search-filter-btn {
+	
 	border: 0;
 }
+.search-tools .search-filter-btn i{
 
+	line-height: 55px;
+}
 .search-dates,
 .search-invoiceType {
 	padding: 0px 20px;

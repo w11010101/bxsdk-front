@@ -4,7 +4,8 @@
     </div>
 </template>
 <script>
-import common from '@/common/js/common'
+import { IsPC } from '@/common/js/common';
+console.log(IsPC)
 export default {
     data() {
         return {
@@ -12,7 +13,7 @@ export default {
         }
     },
     mounted() {
-        if (common.IsPC()) {
+        if (IsPC()) {
             this.$router.replace('pcIndex');
         } else {
             this.$router.replace('mobileIndex');
@@ -21,7 +22,6 @@ export default {
 }
 </script>
 <style lang="scss">
-
 #app {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -42,7 +42,8 @@ export default {
         }
     }
 }
+
 [v-cloak] {
-  display: none;
+    display: none;
 }
 </style>
