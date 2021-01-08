@@ -1,5 +1,9 @@
 .mobile-index {
-	height: 100vh;
+	position: absolute;
+	width:100%;
+	top:0;
+	bottom:0;
+	left:0;
 	background: #eee;
 	overflow: hidden;
 }
@@ -11,17 +15,20 @@
 	position: absolute;
 	top: 60px;
 	bottom: 0;
+	z-index: 1
 
 }
 
 .container {
-	flex: 1;
+	height:calc(100% - 50px);
 	background: #fff;
 
 }
 
 .floor {
-
+	height:50px;
+	position: relative;
+	z-index: 1;
 	padding: 5px 10px 0;
 	background: #fff;
 	border-top: 1px solid #ddd;
@@ -67,7 +74,8 @@
 	width:100%;
 	top:0;
 	bottom: 0;
-	z-index: 1
+	z-index: 9;
+
 }
 .van-list {
 	height: calc(100vh - 166px);
@@ -112,4 +120,11 @@
 .slide-fadeX-enter,
 .slide-fadeX-leave-to {
     transform: translateX(100%);
+}
+
+.loading-toast{
+	width:50px;
+	height:50px;
+	max-width: 70%;
+    min-height: 50px;
 }

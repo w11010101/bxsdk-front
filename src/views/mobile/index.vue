@@ -1,28 +1,45 @@
 <template>
 	<div class="mobile-index">
 		<!-- 头部搜索框 和 筛选条件 -->
-		<SearchTool></SearchTool>
+		<SearchTool @onSearchCallBack='onSearchCallBackFn'></SearchTool>
 		<!-- 内容 -->
 		<div class="content">
 			<!-- 列表或tabs -->
 			<div class='container'>
 				<van-tabs v-model="active" color='#229FFF' title-active-color='#229FFF' class='container-tabs' @change='tabChangeFn'>
 					<van-tab :title="tab.name" v-for='(tab,index) in tabs' :name='tab.active' :key='index'>
-						<van-list v-model="loading" :finished="finished" class='list' finished-text="没有更多了" @load="pullUpFn" >
+						<van-list v-model="loading" :finished="finished" class='list' finished-text="没有更多了" @load="pullUpFn">
 							<van-pull-refresh v-model="isLoading" @refresh="pullDownFn">
 								<van-checkbox-group v-model="checkboxGroup" ref='checkboxGroup' @change='checkChangeFn'>
-									<van-swipe-cell v-for="(item,i) in list" :key="item" :title="item" >
-										<div class='list-item' @click='toDetailFn'>
+									<van-swipe-cell v-for="(item,i) in listData" :key="i" :title="item">
+										<div class='list-item' @click='goDetailFn(item,i)'>
 											<van-row type="flex">
 												<van-col span='4' class='checkbox-box'>
-													<van-checkbox :name='i' class='checkbox-btn' shape="square" ></van-checkbox>
+													<van-checkbox :name='i' class='checkbox-btn' shape="square"></van-checkbox>
 												</van-col>
 												<van-col span='20'>
-													<h2><label class='van-ellipsis'>发票名称{{tab.active}}</label><span>￥123456789.99</span></h2>
-													<div class='list-detial'>
-														<div><label>购方信息：</label><span class='van-ellipsis'>购方信息购方信息购方信息购方信息购方信息购方信息购方信息购方信息购方信息购方信息购方信息</span></div>
-														<div><label>销方信息：</label><span class='van-ellipsis'>销方信息销方信息销方信息销方信息销方信息销方信息销方信息销方信息销方信息销方信息：销方信息：</span></div>
-														<div><label>查验状态：</label><span class='van-ellipsis'>查验状态查验状态查验状态查验状态查验状态查验状态查验状态查验状态查验状态查验状态查验状态</span></div>
+													<h2><label class='van-ellipsis'>{{getInvoiceTypeText(item.invoiceTypeCode)}}</label><span>￥{{item.totalAmount}}</span></h2>
+													<template v-if='invoiceCodeClass.ZZSInvoiceCodes.includes(item.invoiceTypeCode)'>
+														<div class='list-detial'>
+															<div>
+																<label>购方信息：</label>
+																<span class='van-ellipsis'>{{item.buyerName}}</span>
+															</div>
+															<div>
+																<label>销方信息：</label>
+																<span class='van-ellipsis'>{{item.salerName}}</span>
+															</div>
+															<div>
+																<label>查验状态：</label>
+																<span class='van-ellipsis'>{{getCheckStateFn(item.checkState)}}</span>
+															</div>
+														</div>
+													</template>
+													<div class='list-detial list-detial-other' v-else>
+														<div>
+															<label>开票日期</label>
+															<span class='van-ellipsis'>{{item.invoiceDate}}</span>
+														</div>
 													</div>
 												</van-col>
 											</van-row>
@@ -62,23 +79,31 @@
 		</div>
 		<!--  -->
 		<transition name="slide-fade">
-            <router-view class='child-view' name='detailView' ref='child'></router-view>
-        </transition>
+			<router-view class='child-view' name='detailView' ref='child'></router-view>
+		</transition>
 	</div>
 </template>
 <script>
 // @ is an alias to /src
 import SearchTool from '@/components/search'
-
+import { resolve } from '@/common/js/formData';
+import { getInvoiceTypeText, getCheckStateFn, formatDate } from '@/common/js/common';
+import { mapState, mapMutations } from 'vuex';
+import httpApi from '@/common/js/httpApi.js'
 export default {
 	name: 'Home',
-	components: { SearchTool },
+	components: {
+		SearchTool
+	},
+	computed: {
+		...mapState(['invoiceCodeClass']),
+	},
 	data() {
 		return {
 			checked: '',
 			allChecked: false, // 全选按钮状态
 			checkboxGroup: [], // 全选集合
-			list: [],
+			listData: [],
 			// 上划和下划
 			loading: false, // 上划加载状态
 			finished: false, // 上划完成状态
@@ -87,7 +112,7 @@ export default {
 			// 
 			tabs: [{
 				name: '未报销',
-				active: 1
+				active: 0
 			}, {
 				name: '报销中',
 				active: 2
@@ -95,25 +120,63 @@ export default {
 				name: '已报销',
 				active: 3
 			}],
-			active: 1
+			active: 0,
+			height: window.innerHeight,
+			detaillist: resolve,
+			searchObj: {
+
+			},
+			page: 1,
+			rows: 10,
+			dateRank:2
 		}
 	},
+	mounted() {
+		this.pullUpFn();
+		console.log(1, this.invoiceCodeClass);
+		console.log(2, this.axios);
+		console.log(3, httpApi);
+		
+		this.selectList();
+	},
 	methods: {
+		...mapMutations(['getDetailListFn']),
+		selectList(){
+			this.axios({
+				url: httpApi.mobile.selectList,
+				data: {
+					startTime: this.searchObj.searchStartDate||'', //发票开始时间
+					endTime: this.searchObj.searchEndDate||'', //发票结束时间
+					reimburseState: this.active, //报销状态
+					invoiceTypeCode: this.searchObj.searchInvoiceType||'', //发票类型串
+					dateRank: this.dateRank, //开票时间排序
+					dimParam: this.searchObj.searchVal||'', //模糊参数
+					page: this.page, //页码
+					rows: this.rows //条数	
+				}
+			}).then(resolve => {
+				console.log('resolve = ', resolve);
+				if (resolve.length) {
+					this.$set(this.$data, 'listData', resolve);
+				} else {
+					this.$toast({
+						message: '暂无数据',
+						duration: 1500,
+					})
+				}
+
+			}).catch(reject => {
+				console.log('reject = ', reject);
+			});
+		},
 		// 上划加载
 		pullUpFn() {
 			// 异步更新数据
 			// setTimeout 仅做示例，真实场景中一般为 ajax 请求
 			setTimeout(() => {
-				for (let i = 0; i < 5; i++) {
-					this.list.push(this.list.length + 1);
-				}
 				// 加载状态结束
 				this.loading = false;
-
-				// 数据全部加载完成
-				if (this.list.length >=5) {
-					this.finished = true;
-				}
+				this.finished = true;
 			}, 1000);
 		},
 		// 下划刷新
@@ -127,9 +190,9 @@ export default {
 		// 单选
 		checkChangeFn(arr) {
 			this.checkboxGroup = arr;
-			if(arr.length == this.list.length){
+			if (arr.length == this.listData.length) {
 				this.allChecked = true;
-			}else{
+			} else {
 				this.allChecked = false;
 			}
 		},
@@ -139,25 +202,33 @@ export default {
 			this.$refs.checkboxGroup[0].toggleAll(this.allChecked);
 		},
 		// 选项卡切换
-		tabChangeFn(index){
-			this.list = [];
+		tabChangeFn(index) {
+			this.listData = [];
 			this.finished = false;
 			this.pullUpFn();
 		},
-		toDetailFn(){
-			console.log('toDetailFn')
+		//
+		goDetailFn(item, index) {
+			console.log('goDetailFn')
 			this.$router.push({
-				name:'detail',
-				params:{
-					type:'detail',
+				name: 'detail',
+				params: {
+					type: 'detail',
+					index,
+					item
 				}
 			})
+		},
+		getInvoiceTypeText,
+		getCheckStateFn,
+		formatDate,
+		onSearchCallBackFn(obj) {
+			console.log(obj)
+			this.searchObj = obj;
 		}
-		
+
 	},
-	mounted() {
-		this.pullUpFn();
-	}
+
 }
 </script>
 <style>

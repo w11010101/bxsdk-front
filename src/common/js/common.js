@@ -81,8 +81,9 @@ export function compress(img, Orientation = null) {
 }
 // base64转file
 export function base64ToFile(base, filename) {
+
 	let baseArr = base.split(','),
-		mime = baseArr[0].match(/:(.*?);/)[1],
+		mime = baseArr[0].match(/:(.*?);/) ? baseArr[0].match(/:(.*?);/)[1] : '',
 		_atob = atob(baseArr[1]),
 		l = _atob.length,
 		_uint8 = new Uint8Array(l);
@@ -90,7 +91,7 @@ export function base64ToFile(base, filename) {
 		_uint8[l] = _atob.charCodeAt(l)
 	};
 	let _file = new File([_uint8], filename, { type: mime });
-	// console.log(_file);
+
 	return _file;
 }
 // 上传
@@ -155,3 +156,99 @@ export function getInvoiceTypeText(invoiceType) {
 	if (invoiceType == "98") return "政府非税收收入一般缴款书";
 	if (invoiceType == "00") return "其他";
 }
+/*//专用增值税类型、机动车销售统一发票
+this.majioAddTaxValue = ['01', '03'].indexOf(this.invoiceTypeCode) > -1 ? true : false;
+//火车票、飞机行程单、公路、水路、其他客票
+this.trainAndAirRoadWater = ['90', '93', '92', '87', '88', '89'].indexOf(this.invoiceTypeCode) > -1 ? true : false;
+//普通增值税类型
+this.normalAddTaxValue = ['04', '10', '11', '14'].indexOf(this.invoiceTypeCode) > -1 ? true : false;
+//出租车、定额发票等其他发票
+this.taxiAndQuota = ['51', '91', '94', '95', '97', '98'].indexOf(this.invoiceTypeCode) > -1 ? true : false;
+//货物运输业增值税普通发票
+this.transportAddTaxValue = this.invoiceTypeCode == '02' ? true : false;
+//其他
+this.otherValue = this.invoiceTypeCode == '00' ? true : false;*/
+// 发票分类
+export let invoiceCodeClass = {
+
+	majioAddTaxValue: ['01', '03'], // 专用增值税类型、机动车销售统一发票
+
+	trainAndAirRoadWater: ['90', '93', '92', '87', '88', '89'], // 火车票、飞机行程单、公路、水路、其他客票
+
+	normalAddTaxValue: ['04', '10', '11', '14'], // 普通增值税类型
+
+	taxiAndQuota: ['51', '91', '94', '95', '97', '98'], // 出租车、定额发票等其他发票
+
+	transportAddTaxValue: "02", // 货物运输业增值税普通发票
+
+	otherValue: '00', // 其他
+
+	ZZSInvoiceCodes: ['01', '02', '03', '04', '10', '11', '14'], // 所有增值税
+
+}
+
+export function isToString(value) {
+	let _toString = Object.prototype.toString;
+	switch (_toString.call(value)) {
+		case "[object String]":
+			return 'String';
+			break;
+		case "[object Object]":
+			return 'Object';
+			break;
+		case "[object Number]":
+			return 'Number';
+			break;
+		case "[object Boolean]":
+			return 'Boolean';
+			break;
+		case "[object Function]":
+			return 'Function';
+			break;
+	}
+
+}
+// 查验状态
+export function getCheckStateFn(value) {
+	switch (value) {
+		case "0":
+			return '—';
+			// return '未查验'; 
+			break;
+		case "1":
+			return '查验成功';
+			break;
+		case "2":
+			return '查验失败';
+			break;
+	}
+}
+// 日期格式化 20201212 => 2020-12-12
+export function formatDate(data){
+	console.log(data)
+	if(data.includes('/')){
+		return data.replace(/\//g,'-').split('-').map((item,index)=>{
+			if(index!=0) {
+				return parseInt(item)<10?('0'+item):item;
+			}else{
+				return item;
+			}
+		}).join('-');
+	}else{
+		return data.split('').map((item,index)=>{
+			return [3,5].includes(index)?item+'-':item;
+		}).join('');
+	}
+	
+}
+// _this.replaceAndSetPosMoney(e.target,/\d+\.?\d{0,2}/,"")
+// function replaceAndSetPosMoney(obj, pattern, text) {
+// 	// var pos = this.getCursorPos(obj); //保存原始光标位置
+// 	var temp = obj.value; //保存原始值
+// 	// obj.value=temp.replace(pattern,text);//替换掉非法值
+// 	obj.value = temp.match(/\d+\.?\d{0,2}/, '')
+// 	this.value = obj.value;
+// 	this.$emit('input', obj.value);
+// 	pos = pos - (temp.length - obj.value.length); //当前光标位置
+// 	this.setCursorPos(obj, pos); //设置光标
+// }

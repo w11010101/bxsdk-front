@@ -11,6 +11,12 @@ import store from './store'
 import vantComponents from './common/js/vantComponents.js';
 Vue.config.productionTip = false
 
+// axios
+import axios from 'axios';
+import { _axios } from './common/js/request.js';
+Vue.prototype.axios = _axios;
+Vue.prototype.$axios = axios;
+// 
 new Vue({
   router,
   store,

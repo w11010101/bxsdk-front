@@ -110,4 +110,5 @@ Vue.use(DropdownMenu).use(DropdownItem);
 Vue.use(Icon);
 Vue.use(Picker);
 Vue.use(Toast);
+window._Toast = Toast
 Vue.use(Popup);
