@@ -1,51 +1,49 @@
 <template>
 	<div class="detail">
-		<van-swipe class="my-swipe" indicator-color="white" ref='detailSwipe' :initial-swipe='initialSwipe' :show-indicators='false' :loop='false'>
-			<van-swipe-item v-for='(item,index) in list' :key='index'>
-				<!-- 发票类型 和 发票图片 -->
-				<div class="detail-header">
-					<div class='detail-header-bg'>
-						<van-row type="flex" justify="space-between">
-							<van-col span='18'>
-								<div class='select-invoice' @click='selectInvoiceFn'>{{getInvoiceTypeText(item.invoiceTypeCode)}}
-									<van-icon name="arrow-down" class='select-arrow-down' :class='{"select-arrow-down-focus":selectState}' />
-								</div>
-							</van-col>
-							<van-col span='6'>
-								<van-image class='detail-header-img' width="60" height="60" lazy-load src="https://img.yzcdn.cn/vant/cat.jpeg" @click='previewImgFn' />
-							</van-col>
-						</van-row>
-					</div>
-				</div>
-				<!-- 查验状态 -->
-				<div class='check-status'>
-					查验结果：<span>查验成功</span>
-				</div>
-				<!-- 表单 -->
-				<div class='detail-form'>
-					<van-form :validate-first='true' @failed='onFailedFn' ref='formData'>
-						<!-- formData 分类：增票类、费增票（火车，飞机，定额，等） -->
-						<template v-if='item.invoiceTypeCode == "92"'>
-							<FormDataItem :showOptions='trainShowOptions' :data='item' :index='index' :isReadOnly='isReadOnly'></FormDataItem>
-						</template>
-						<template v-if='item.invoiceTypeCode == "91"'>
-							<FormDataItem :showOptions='taxiShowOptions' :data='item' :index='index' :isReadOnly='isReadOnly'></FormDataItem>
-						</template>
-						<template v-else-if='invoiceCodeClass.normalAddTaxValue.includes(item.invoiceTypeCode)'>
-							<FormDataItem :showOptions='normalAddTaxValueShowOptions' :data='item' :index='index' :isReadOnly='isReadOnly'></FormDataItem>
-						</template>
-						<template v-else>
-							<FormDataItem :showOptions='showOptions' :data='item' :index='index' :isReadOnly='isReadOnly'></FormDataItem>
-						</template>
-						<div class='form-submit'>
-							<van-button block color='#229FFF' @click='onSubmitFn'>保存</van-button>
-							<!-- <van-button block color='#229FFF'>返回</van-button> -->
-							<!-- <van-button block color='#229FFF' native-type="submit">保存</van-button> -->
+		<!-- 发票类型 和 发票图片 -->
+		<div class="detail-header">
+			<div class='detail-header-bg'>
+				<van-row type="flex" justify="space-between">
+					<van-col span='18'>
+						<div class='select-invoice' @click='changeInvoiceTypeFn'>{{getInvoiceTypeText(localData.invoiceTypeCode)}}
+							<van-icon name="arrow-down" class='select-arrow-down' :class='{"select-arrow-down-focus":selectState}' />
 						</div>
-					</van-form>
+					</van-col>
+					<van-col span='6'>
+						<van-image class='detail-header-img' width="60" height="60" lazy-load src="https://img.yzcdn.cn/vant/cat.jpeg" @click='previewImgFn' />
+					</van-col>
+				</van-row>
+			</div>
+		</div>
+		<!-- 查验状态 -->
+		<div class='check-status' :class='localData.checkState!="2"?"check-success":"check-fail"' v-if='localData.checkState!="0"'>
+			<van-icon name="checked" v-if='localData.checkState!="2"' />
+			<van-icon name="clear" v-else />
+			查验结果(<span>{{getCheckStateFn(localData.checkState)}}</span>)
+		</div>
+		<!-- 表单 -->
+		<div class='detail-form'>
+			<van-form :validate-first='true' @failed='onFailedFn' ref='formData'>
+				<!-- formData 分类：增票类、费增票（火车，飞机，定额，等） -->
+				<template v-if='localData.invoiceTypeCode == "92"'>
+					<FormDataItem :showOptions='trainShowOptions' :data='localData' :key='localData.uuid+new Date().getTime()' :isReadOnly='isReadOnly'></FormDataItem>
+				</template>
+				<template v-else-if='localData.invoiceTypeCode == "91"'>
+					<FormDataItem :showOptions='taxiShowOptions' :data='localData' :key='localData.uuid+new Date().getTime()' :isReadOnly='isReadOnly'></FormDataItem>
+				</template>
+				<template v-else-if='invoiceCodeClass.normalAddTaxValue.includes(localData.invoiceTypeCode)'>
+					<FormDataItem :showOptions='normalAddTaxValueShowOptions' :key='localData.uuid+new Date().getTime()' :data='localData' :isReadOnly='isReadOnly'></FormDataItem>
+				</template>
+				<template v-else>
+					<FormDataItem :showOptions='showOptions' :data='localData' :key='localData.uuid+new Date().getTime()' :isReadOnly='isReadOnly'></FormDataItem>
+				</template>
+				<div class='form-submit'>
+					<van-button block color='#229FFF' @click='onSubmitFn'>保存</van-button>
+					<!-- <van-button block color='#229FFF'>返回</van-button> -->
+					<!-- <van-button block color='#229FFF' native-type="submit">保存</van-button> -->
 				</div>
-			</van-swipe-item>
-		</van-swipe>
+			</van-form>
+		</div>
 		<!-- 发票选择 -->
 		<van-popup v-model="selectInvoiceShow" position="bottom" :style="{ height: '50%' }" get-container="body">
 			<van-picker show-toolbar :columns="invoiceType" @confirm="onConfirm" @cancel="onCancel" />
@@ -57,8 +55,8 @@
 <script>
 import { mapState, mapMutations } from 'vuex';
 import FormDataItem from '@/components/formDataItem'
-import { uploadFileFn, getInvoiceTypeText, invoiceCodeClass } from '@/common/js/common.js';
-import { exampleData, exampleData1 } from '@/common/js/formData';
+import { uploadFileFn, getInvoiceTypeText, invoiceCodeClass, getCheckStateFn } from '@/common/js/common.js';
+import httpApi from '@/common/js/httpApi.js'
 export default {
 	name: '',
 	mixins: [],
@@ -68,7 +66,7 @@ export default {
 	props: {},
 	data() {
 		return {
-			localData:{
+			localData: {
 
 			},
 			// 当前选择的发票类型
@@ -129,8 +127,8 @@ export default {
 			// 出租车
 			taxiShowOptions: [
 
-				{ key: 'totalAmount', required: true ,label:'总金额'},
-				// { key: 'totalNum', required: true ,label:'总张数'},
+				{ key: 'totalAmount', required: true, label: '总金额' },
+				{ key: 'totalNum', required: true ,label:'总张数'},
 				{ key: 'reimbursementNote', required: true },
 				{ key: 'sourceFile', required: false },
 				{ key: 'files', required: false, type: 'files' },
@@ -153,36 +151,59 @@ export default {
 			// 
 			list: [],
 			invoiceCodeClass,
-			initialSwipe:0
+			initialSwipe: 0,
+			activeUuid: ''
 
 		}
 	},
 	computed: {
-		...mapState(['invoiceType', 'detailList']),
+		...mapState(['invoiceType', 'detailListUuid']),
 	},
 	watch: {
 		selectInvoiceShow(newVal, oldVal) {
 			this.selectState = newVal
 		}
 	},
-	created() {},
+	created() {
+		for (let key in this.$route.params.item) {
+			this.$set(this.localData, key, this.$route.params.item[key]);
+		}
+		this.detailListUuid.forEach((item, index) => {
+			if (item == this.localData.uuid) {
+				this.initialSwipe = index;
+			}
+		})
+	},
 	mounted() {
 		this.formatInvoiceOptionFn()
-		this.$set(this.$data,'list',this.detailList);
-		
-		this.$nextTick().then(()=>{
-			console.log(13, this.$refs.formData[this.$route.params.index]);
-			// console.log(13, this.$refs.formData[this.$route.params.index].validateAll())
-			
-		})
-		this.changeSwipeIndexFn(this.$route.params.index);
+		this.findDetail(this.$route.params.item.uuid)
+		// 左右滑动事件
+		let zeptoEvent = this.$zepto('.detail.child-view');
 
+		zeptoEvent.on('swipeLeft', (event) => {
+
+			if (this.initialSwipe < this.detailListUuid.length - 1) {
+				this.activeUuid = this.detailListUuid[++this.initialSwipe];
+				this.findDetail(this.activeUuid);
+			} else {
+				this.$toast('已是最后一条');
+			}
+		})
+		zeptoEvent.on('swipeRight', (event) => {
+
+			if (this.initialSwipe > 0) {
+				this.activeUuid = this.detailListUuid[--this.initialSwipe];
+				this.findDetail(this.activeUuid);
+			} else {
+				this.$toast('已是第一条');
+			}
+		})
 	},
 	methods: {
-		// 从详情来切换到对应的index
-		changeSwipeIndexFn(index){
-			this.initialSwipe = index;
-		},
+		// 发票类型转换
+		getInvoiceTypeText,
+		// 获取查验结果
+		getCheckStateFn,
 		// 格式化发票类型
 		formatInvoiceOptionFn() {
 			this.invoiceType.forEach(item => {
@@ -190,19 +211,21 @@ export default {
 				this.localInvoiceType.push(item);
 			})
 		},
-		selectInvoiceFn() {
+		// 修改发票类型
+		changeInvoiceTypeFn() {
 			this.selectState = false;
 			this.selectInvoiceShow = true;
 		},
+		// 弹窗 发票类型 确定
 		onConfirm(item) {
-			console.log(item);
-			// this.
-			// this.activeInvoiceType = item;
+
 			this.selectInvoiceShow = false;
 		},
+		// 弹窗 发票类型 取消
 		onCancel() {
-
+			this.selectInvoiceShow = false;
 		},
+		// 图片预览
 		previewImgFn() {
 			this.previewShow = true;
 		},
@@ -224,7 +247,6 @@ export default {
 				});
 			}
 
-
 		},
 		// 表单验证失败
 		onFailedFn() {
@@ -233,18 +255,31 @@ export default {
 		},
 		// vant上传组件
 		beforeRead(files) {
-			console.log(0, files)
 			let that = this;
 			uploadFileFn(files).then(resolve => {
 				console.log(3, resolve)
 			})
 		},
-		// 发票类型转换
-		getInvoiceTypeText,
-
+		
+		// 返回
 		goBackFn() {
 			this.$route.back()
-		}
+		},
+		// 查询详情
+		findDetail(uuid) {
+			this.axios({
+				url: httpApi.mobile.findDetail,
+				data: {
+					uuid,
+				}
+			}).then(resolve => {
+				console.log('resolve = ', resolve);
+				this.$set(this.$data, 'localData', resolve);
+			}).catch(reject => {
+
+			});
+		},
+
 
 	},
 
@@ -292,27 +327,35 @@ export default {
 	line-height: 30px;
 	text-align: center;
 	background: #fff;
-	font-size: 14px;
+	font-size: 13px;
 	border-bottom: 1px solid #ddd;
 	box-sizing: border-box;
 }
 
-.check-status span {}
+.check-status .van-icon {
+	vertical-align: middle;
+	margin-top: -4px;
+}
 
-.check-status span.check-success {
+.check-success {
 	color: #52C41A;
 }
 
-.check-status span.check-fail {
+.check-fail {
 	color: #FF3737;
 }
 
 .detail-form {
 	position: absolute;
 	width: 100%;
-	top: 140px;
+	top: 110px;
 	bottom: 0;
 	left: 0;
+	min-height: 50px;
+}
+
+.check-status+.detail-form {
+	top: 140px;
 }
 
 .form-submit {
@@ -330,7 +373,5 @@ export default {
 
 .my-swipe {
 	height: 100%;
-
-	/*height: 100vh;*/
 }
 </style>

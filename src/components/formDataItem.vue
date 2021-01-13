@@ -5,11 +5,11 @@
 			<template v-for='(item,index) in showOptions'>
 				<!-- 日期 -->
 				<template v-if='item.type == "date"'>
-					<van-field v-model="data[item.key]" label-width='100' :label="item.label||formData[item.key].label" :placeholder="formData[item.key].placeholder" :rules="formData[item.key].rules" clearable :required='formData[item.key].required' input-align='right' readonly @click='selectDateFn' :key='index' />
+					<van-field v-model="localItemData[item.key]" label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' readonly @click='selectDateFn' :key='index' />
 				</template>
 				<!-- 附件 -->
 				<template v-else-if='item.type == "files"'>
-					<van-cell label-width='100' :title="item.label||formData[item.key].label" title-class='cell-label-style' :key='index'>
+					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" title-class='cell-label-style' :key='index'>
 						<template #right-icon>
 							<van-icon name="photo-o" size='24' color='#ccc'>
 								<van-uploader v-model="fileList" class='upload-btn' multiple>
@@ -23,7 +23,7 @@
 				</template>
 				<!-- 其他 -->
 				<template v-else>
-					<van-field v-model="data[item.key]" label-width='100' :label="item.label||formData[item.key].label" :placeholder="formData[item.key].placeholder" :rules="formData[item.key].rules" clearable :required='formData[item.key].required' input-align='right' :readonly='formData[item.key].readonly' :maxLength='formData[item.key].maxLength' @input='onInputFn(item.key)' :type='formData[item.key].type||"text"' :key='index' />
+					<van-field v-model="localItemData[item.key]" label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' :readonly='formDataConfig[item.key].readonly' :maxLength='formDataConfig[item.key].maxLength' @input='onInputFn(item.key)' :type='formDataConfig[item.key].type||"text"' :key='index' />
 				</template>
 			</template>
 		</template>
@@ -32,7 +32,7 @@
 			<!-- 附件 -->
 			<template v-for='(item,index) in showOptions'>
 				<template v-if='item.type == "files"'>
-					<van-cell label-width='100' :title="item.label||formData[item.key].label" title-class='cell-label-style' :key='index'>
+					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" title-class='cell-label-style' :key='index'>
 						<div class='readonly-fileList'>
 							<div class='readonly-fileList-item' v-for='file in fileList'>
 								<label class='van-ellipsis'>{{ file.split('.')[0] }}</label><span>.{{file.split('.')[1]}}</span>
@@ -41,7 +41,7 @@
 					</van-cell>
 				</template>
 				<!-- 其他 -->
-				<van-cell label-width='100' :title="item.label||formData[item.key].label" :key='index' :value='data[item.key]' title-class='cell-label-style' value-class='cell-value-style' v-else></van-cell>
+				<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" :key='index' :value='localItemData[item.key]' title-class='cell-label-style' value-class='cell-value-style' v-else></van-cell>
 			</template>
 		</template>
 		<!-- 开票日期 -->
@@ -53,7 +53,7 @@
 <script>
 import { mapState, mapMutations } from 'vuex';
 import { isToString, compress, base64ToFile, formatDate } from '@/common/js/common';
-import { formData } from '@/common/js/formData';
+import { formDataConfig } from '@/common/js/formDataConfig';
 
 export default {
 	name: 'formDataItem',
@@ -79,7 +79,7 @@ export default {
 	},
 	data() {
 		return {
-			formData,
+			formDataConfig,
 			// localFormData: {},
 			photo: '图片',
 			photoValue: '', //图片src base64
@@ -93,7 +93,7 @@ export default {
 			currentDate: new Date(),
 			// 
 			fileList: [],
-
+			localItemData: {}
 
 		}
 	},
@@ -101,11 +101,12 @@ export default {
 		...mapState(['invoiceType']),
 	},
 	watch: {
-		fileList(newVal) {
-			console.log(newVal)
-		}
+
 	},
-	created() {},
+	created() {
+		console.log(this.showOptions)
+		this.initFormDataItem();
+	},
 	mounted() {
 		let img1 = document.createElement("img");
 		let img2 = document.createElement("img");
@@ -130,11 +131,13 @@ export default {
 			});
 
 		}, 2000);
+		// this.localItemData
+		// console.log(99,this.data)
+		for (let key in this.data) {
+			this.$set(this.localItemData, key, this.data[key]);
+		}
 
-		this.initFormDataItem();
-		// this.voluationFormData();
 
-		console.log(3, this.data);
 
 	},
 	methods: {
@@ -142,17 +145,18 @@ export default {
 
 		// 初始化表单参数
 		initFormDataItem() {
-			let keys = Object.keys(this.formData);
+			let keys = Object.keys(this.formDataConfig);
 			keys.forEach(k => {
 				this.showOptions.forEach(item => {
+
 					if (item.key == k) {
 						if ('invoiceDate' == k) {
-							this.$set(this.data, 'invoiceDate', formatDate(this.data.invoiceDate));
+							this.$set(this.localItemData, 'invoiceDate', formatDate(this.localItemData.invoiceDate));
 						}
-						this.$set(this.formData[k], 'required', this.isReadOnly ? this.isReadOnly : item.required);
-						// console.log(this.formData[k].rules)
-						if (this.formData[k].rules) {
-							this.$set(this.formData[k].rules[0], 'required', this.isReadOnly ? this.isReadOnly : item.required);
+						this.$set(this.formDataConfig[k], 'required', this.isReadOnly ? this.isReadOnly : item.required);
+
+						if (this.formDataConfig[k].rules) {
+							this.$set(this.formDataConfig[k].rules[0], 'required', this.isReadOnly ? this.isReadOnly : item.required);
 						}
 					}
 				});
@@ -165,18 +169,17 @@ export default {
 		},
 		// 开票日期选择
 		confirmFn(date) {
-			console.log(date)
-			this.$set(this.data, 'invoiceDate', new Date(date).toLocaleDateString());
+			this.$set(this.localItemData, 'invoiceDate', new Date(date).toLocaleDateString());
 			this.calendarShow = false;
 		},
 		onCancelFn() {
 			this.calendarShow = false;
 		},
-		// 表单正则输入验证 ,表单数据（data）、表单配置（formData）
+		// 表单正则输入验证 ,表单数据（data）、表单配置（ formDataConfig ）
 		onInputFn(key) {
-			if (this.formData[key].reg) {
-				if (this.data[key]) {
-					this.data[key] = this.data[key].replace(this.formData[key].reg, '$1');
+			if (this.formDataConfig[key].reg) {
+				if (this.localItemData[key]) {
+					this.localItemData[key] = this.localItemData[key].replace(this.formDataConfig[key].reg, '$1');
 				}
 			}
 		}

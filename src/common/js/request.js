@@ -1,30 +1,32 @@
 import axios from 'axios';
 export var _axios = function(option) {
     let toast;
-    console.log('option = ', option)
+    let _this = this;
     // if (option.loading) {
     toast = this.$toast.loading({
         message: option.loading ? option.loading.msg : '',
-        className: 'loading-toast ' + (option.loading ? option.loading.className : '')
+        className: 'loading-toast ' + (option.loading ? option.loading.className : ''),
+        overlay:true
     });
     // }
+    
     axios.defaults.baseURL = '/api';
 
-    var CancelToken = axios.CancelToken;
-    var source = CancelToken.source();
-
+    // var CancelToken = axios.CancelToken;
+    // var source = CancelToken.source();
+    // console.log(5,source.token)
     // 添加请求拦截器
     axios.interceptors.request.use(function(config) {
         // 在发送请求之前做些什么
         // alert('请求拦截器 request config = '+ Jconfig.data);
         let token = window.localStorage.getItem("token");
-        console.log(token)
+
         if (token) {
             config.headers.token = token; //将token放到请求头发送给服务器
 
             return config;
         } else {
-            this.$toast.show('123')
+            _this.$toast('token为空')
         }
 
     }, function(error) {
@@ -48,7 +50,7 @@ export var _axios = function(option) {
             data: option.data,
             method: option.type || 'post',
             // timeout: option.timeout || 10000,
-            cancelToken: source.token,
+            // cancelToken: source.token,
         }).then(res => {
             if (res.status == 200) {
                 let data = res.data;
@@ -58,9 +60,9 @@ export var _axios = function(option) {
                         let response = data.data;
                         resolve(response);
 
-                        if (option.loading) toast.clear();
+                        toast.clear();
                     } else {
-                        if (option.loading) toasust.clear();
+                        toast.clear();
                         if (option.isTips !== false) {
                             reject(data);
                         }
@@ -74,7 +76,7 @@ export var _axios = function(option) {
             if (option.loading) toast.clear();
             if (option.isTips !== false) {
                 setTimeout(() => {
-                    this.$toast(err.errMsg || '数据请求失败');
+                    _this.$toast(err.errMsg || '数据请求失败');
                 }, 300)
             }
         });

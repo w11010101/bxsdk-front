@@ -19,7 +19,7 @@ module.exports = {
     devServer: {
         proxy: {
             '/api': {
-                target:'http://101.124.7.184',
+                target:'http://52.82.87.90:8089', // 测试用科伦
                 changeOrigin: true,
                 pathRewrite: {
                     '^/api': '',

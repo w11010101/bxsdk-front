@@ -37,11 +37,11 @@ export default new Vuex.Store({
 			ZZSInvoiceCodes: ['01', '02', '03', '04', '10', '11', '14'], // 所有增值税
 		},
 		// 供详情页面左右滑动的列表
-		detailList:[]
+		detailListUuid:[]
 	},
 	mutations: {
-		getDetailListFn(state,list){
-			state.detailList = list;
+		getDetailListUuidFn(state,list){
+			state.detailListUuid = list;
 		}
 	},
 	actions: {},

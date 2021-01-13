@@ -225,7 +225,8 @@ export function getCheckStateFn(value) {
 }
 // 日期格式化 20201212 => 2020-12-12
 export function formatDate(data){
-	console.log(data)
+	
+	if(!data) return '';
 	if(data.includes('/')){
 		return data.replace(/\//g,'-').split('-').map((item,index)=>{
 			if(index!=0) {

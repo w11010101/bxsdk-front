@@ -8,7 +8,7 @@
 			<div class='container'>
 				<van-tabs v-model="active" color='#229FFF' title-active-color='#229FFF' class='container-tabs' @change='tabChangeFn'>
 					<van-tab :title="tab.name" v-for='(tab,index) in tabs' :name='tab.active' :key='index'>
-						<van-list v-model="loading" :finished="finished" class='list' finished-text="没有更多了" @load="pullUpFn">
+						<van-list v-model="loading" :finished="finished" class='list' finished-text="没有更多了" @load="pullUpFn" :immediate-check='false' :offset='0' >
 							<van-pull-refresh v-model="isLoading" @refresh="pullDownFn">
 								<van-checkbox-group v-model="checkboxGroup" ref='checkboxGroup' @change='checkChangeFn'>
 									<van-swipe-cell v-for="(item,i) in listData" :key="i" :title="item">
@@ -38,7 +38,7 @@
 													<div class='list-detial list-detial-other' v-else>
 														<div>
 															<label>开票日期</label>
-															<span class='van-ellipsis'>{{item.invoiceDate}}</span>
+															<span class='van-ellipsis'>{{formatDate(item.invoiceDate)}}</span>
 														</div>
 													</div>
 												</van-col>
@@ -86,7 +86,7 @@
 <script>
 // @ is an alias to /src
 import SearchTool from '@/components/search'
-import { resolve } from '@/common/js/formData';
+
 import { getInvoiceTypeText, getCheckStateFn, formatDate } from '@/common/js/common';
 import { mapState, mapMutations } from 'vuex';
 import httpApi from '@/common/js/httpApi.js'
@@ -122,17 +122,17 @@ export default {
 			}],
 			active: 0,
 			height: window.innerHeight,
-			detaillist: resolve,
+			
 			searchObj: {
 
 			},
 			page: 1,
-			rows: 10,
+			rows: 20,
 			dateRank:2
 		}
 	},
 	mounted() {
-		this.pullUpFn();
+		
 		console.log(1, this.invoiceCodeClass);
 		console.log(2, this.axios);
 		console.log(3, httpApi);
@@ -140,8 +140,10 @@ export default {
 		this.selectList();
 	},
 	methods: {
-		...mapMutations(['getDetailListFn']),
-		selectList(){
+		...mapMutations(['getDetailListUuidFn']),
+		selectList(isRefresh = false){
+			this.loading = true;
+            if (this.finished) return false;
 			this.axios({
 				url: httpApi.mobile.selectList,
 				data: {
@@ -157,35 +159,47 @@ export default {
 			}).then(resolve => {
 				console.log('resolve = ', resolve);
 				if (resolve.length) {
-					this.$set(this.$data, 'listData', resolve);
+					if (isRefresh) {
+                        console.log(' 刷新 赋值');
+                        this.$set(this.$data, 'listData', []);
+                    }else{
+                    	this.$set(this.$data, 'listData', this.listData.concat(resolve));
+						this.page++;
+                    }
+					this.getDetailListUuidFn(this.listData.map(item=>item.uuid))
+					this.finished = false;
+					this.isLoading = false;
+                    this.loading = false;
 				} else {
 					this.$toast({
 						message: '暂无数据',
 						duration: 1500,
-					})
+					});
+					// 数据全部加载完成
+	                this.loading = false;
+	                this.isLoading = false;
+	                this.isRefresh = false;
 				}
-
 			}).catch(reject => {
 				console.log('reject = ', reject);
+				// 数据全部加载完成
+                this.loading = false;
+                this.isLoading = false;
+                this.isRefresh = false;
 			});
 		},
 		// 上划加载
 		pullUpFn() {
 			// 异步更新数据
-			// setTimeout 仅做示例，真实场景中一般为 ajax 请求
-			setTimeout(() => {
-				// 加载状态结束
-				this.loading = false;
-				this.finished = true;
-			}, 1000);
+			this.selectList();
 		},
 		// 下划刷新
 		pullDownFn() {
-			setTimeout(() => {
-				this.$toast('刷新成功');
-				this.isLoading = false;
-				this.count++;
-			}, 1000);
+			this.isRefresh = true;
+            this.finished = false;
+            this.page = 1;
+            this.finished = false;
+			this.selectList(true);
 		},
 		// 单选
 		checkChangeFn(arr) {
