@@ -9,9 +9,18 @@ import router from './router'
 import store from './store'
 // vantComponents
 import vantComponents from './common/js/vantComponents.js';
-Vue.config.productionTip = false
+// iview
+// import iviewComponents from './common/js/iviewComponents.js';
+Vue.config.productionTip = false;
+
+import iView from 'iview';
+
+// import 'iview/dist/styles/iview.css';
+Vue.use(iView);
+
 // vConsole
 // var vConsole = new VConsole();
+
 // axios
 import axios from 'axios';
 import { _axios } from './common/js/request.js';

@@ -37,11 +37,16 @@ export default new Vuex.Store({
 			ZZSInvoiceCodes: ['01', '02', '03', '04', '10', '11', '14'], // 所有增值税
 		},
 		// 供详情页面左右滑动的列表
-		detailListUuid:[]
+		detailListUuid:[],
+		// 根据发票类型重置必填项后的
+		resetFormDataConfig:{}
 	},
 	mutations: {
 		getDetailListUuidFn(state,list){
 			state.detailListUuid = list;
+		},
+		setResetFormDataConfig(state,object){
+			state.resetFormDataConfig = object;
 		}
 	},
 	actions: {},

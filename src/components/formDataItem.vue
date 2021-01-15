@@ -23,7 +23,7 @@
 				</template>
 				<!-- 其他 -->
 				<template v-else>
-					<van-field v-model="localItemData[item.key]" label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' :readonly='formDataConfig[item.key].readonly' :maxLength='formDataConfig[item.key].maxLength' @input='onInputFn(item.key)' :type='formDataConfig[item.key].type||"text"' :key='index' />
+					<van-field v-model="localItemData[item.key]" label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' :readonly='formDataConfig[item.key].readonly' :maxLength='formDataConfig[item.key].maxLength' @input='onInputFn(item.key)' :type='formDataConfig[item.key].type||"text"' :key='index' @blur='onBlurFn'/>
 				</template>
 			</template>
 		</template>
@@ -104,10 +104,11 @@ export default {
 
 	},
 	created() {
-		console.log(this.showOptions)
+		console.log('调用')
 		this.initFormDataItem();
 	},
 	mounted() {
+		
 		let img1 = document.createElement("img");
 		let img2 = document.createElement("img");
 
@@ -141,6 +142,7 @@ export default {
 
 	},
 	methods: {
+		...mapMutations(['setResetFormDataConfig']),
 		isToString,
 
 		// 初始化表单参数
@@ -161,6 +163,8 @@ export default {
 					}
 				});
 			});
+			this.setResetFormDataConfig(this.formDataConfig);
+			console.log('formDataConfig = ',this.formDataConfig);
 		},
 
 		// 日期选择
@@ -182,6 +186,9 @@ export default {
 					this.localItemData[key] = this.localItemData[key].replace(this.formDataConfig[key].reg, '$1');
 				}
 			}
+		},
+		onBlurFn(){
+			this.$emit('onBlurFn')
 		}
 	},
 

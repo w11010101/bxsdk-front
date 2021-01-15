@@ -1,13 +1,17 @@
 import axios from 'axios';
+import {IsPC} from '@/common/js/common';
+console.log(IsPC)
 export var _axios = function(option) {
     let toast;
     let _this = this;
     // if (option.loading) {
+    
     toast = this.$toast.loading({
         message: option.loading ? option.loading.msg : '',
         className: 'loading-toast ' + (option.loading ? option.loading.className : ''),
         overlay:true
     });
+    
     // }
     
     axios.defaults.baseURL = '/api';
@@ -52,13 +56,14 @@ export var _axios = function(option) {
             // timeout: option.timeout || 10000,
             // cancelToken: source.token,
         }).then(res => {
+            console.log(999,res)
             if (res.status == 200) {
                 let data = res.data;
                 setTimeout(() => {
 
                     if (!data.errCode) {
                         let response = data.data;
-                        resolve(response);
+                        resolve(data);
 
                         toast.clear();
                     } else {

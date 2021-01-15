@@ -15,7 +15,7 @@
 	position: absolute;
 	top: 60px;
 	bottom: 0;
-	z-index: 1
+	z-index: 1;
 }
 
 .container {
@@ -102,17 +102,6 @@
 	transform: translateX(100%);
 }
 
-/* slide-fadeY */
-/*.slide-fadeY-enter-active,
-.slide-fadeY-leave-active {
-	transition: all .3s ease;
-}*/
-
-/*.slide-fadeY-enter,
-.slide-fadeY-leave-to {
-	transform: translateY(-100%);
-}*/
-
 /* slide-fadeX */
 .slide-fadeX-enter-active,
 .slide-fadeX-leave-active {
@@ -132,5 +121,10 @@
 }
 
 .van-overlay {
-	background: rgba(0,0,0,0.3)!important;
+	background: rgba(0, 0, 0, 0.3) !important;
+}
+
+div.inline {
+	display: inline-block;
+	width: 400px;
 }

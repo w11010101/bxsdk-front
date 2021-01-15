@@ -23,22 +23,24 @@
 		</div>
 		<!-- 表单 -->
 		<div class='detail-form'>
+			<!-- :rules="" -->
 			<van-form :validate-first='true' @failed='onFailedFn' ref='formData'>
 				<!-- formData 分类：增票类、费增票（火车，飞机，定额，等） -->
 				<template v-if='localData.invoiceTypeCode == "92"'>
-					<FormDataItem :showOptions='trainShowOptions' :data='localData' :key='localData.uuid+new Date().getTime()' :isReadOnly='isReadOnly'></FormDataItem>
+					<FormDataItem :showOptions='trainShowOptions' :data='localData' :key='localData.uuid+new Date().getTime()' :isReadOnly='isReadOnly' @onBlurFn='onBlurFn'></FormDataItem>
 				</template>
 				<template v-else-if='localData.invoiceTypeCode == "91"'>
-					<FormDataItem :showOptions='taxiShowOptions' :data='localData' :key='localData.uuid+new Date().getTime()' :isReadOnly='isReadOnly'></FormDataItem>
+					<FormDataItem :showOptions='taxiShowOptions' :data='localData' :key='localData.uuid+new Date().getTime()' :isReadOnly='isReadOnly' @onBlurFn='onBlurFn'></FormDataItem>
 				</template>
 				<template v-else-if='invoiceCodeClass.normalAddTaxValue.includes(localData.invoiceTypeCode)'>
-					<FormDataItem :showOptions='normalAddTaxValueShowOptions' :key='localData.uuid+new Date().getTime()' :data='localData' :isReadOnly='isReadOnly'></FormDataItem>
+					<FormDataItem :showOptions='normalAddTaxValueShowOptions' :key='localData.uuid+new Date().getTime()' :data='localData' :isReadOnly='isReadOnly' @onBlurFn='onBlurFn'></FormDataItem>
 				</template>
 				<template v-else>
-					<FormDataItem :showOptions='showOptions' :data='localData' :key='localData.uuid+new Date().getTime()' :isReadOnly='isReadOnly'></FormDataItem>
+					<FormDataItem :showOptions='showOptions' :data='localData' :key='localData.uuid+new Date().getTime()' :isReadOnly='isReadOnly' @onBlurFn='onBlurFn'></FormDataItem>
 				</template>
 				<div class='form-submit'>
-					<van-button block color='#229FFF' @click='onSubmitFn'>保存</van-button>
+					<van-button block color='#229FFF' @click='onSubmitFn' v-if='validateState'>保存</van-button>
+					<van-button block color='#ccc' @click='onSubmitFn' v-else>保存</van-button>
 					<!-- <van-button block color='#229FFF'>返回</van-button> -->
 					<!-- <van-button block color='#229FFF' native-type="submit">保存</van-button> -->
 				</div>
@@ -57,6 +59,8 @@ import { mapState, mapMutations } from 'vuex';
 import FormDataItem from '@/components/formDataItem'
 import { uploadFileFn, getInvoiceTypeText, invoiceCodeClass, getCheckStateFn } from '@/common/js/common.js';
 import httpApi from '@/common/js/httpApi.js'
+import { formDataConfig } from '@/common/js/formDataConfig';
+import config from '@/common/js/config'
 export default {
 	name: '',
 	mixins: [],
@@ -81,70 +85,70 @@ export default {
 			images: [
 				require('../../assets/logo.png'),
 			],
+			...config,
+			// // 要渲染的表单字段
+			// showOptions: [
+			// 	{ key: 'invoiceCode', required: true },
+			// 	{ key: 'invoiceNo', required: true },
+			// 	{ key: 'invoiceDate', required: true, type: 'date' },
 
-			// 要渲染的表单字段
-			showOptions: [
-				{ key: 'invoiceCode', required: true },
-				{ key: 'invoiceNo', required: true },
-				{ key: 'invoiceDate', required: true, type: 'date' },
+			// 	{ key: 'buyerName', required: false },
+			// 	{ key: 'goodsName', required: false },
+			// 	{ key: 'salerName', required: false },
+			// 	{ key: 'taxRate', required: false, unit: '%' },
 
-				{ key: 'buyerName', required: false },
-				{ key: 'goodsName', required: false },
-				{ key: 'salerName', required: false },
-				{ key: 'taxRate', required: false, unit: '%' },
+			// 	{ key: 'fare', required: true },
+			// 	{ key: 'invoiceAmount', required: true },
+			// 	{ key: 'totalAmount', required: true },
+			// 	{ key: 'deductTaxAmount', required: true },
+			// 	{ key: 'reimbursementNote', required: true },
+			// 	{ key: 'sourceFile', required: false },
+			// 	{ key: 'files', required: false, type: 'files' },
 
-				{ key: 'fare', required: true },
-				{ key: 'invoiceAmount', required: true },
-				{ key: 'totalAmount', required: true },
-				{ key: 'deductTaxAmount', required: true },
-				{ key: 'reimbursementNote', required: true },
-				{ key: 'sourceFile', required: false },
-				{ key: 'files', required: false, type: 'files' },
+			// ],
+			// // 火车票
+			// trainShowOptions: [
 
-			],
-			// 火车票
-			trainShowOptions: [
+			// 	{ key: 'invoiceNo', required: true },
+			// 	{ key: 'invoiceDate', required: true, type: 'date' },
 
-				{ key: 'invoiceNo', required: true },
-				{ key: 'invoiceDate', required: true, type: 'date' },
+			// 	{ key: 'departCity', },
+			// 	{ key: 'arriveCity', },
+			// 	{ key: 'trainNumber', },
+			// 	{ key: 'riderValue', },
+			// 	{ key: 'taxRate', required: false, unit: '%' },
+			// 	{ key: 'idNumber' },
+			// 	{ key: 'startDate' },
+			// 	{ key: 'endDate' },
+			// 	{ key: 'fare', required: true },
+			// 	{ key: 'invoiceAmount', required: true },
+			// 	{ key: 'deductTaxAmount', required: true },
+			// 	{ key: 'reimbursementNote', required: true },
+			// 	{ key: 'sourceFile', required: false },
+			// 	{ key: 'files', required: false, type: 'files' },
 
-				{ key: 'departCity', },
-				{ key: 'arriveCity', },
-				{ key: 'trainNumber', },
-				{ key: 'riderValue', },
-				{ key: 'taxRate', required: false, unit: '%' },
-				{ key: 'idNumber' },
-				{ key: 'startDate' },
-				{ key: 'endDate' },
-				{ key: 'fare', required: true },
-				{ key: 'invoiceAmount', required: true },
-				{ key: 'deductTaxAmount', required: true },
-				{ key: 'reimbursementNote', required: true },
-				{ key: 'sourceFile', required: false },
-				{ key: 'files', required: false, type: 'files' },
+			// ],
+			// // 出租车
+			// taxiShowOptions: [
 
-			],
-			// 出租车
-			taxiShowOptions: [
+			// 	{ key: 'totalAmount', required: true, label: '总金额' },
+			// 	{ key: 'totalNum', required: true, label: '总张数' },
+			// 	{ key: 'reimbursementNote', required: true },
+			// 	{ key: 'sourceFile', required: false },
+			// 	{ key: 'files', required: false, type: 'files' },
 
-				{ key: 'totalAmount', required: true, label: '总金额' },
-				{ key: 'totalNum', required: true ,label:'总张数'},
-				{ key: 'reimbursementNote', required: true },
-				{ key: 'sourceFile', required: false },
-				{ key: 'files', required: false, type: 'files' },
-
-			],
-			// 普通增值税类型
-			normalAddTaxValueShowOptions: [
-				{ key: 'invoiceCode', required: true },
-				{ key: 'invoiceNo', required: true },
-				{ key: 'invoiceDate', required: true, type: 'date' },
-				{ key: 'verifyCode', },
-				{ key: 'deductTaxAmount', required: true },
-				{ key: 'reimbursementNote', },
-				{ key: 'sourceFile', required: false },
-				{ key: 'files', required: false, type: 'files' },
-			],
+			// ],
+			// // 普通增值税类型
+			// normalAddTaxValueShowOptions: [
+			// 	{ key: 'invoiceCode', required: true },
+			// 	{ key: 'invoiceNo', required: true },
+			// 	{ key: 'invoiceDate', required: true, type: 'date' },
+			// 	{ key: 'verifyCode', },
+			// 	{ key: 'deductTaxAmount', required: true },
+			// 	{ key: 'reimbursementNote', },
+			// 	{ key: 'sourceFile', required: false },
+			// 	{ key: 'files', required: false, type: 'files' },
+			// ],
 			isReadOnly: false,
 			// 压缩有的图片集合
 			uploadFileList: [],
@@ -152,19 +156,21 @@ export default {
 			list: [],
 			invoiceCodeClass,
 			initialSwipe: 0,
-			activeUuid: ''
-
+			activeUuid: '',
+			rules: [],
+			validateState: true
 		}
 	},
 	computed: {
-		...mapState(['invoiceType', 'detailListUuid']),
+		...mapState(['invoiceType', 'detailListUuid', 'resetFormDataConfig']),
 	},
 	watch: {
 		selectInvoiceShow(newVal, oldVal) {
-			this.selectState = newVal
+			this.selectState = newVal;
 		}
 	},
 	created() {
+		console.log(5)
 		for (let key in this.$route.params.item) {
 			this.$set(this.localData, key, this.$route.params.item[key]);
 		}
@@ -175,7 +181,7 @@ export default {
 		})
 	},
 	mounted() {
-		this.formatInvoiceOptionFn()
+		console.log(6)
 		this.findDetail(this.$route.params.item.uuid)
 		// 左右滑动事件
 		let zeptoEvent = this.$zepto('.detail.child-view');
@@ -188,7 +194,7 @@ export default {
 			} else {
 				this.$toast('已是最后一条');
 			}
-		})
+		});
 		zeptoEvent.on('swipeRight', (event) => {
 
 			if (this.initialSwipe > 0) {
@@ -197,13 +203,37 @@ export default {
 			} else {
 				this.$toast('已是第一条');
 			}
-		})
+		});
+
+
 	},
 	methods: {
 		// 发票类型转换
 		getInvoiceTypeText,
 		// 获取查验结果
 		getCheckStateFn,
+		// 表单初始化验证
+		formDataInitValidateFn() {
+			// console.log(3,this.resetFormDataConfig)
+			// let keys = Object.keys(this.resetFormDataConfig);
+			// console.log(4,keys)
+			// keys.forEach(key=>{
+			// 	if(this.resetFormDataConfig[key].required){
+			// 		this.rules.push(this.resetFormDataConfig[key].rules[0])
+			// 	}
+			// });
+			// console.log(5,'rules = ',this.rules);
+
+			this.$refs.formData.validate().then(state => {
+				console.log('state = ', state);
+				// this.validateState = true;
+				// return false;
+			}).catch(error => {
+				console.log('error = ', error);
+				// this.validateState = false;
+
+			})
+		},
 		// 格式化发票类型
 		formatInvoiceOptionFn() {
 			this.invoiceType.forEach(item => {
@@ -218,7 +248,7 @@ export default {
 		},
 		// 弹窗 发票类型 确定
 		onConfirm(item) {
-
+			this.$set(this.localData, 'invoiceTypeCode', item.invoiceTypeCode);
 			this.selectInvoiceShow = false;
 		},
 		// 弹窗 发票类型 取消
@@ -232,26 +262,29 @@ export default {
 		onpPreviewImgChangeFn() {
 
 		},
-		// 表单验证成功
+		// 提交表单
 		onSubmitFn() {
 			let _this = this;
 			console.log('onSubmitFn');
-			if (this.isReadOnly) {
-				_this.$router.back();
-			} else {
-				this.$toast({
-					message: '保存成功',
-					onClose() {
-						_this.$router.back();
-					}
-				});
-			}
+			// this.$refs.formData.validate().then(state=>{
+			// 	console.log('state = ',state)
+			// })
+			// if (this.isReadOnly) {
+			// 	_this.$router.back();
+			// } else {
+			// 	this.$toast({
+			// 		message: '保存成功',
+			// 		onClose() {
+			// 			_this.$router.back();
+			// 		}
+			// 	});
+			// }
 
 		},
 		// 表单验证失败
 		onFailedFn() {
-			console.log('onFailedFn');
-			this.$toast('表单验证失败');
+			console.log('表单验证失败');
+			// this.$toast('表单验证失败');
 		},
 		// vant上传组件
 		beforeRead(files) {
@@ -260,7 +293,6 @@ export default {
 				console.log(3, resolve)
 			})
 		},
-		
 		// 返回
 		goBackFn() {
 			this.$route.back()
@@ -273,13 +305,16 @@ export default {
 					uuid,
 				}
 			}).then(resolve => {
-				console.log('resolve = ', resolve);
-				this.$set(this.$data, 'localData', resolve);
+				console.log('resolve = ', resolve.data);
+				this.$set(this.$data, 'localData', resolve.data);
+				this.formDataInitValidateFn()
 			}).catch(reject => {
 
 			});
 		},
-
+		onBlurFn() {
+			this.formDataInitValidateFn()
+		}
 
 	},
 

@@ -69,31 +69,31 @@ module.exports = {
     chainWebpack: config => {
         if (process.env.NODE_ENV === 'production') {
             // 为生产环境修改配置...
-            config.module
-                .rule('images')
-                .use('image-webpack-loader')
-                .loader('image-webpack-loader')
-                .options({
-                    bypassOnDebug: true,
-                    mozjpeg: {
-                        progressive: true,
-                        quality: 65
-                    },
-                    optipng: {
-                        enabled: false,
-                    },
-                    pngquant: {
-                        quality: [0.65, 0.90],
-                        speed: 4
-                    },
-                    gifsicle: {
-                        interlaced: false,
-                    },
-                    webp: {
-                        quality: 75
-                    }
-                })
-                .end();
+            // config.module
+            //     .rule('images')
+            //     .use('image-webpack-loader')
+            //     .loader('image-webpack-loader')
+            //     .options({
+            //         bypassOnDebug: true,
+            //         mozjpeg: {
+            //             progressive: true,
+            //             quality: 65
+            //         },
+            //         optipng: {
+            //             enabled: false,
+            //         },
+            //         pngquant: {
+            //             quality: [0.65, 0.90],
+            //             speed: 4
+            //         },
+            //         gifsicle: {
+            //             interlaced: false,
+            //         },
+            //         webp: {
+            //             quality: 75
+            //         }
+            //     })
+            //     .end();
 
         } else {
             // 为开发环境修改配置...

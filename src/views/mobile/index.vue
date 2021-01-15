@@ -131,6 +131,10 @@ export default {
 			dateRank:2
 		}
 	},
+	created(){
+		let mobileCss = require('@/common/css/mobile.css');
+		let listCss = require('@/common/css/list.css');
+	},
 	mounted() {
 		
 		console.log(1, this.invoiceCodeClass);
@@ -158,12 +162,12 @@ export default {
 				}
 			}).then(resolve => {
 				console.log('resolve = ', resolve);
-				if (resolve.length) {
+				if (resolve.data.length) {
 					if (isRefresh) {
                         console.log(' 刷新 赋值');
                         this.$set(this.$data, 'listData', []);
                     }else{
-                    	this.$set(this.$data, 'listData', this.listData.concat(resolve));
+                    	this.$set(this.$data, 'listData', this.listData.concat(resolve.data));
 						this.page++;
                     }
 					this.getDetailListUuidFn(this.listData.map(item=>item.uuid))
@@ -246,6 +250,6 @@ export default {
 }
 </script>
 <style>
-@import '../../common/css/index.css';
-@import '../../common/css/list.css';
+/*@import '../../common/css/index.css';
+@import '../../common/css/list.css';*/
 </style>
