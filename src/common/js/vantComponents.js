@@ -55,8 +55,12 @@ import {
     Slider,
     Card,
     Tab, 
-    Tabs
+    Tabs,
+    ActionSheet
 } from 'vant';
+
+
+Vue.use(ActionSheet);
 Vue.use(Tab);
 Vue.use(Tabs);
 Vue.use(Card);

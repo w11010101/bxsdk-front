@@ -5,7 +5,7 @@
 			<template v-for='(item,index) in showOptions'>
 				<!-- 日期 -->
 				<template v-if='item.type == "date"'>
-					<van-field v-model="localItemData[item.key]" label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' readonly @click='selectDateFn' :key='index' />
+					<van-field v-model="localItemData[item.key]" :name='item.key' label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' readonly @click='selectDateFn' :key='index' />
 				</template>
 				<!-- 附件 -->
 				<template v-else-if='item.type == "files"'>
@@ -21,9 +21,14 @@
 						</template>
 					</van-cell>
 				</template>
+				<template v-else-if='item.type == "state"'>
+					<!-- <van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" :key='index' :value='getCheckStateFn(localItemData[item.key])' title-class='cell-label-style' value-class='cell-value-style' v-if='item.key == "checkState"'></van-cell> -->
+					<!-- 报销状态 -->
+					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" :key='index' :value='getReimburseStateFn(localItemData[item.key])' title-class='cell-label-style' value-class='cell-value-style' v-if='item.key == "reimburseState"'></van-cell>
+				</template>
 				<!-- 其他 -->
 				<template v-else>
-					<van-field v-model="localItemData[item.key]" label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' :readonly='formDataConfig[item.key].readonly' :maxLength='formDataConfig[item.key].maxLength' @input='onInputFn(item.key)' :type='formDataConfig[item.key].type||"text"' :key='index' @blur='onBlurFn'/>
+					<van-field v-model="localItemData[item.key]" :name='item.key' label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' :readonly='formDataConfig[item.key].readonly' :maxLength='formDataConfig[item.key].maxLength' @input='onInputFn(item.key)' :type='formDataConfig[item.key].type||"text"' :key='index' @blur='onBlurFn' />
 				</template>
 			</template>
 		</template>
@@ -52,7 +57,7 @@
 </template>
 <script>
 import { mapState, mapMutations } from 'vuex';
-import { isToString, compress, base64ToFile, formatDate } from '@/common/js/common';
+import { isToString, compress, base64ToFile, formatDate, getCheckStateFn, getReimburseStateFn } from '@/common/js/common';
 import { formDataConfig } from '@/common/js/formDataConfig';
 
 export default {
@@ -100,51 +105,49 @@ export default {
 	computed: {
 		...mapState(['invoiceType']),
 	},
-	watch: {
-
-	},
+	watch: {},
 	created() {
 		console.log('调用')
-		this.initFormDataItem();
+
 	},
 	mounted() {
-		
-		let img1 = document.createElement("img");
-		let img2 = document.createElement("img");
 
-		img1.src = require('@/assets/E3767164-FC3A-49B2-9717-E131179E1291_1_105_c.jpeg');
-		img2.src = require('@/assets/F7BD5EC2-58BF-4C13-8E93-D61808FAC18E_1_105_c.jpeg');
+		// let img1 = document.createElement("img");
+		// let img2 = document.createElement("img");
 
-		let baseImg1 = compress(img1);
-		let baseImg2 = compress(img2);
-		setTimeout(() => {
-			this.fileList.push({
-				content: compress(img1),
-				file: base64ToFile(baseImg1, 'E3767164-FC3A-49B2-9717-E131179E1291_1_105_c.jpeg'),
-				message: "",
-				status: ""
-			});
-			this.fileList.push({
-				content: compress(img1),
-				file: base64ToFile(baseImg2, 'F7BD5EC2-58BF-4C13-8E93-D61808FAC18E_1_105_c.jpeg'),
-				message: "",
-				status: ""
-			});
+		// img1.src = require('@/assets/E3767164-FC3A-49B2-9717-E131179E1291_1_105_c.jpeg');
+		// img2.src = require('@/assets/F7BD5EC2-58BF-4C13-8E93-D61808FAC18E_1_105_c.jpeg');
 
-		}, 2000);
+		// let baseImg1 = compress(img1);
+		// let baseImg2 = compress(img2);
+		// setTimeout(() => {
+		// 	this.fileList.push({
+		// 		content: compress(img1),
+		// 		file: base64ToFile(baseImg1, 'E3767164-FC3A-49B2-9717-E131179E1291_1_105_c.jpeg'),
+		// 		message: "",
+		// 		status: ""
+		// 	});
+		// 	this.fileList.push({
+		// 		content: compress(img1),
+		// 		file: base64ToFile(baseImg2, 'F7BD5EC2-58BF-4C13-8E93-D61808FAC18E_1_105_c.jpeg'),
+		// 		message: "",
+		// 		status: ""
+		// 	});
+
+		// }, 2000);
 		// this.localItemData
-		// console.log(99,this.data)
+		console.log(8, this.data)
 		for (let key in this.data) {
-			this.$set(this.localItemData, key, this.data[key]);
+			this.$set(this.localItemData, key, this.data[key] === void 0 || this.data[key] === null ? '' : this.data[key]);
 		}
 
-
-
+		this.initFormDataItem();
 	},
 	methods: {
 		...mapMutations(['setResetFormDataConfig']),
 		isToString,
-
+		getCheckStateFn,
+		getReimburseStateFn,
 		// 初始化表单参数
 		initFormDataItem() {
 			let keys = Object.keys(this.formDataConfig);
@@ -155,16 +158,19 @@ export default {
 						if ('invoiceDate' == k) {
 							this.$set(this.localItemData, 'invoiceDate', formatDate(this.localItemData.invoiceDate));
 						}
-						this.$set(this.formDataConfig[k], 'required', this.isReadOnly ? this.isReadOnly : item.required);
-
-						if (this.formDataConfig[k].rules) {
-							this.$set(this.formDataConfig[k].rules[0], 'required', this.isReadOnly ? this.isReadOnly : item.required);
+						// 必填项根据config.js的自定义配置进行重新设置
+						// 如果有 required 属性，则进行重新配置，如果没有 required 属性，则按照formDataConfig.js的默认配置
+						if (item.required !== void 0) {
+							if (this.formDataConfig[k].rules) {
+								this.$set(this.formDataConfig[k].rules[0], 'required', item.required);
+							}
+							// 星号必填项标识
+							this.$set(this.formDataConfig[k], 'required', this.isReadOnly ? this.isReadOnly : (item.required === void 0 ? this.formDataConfig[k].required : item.required));
 						}
 					}
 				});
 			});
 			this.setResetFormDataConfig(this.formDataConfig);
-			console.log('formDataConfig = ',this.formDataConfig);
 		},
 
 		// 日期选择
@@ -186,9 +192,10 @@ export default {
 					this.localItemData[key] = this.localItemData[key].replace(this.formDataConfig[key].reg, '$1');
 				}
 			}
+			this.$emit('onInputFn', key, this.localItemData[key]);
 		},
-		onBlurFn(){
-			this.$emit('onBlurFn')
+		onBlurFn() {
+			// this.$emit('onBlurFn')
 		}
 	},
 

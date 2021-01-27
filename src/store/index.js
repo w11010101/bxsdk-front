@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
+	token:'',
 	state: {
 		invoiceType: [
 			{ "invoiceTypeName": "增值税专用发票", "invoiceTypeCode": "01" },
@@ -26,22 +27,17 @@ export default new Vuex.Store({
 			{ "invoiceTypeName": "政府非税收收入一般缴款书", "invoiceTypeCode": "98" },
 			{ "invoiceTypeName": "其他", "invoiceTypeCode": "00" }
 		],
-		// 发票类
-		invoiceCodeClass: {
-			majioAddTaxValue: ['01', '03'], // 专用增值税类型、机动车销售统一发票
-			trainAndAirRoadWater: ['90', '93', '92', '87', '88', '89'], // 火车票、飞机行程单、公路、水路、其他客票
-			normalAddTaxValue: ['04', '10', '11', '14'], // 普通增值税类型
-			taxiAndQuota: ['51', '91', '94', '95', '97', '98'], // 出租车、定额发票等其他发票
-			transportAddTaxValue: "02", // 货物运输业增值税普通发票
-			otherValue: '00', // 其他
-			ZZSInvoiceCodes: ['01', '02', '03', '04', '10', '11', '14'], // 所有增值税
-		},
+		
 		// 供详情页面左右滑动的列表
 		detailListUuid:[],
 		// 根据发票类型重置必填项后的
 		resetFormDataConfig:{}
 	},
 	mutations: {
+		saveToken(state,token){
+			state.token = token;
+			localStorage.setItem('token',token)
+		},
 		getDetailListUuidFn(state,list){
 			state.detailListUuid = list;
 		},
