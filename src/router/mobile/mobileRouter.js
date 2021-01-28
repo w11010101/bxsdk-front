@@ -16,6 +16,9 @@ export default [
 			// which is lazy-loaded when the route is visited.
 			components: {
 				detailView: () => import( /* webpackChunkName: "mobile-index" */ '@/views/mobile/detail.vue'),
+			},
+			meta: {
+				parent: 'app'
 			}
 		}]
 	}

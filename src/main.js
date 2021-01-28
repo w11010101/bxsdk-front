@@ -36,11 +36,11 @@ function debounce(delay) {
 		if (timer) clearTimeout(timer);
 		timer = setTimeout(function() {
 			if(IsPC()){
-				if(VM.$route.name !== 'pcIndex'){
+				if(VM.$route.meta.parent !== 'pc'){
 					VM.$router.replace('pcIndex');
 				}
 			}else{
-				if(VM.$route.name !== 'mobileIndex'){
+				if(VM.$route.meta.parent !== 'app'){
 					VM.$router.replace('mobileIndex');
 				}
 			}

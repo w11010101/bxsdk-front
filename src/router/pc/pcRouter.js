@@ -10,6 +10,9 @@ export default [
 			    name: 'invoice',
 	    		components:{
 	    			pcView:() => import(/* webpackChunkName: "pc-index" */ '@/views/pc/invoice.vue'),
+	    		},
+	    		meta:{
+	    			parent:'pc'
 	    		}
 	    	}
 	    ]

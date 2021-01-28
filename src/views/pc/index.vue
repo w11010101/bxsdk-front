@@ -2,7 +2,7 @@
 	<div class="pc-index">
 		<Layout :style="{minHeight: '100vh'}">
 			<Sider v-model="isCollapsed">
-				<Menu active-name="1-2" theme="dark" width="auto" :class="menuitemClasses">
+				<Menu active-name="1-1" theme="dark" width="auto" :class="menuitemClasses">
 					<MenuItem :name="item.key" v-for='item in menu'>
 					<span>{{item.label}}</span>
 					</MenuItem>
