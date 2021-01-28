@@ -77,11 +77,12 @@ export default {
 			type: Object,
 			default: {},
 		},
-		// index: {
-		// 	type: Number,
-		// 	default: 0,
-		// }
+		uuid: {
+			type: String,
+			default: 0,
+		}
 	},
+
 	data() {
 		return {
 			formDataConfig,
@@ -98,19 +99,26 @@ export default {
 			currentDate: new Date(),
 			// 
 			fileList: [],
-			localItemData: {}
+			localItemData: {},
+
 
 		}
 	},
 	computed: {
 		...mapState(['invoiceType']),
 	},
-	watch: {},
+	watch: {
+		uuid() {
+			console.log(3, this.uuid, this.data.uuid);
+
+			this.resetLocalDataFn();
+		}
+	},
 	created() {
 
 	},
 	mounted() {
-		console.log('调用')
+		console.log('调用', this.showOptions)
 		// let img1 = document.createElement("img");
 		// let img2 = document.createElement("img");
 
@@ -135,11 +143,8 @@ export default {
 
 		// }, 2000);
 		// this.localItemData
-		// console.log(8, this.data)
-		for (let key in this.data) {
-			this.$set(this.localItemData, key, this.data[key] === void 0 || this.data[key] === null ? '' : this.data[key]);
-		}
 
+		this.resetLocalDataFn();
 		this.initFormDataItem();
 	},
 	methods: {
@@ -171,7 +176,13 @@ export default {
 			});
 			this.setResetFormDataConfig(this.formDataConfig);
 		},
-
+		resetLocalDataFn() {
+			console.log(4, this.data)
+			for (let key in this.data) {
+				this.$set(this.localItemData, key, this.data[key] === void 0 || this.data[key] === null ? '' : this.data[key]);
+			}
+			// console.log(3, JSON.stringify(this.localItemData));
+		},
 		// 日期选择
 		selectDateFn() {
 			this.calendarShow = true;

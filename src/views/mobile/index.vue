@@ -173,6 +173,7 @@ export default {
 		}
 	},
 	created() {
+		console.log('app created')
 		let mobileCss = require('@/common/css/mobile.css');
 		let listCss = require('@/common/css/list.css');
 	},

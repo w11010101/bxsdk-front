@@ -5,11 +5,12 @@ export var _axios = function(option) {
         _this = this,
         _default = {};
 
-    this.$toast.setDefaultOptions({ duration: 0 });
+    // this.$toast.setDefaultOptions({ duration: 0 });
     toast = this.$toast.loading({
         message: option.loading ? option.loading.msg : '加载中',
         className: 'loading-toast ' + (option.loading ? option.loading.className : ''),
         overlay: true,
+        duration: 0
     });
 
     axios.defaults.baseURL = '/api';

@@ -40,6 +40,7 @@ export default new Vuex.Store({
 		},
 		getDetailListUuidFn(state,list){
 			state.detailListUuid = list;
+			console.log('state.detailListUuid = ',state.detailListUuid)
 		},
 		setResetFormDataConfig(state,object){
 			state.resetFormDataConfig = object;

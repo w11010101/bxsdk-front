@@ -26,39 +26,7 @@
 		<!-- 表单 -->
 		<div class='detail-form'>
 			<van-form @failed='onFailedFn' ref='formData' :show-error-message='false'>
-				<!-- formData 分类：增票类、费增票（火车，飞机，定额，等） -->
-				<!-- 增值税专用发票、机动车销售统一发票、货运运输业增值税专用发票 -->
-				<template v-if='VATGClass.includes(localData.invoiceTypeCode)'>
-					<FormDataItem ref='formDataItem' :showOptions='VATGOptions' :key='random' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn'></FormDataItem>
-				</template>
-				<!-- 增值税普通发票、增值税普通发票(电子)、增值税普通发票(卷式)、增值税电子普通发票(通行费) -->
-				<template v-if='VATSElectcClass.includes(localData.invoiceTypeCode)'>
-					<FormDataItem ref='formDataItem' :showOptions='VATSElectcOption' :key='random' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn'></FormDataItem>
-				</template>
-				<!-- 航空 -->
-				<template v-if='localData.invoiceTypeCode === "90"'>
-					<FormDataItem ref='formDataItem' :showOptions='aviationShowOptions' :key='random' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn'></FormDataItem>
-				</template>
-				<!-- 出租车票 -->
-				<template v-if='localData.invoiceTypeCode === "91"'>
-					<FormDataItem ref='formDataItem' :showOptions='taxiShowOptions' :data='localData' :key='random' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn'></FormDataItem>
-				</template>
-				<!-- 火车票、公路、水路、其他（实名） -->
-				<template v-if='trainAndRealNameClass.includes(localData.invoiceTypeCode)'>
-					<FormDataItem ref='formDataItem' :showOptions='trainAndRealNameShowOptions' :data='localData' :key='random' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn'></FormDataItem>
-				</template>
-				<!-- 汽车票 -->
-				<template v-if='localData.invoiceTypeCode === "94"'>
-					<FormDataItem ref='formDataItem' :showOptions='carShowOptions' :data='localData' :key='random' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn'></FormDataItem>
-				</template>
-				<!-- 定额发票、通用、政府非税收 -->
-				<template v-if='QCGClass.includes(localData.invoiceTypeCode)'>
-					<FormDataItem ref='formDataItem' :showOptions='QCGShowOptions' :data='localData' :key='random' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn'></FormDataItem>
-				</template>
-				<!-- 其他 -->
-				<template v-if='localData.invoiceTypeCode === "00"'>
-					<FormDataItem ref='formDataItem' :showOptions='otherShowOptions' :data='localData' :key='random' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn'></FormDataItem>
-				</template>
+				<FormDataItem ref='formDataItem' v-if='showOptions.length' :showOptions='showOptions' :uuid='localData.uuid' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn'></FormDataItem>
 				<!--  -->
 				<div class='form-submit'>
 					<!-- <van-button block type='info' @click='onSubmitFn' >保存</van-button> -->
@@ -114,7 +82,7 @@ export default {
 			// 
 			list: [],
 
-			initialSwipe: 0,
+			initialSwipe: 0, // 左右滑动的下标
 			activeUuid: '',
 			rules: [],
 			validateState: true,
@@ -123,7 +91,8 @@ export default {
 			password: '',
 			swipteListUuids: [], // 从vuex（首页列表数据）或混扫归集的列表中提取
 			currentInvoiceClass: '', // 当前发票分类
-			random: ''
+			random: '',
+			showOptions: []
 		}
 	},
 	computed: {
@@ -138,6 +107,7 @@ export default {
 		this.random = this.randomFn();
 	},
 	mounted() {
+
 		this.formatInvoiceOptionFn();
 		// item：发票信息；
 		// index：发票对应下标；
@@ -145,83 +115,51 @@ export default {
 		let { item, index, require } = { ...this.$route.params };
 		console.log(item, index, require)
 		if (index != void 0) { // 如果index 不等于 undefined,表明是从详情进来的，就可以左右切换
-			console.log('混扫 或 详情', item)
-
+			console.log('混扫 或 详情', item);
+			this.swipteListUuids = [];
 			if (isToString(item) == 'Array') {
 
-				if (!require) {
-					this.setLocalDataFn(item[0]);
-					item.forEach(item => {
-						this.swipteListUuids.push(item.uuid);
-						this.list.push(item)
-					})
-					this.appFindFn(item[0].uuid);
-					// 归集发票的混扫情况，默认去第一条信息
-					this.setLocalDataFn(item[0]);
-
-				} else {
+				if (!require) { // 非归集
+					this.appFindFn(item[index].uuid);
 					this.detailListUuid.forEach(item => {
 						this.swipteListUuids.push(item);
 					})
+					this.getInvoiceImg(item[index].uuid)
+				} else {
+					item.forEach(item => {
+						this.swipteListUuids.push(item.uuid);
+					});
+					// 归集发票的混扫情况，默认去第一条信息
+					this.setDataFn(item[0]);
+					this.getInvoiceImg(item[0].uuid);
 				}
 
-				this.getInvoiceImg(item[0].uuid)
 			} else {
 				this.detailListUuid.forEach(item => {
 					this.swipteListUuids.push(item);
-				})
-				this.setLocalDataFn(item);
-
+				});
+				this.activeUuid = item.uuid;
+				this.appFindFn(item.uuid);
 			}
-			this.swipteListUuids.forEach((item, index) => {
-				if (item == this.localData.uuid) {
-					this.initialSwipe = index;
-				}
-			});
-			console.log('swipteListUuids = ',this.swipteListUuids)
-			// 左右滑动事件
-			let zeptoEvent = this.$zepto('.detail.child-view');
-			zeptoEvent.on('swipeLeft', (event) => {
-				if (this.initialSwipe < this.swipteListUuids.length - 1) {
-					this.activeUuid = this.swipteListUuids[++this.initialSwipe];
-					console.log('left = ',this.initialSwipe, require,this.activeUuid);
-					if (!require) {
-						this.appFindFn(this.activeUuid);
-					}
-					this.random = this.randomFn();
-					this.getInvoiceImg(this.activeUuid)
-				} else {
-					this.$toast('已是最后一条');
-				}
-			});
-			zeptoEvent.on('swipeRight', (event) => {
-				if (this.initialSwipe > 0) {
-					this.activeUuid = this.swipteListUuids[--this.initialSwipe];
-					console.log('right = ',this.initialSwipe, require,this.activeUuid);
-					if (!require) {
-						this.appFindFn(this.activeUuid);
-					}
-					this.random = this.randomFn();
-					this.getInvoiceImg(this.activeUuid)
 
-				} else {
-					this.$toast('已是第一条');
-				}
 
-			});
+			this.onZeptoEventFn(require);
+
 		} else {
-			console.log('单张', item)
+			console.log('单张', item, require)
 			// 单张
+			
 			if (!require) {
-				this.setLocalDataFn(item);
+
 				this.detailListUuid.forEach(item => {
 					this.swipteListUuids.push(item);
 				})
 				this.appFindFn(item.uuid)
+			}else{
+				this.setDataFn(item);
 			}
-			this.getInvoiceImg(item.uuid)
+			this.getInvoiceImg(item.uuid);
 		}
-
 	},
 	methods: {
 		// 发票类型转换
@@ -243,15 +181,14 @@ export default {
 
 		},
 		// 设置当前显示的发票
-		setLocalDataFn(item) {
+		setDataFn(item) {
+			
 			this.localData = {};
-			console.log(1, JSON.stringify(item));
-			// let
-			for (let key in item) {
-				console.log(key)
+			let keys = Object.keys(item);
+			keys.forEach(key => {
 				this.$set(this.localData, key, item[key]);
-			}
-			console.log(2, JSON.stringify(this.localData));
+			});
+			this.setShowOptionsFn(this.localData.invoiceTypeCode);
 		},
 		// 表单初始化验证
 		formDataInitValidateFn() {
@@ -347,6 +284,7 @@ export default {
 		},
 		// 查询详情
 		appFindFn(uuid) {
+			console.log(2,uuid)
 			this.axios({
 				url: httpApi.app.appFind,
 				data: {
@@ -354,10 +292,14 @@ export default {
 				}
 			}).then(resolve => {
 				// console.log('resolve = ', resolve.data);
-				// this.$set(this.$data, 'localData', resolve.data);
-				this.setLocalDataFn(resolve.data)
+				this.setDataFn(resolve.data)
+				// 定位当前显示发票uuid的下标
+				this.swipteListUuids.forEach((item, index) => {
+					if (item == this.localData.uuid) {
+						this.initialSwipe = index;
+					}
+				});
 				this.onResetFormDataFn();
-
 			}).catch(reject => {
 
 			});
@@ -382,13 +324,75 @@ export default {
 			});
 		},
 		onInputFn(key, value) {
-			// this.formDataInitValidateFn()
 			console.log(arguments)
-			// this.$set(this.list[this.initialSwipe], key, value);
-			// console.log(this.list)
 		},
 		onBlurFn() {
 			// this.formDataInitValidateFn()
+		},
+		// 左右滑动事件
+		onZeptoEventFn(require) {
+			let zeptoEvent = this.$zepto('.detail.child-view');
+			zeptoEvent.on('swipeLeft', (event) => {
+				
+				if (this.initialSwipe < this.swipteListUuids.length - 1) {
+					this.random = this.randomFn();
+					this.activeUuid = this.swipteListUuids[++this.initialSwipe];
+					console.log('left = ', this.initialSwipe, require, this.activeUuid);
+					if (!require) {
+						this.appFindFn(this.activeUuid);
+					}
+					this.getInvoiceImg(this.activeUuid)
+				} else {
+					this.$toast('已是最后一条');
+				}
+			});
+			zeptoEvent.on('swipeRight', (event) => {
+				
+				if (this.initialSwipe > 0) {
+					this.random = this.randomFn();
+					this.activeUuid = this.swipteListUuids[--this.initialSwipe];
+					console.log('right = ', this.initialSwipe, require, this.activeUuid);
+					if (!require) {
+						this.appFindFn(this.activeUuid);
+					}
+					this.getInvoiceImg(this.activeUuid)
+
+				} else {
+					this.$toast('已是第一条');
+				}
+			});
+		},
+		// 
+		setShowOptionsFn(invoiceTypeCode) {
+			this.showOptions = []
+			// console.log('swipteListUuids = ', this.swipteListUuids)
+			// console.log(4, invoiceTypeCode)
+			if (this.VATGClass.includes(invoiceTypeCode)) {
+				// console.log('增值税专用发票、机动车销售统一发票、货运运输业增值税专用发票')
+				this.showOptions = this.VATGOptions;
+			} else if (this.VATSElectcClass.includes(invoiceTypeCode)) {
+				// console.log('增值税普通发票、增值税普通发票(电子)、增值税普通发票(卷式)、增值税电子普通发票(通行费)')
+				this.showOptions = this.VATSElectcOption;
+			} else if (invoiceTypeCode === "90") {
+				// console.log('航空')
+				this.showOptions = this.aviationShowOptions;
+			} else if (invoiceTypeCode === "91") {
+				// console.log('出租车票')
+				this.showOptions = this.taxiShowOptions;
+			} else if (this.trainAndRealNameClass.includes(invoiceTypeCode)) {
+				// console.log('火车票、公路、水路、其他（实名）')
+				this.showOptions = this.trainAndRealNameShowOptions;
+			} else if (invoiceTypeCode === "94") {
+				// console.log('汽车票')
+				this.showOptions = this.carShowOptions;
+			} else if (this.QCGClass.includes(invoiceTypeCode)) {
+				// console.log('定额发票、通用、政府非税收')
+				this.showOptions = this.QCGShowOptions;
+			} else if (invoiceTypeCode === "00") {
+				// console.log('其他')
+				this.showOptions = this.otherShowOptions;
+			}
+			// console.log(this.showOptions)
 		}
 
 	},
