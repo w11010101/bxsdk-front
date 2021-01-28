@@ -18,10 +18,10 @@
 		</div>
 		<!-- 查验状态 -->
 		<!-- v-if='localData.checkState!="0"&&VATsAllClass.includes(localData.invoiceTypeCode)' -->
-		<div class='check-status' :class='localData.checkState!="2"?"check-success":"check-fail"' >
+		<div class='check-status' :class='localData.checkState!="2"?"check-success":"check-fail"' v-if='localData.checkState!="0"&&VATsAllClass.includes(localData.invoiceTypeCode)'>
 			<van-icon name="checked" v-if='localData.checkState!="2"' />
 			<van-icon name="clear" v-else />
-			查验结果(<span>{{getCheckStateFn(localData.checkState)}}</span>){{localData.invoiceNo}} | {{localData.invoiceTypeCode}} | {{random}}
+			查验结果(<span>{{getCheckStateFn(localData.checkState)}}</span>){{localData.uuid}}
 		</div>
 		<!-- 表单 -->
 		<div class='detail-form'>
@@ -29,7 +29,7 @@
 				<!-- formData 分类：增票类、费增票（火车，飞机，定额，等） -->
 				<!-- 增值税专用发票、机动车销售统一发票、货运运输业增值税专用发票 -->
 				<template v-if='VATGClass.includes(localData.invoiceTypeCode)'>
-					<FormDataItem ref='formDataItem' :showOptions='VATGOption' :key='random' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn'></FormDataItem>
+					<FormDataItem ref='formDataItem' :showOptions='VATGOptions' :key='random' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn'></FormDataItem>
 				</template>
 				<!-- 增值税普通发票、增值税普通发票(电子)、增值税普通发票(卷式)、增值税电子普通发票(通行费) -->
 				<template v-if='VATSElectcClass.includes(localData.invoiceTypeCode)'>
@@ -123,7 +123,7 @@ export default {
 			password: '',
 			swipteListUuids: [], // 从vuex（首页列表数据）或混扫归集的列表中提取
 			currentInvoiceClass: '', // 当前发票分类
-			random:''
+			random: ''
 		}
 	},
 	computed: {
@@ -143,7 +143,7 @@ export default {
 		// index：发票对应下标；
 		// require：是否是请求的（true/false）；
 		let { item, index, require } = { ...this.$route.params };
-
+		console.log(item, index, require)
 		if (index != void 0) { // 如果index 不等于 undefined,表明是从详情进来的，就可以左右切换
 			console.log('混扫 或 详情', item)
 
@@ -158,7 +158,6 @@ export default {
 					this.appFindFn(item[0].uuid);
 					// 归集发票的混扫情况，默认去第一条信息
 					this.setLocalDataFn(item[0]);
-					// 
 
 				} else {
 					this.detailListUuid.forEach(item => {
@@ -178,13 +177,14 @@ export default {
 				if (item == this.localData.uuid) {
 					this.initialSwipe = index;
 				}
-			})
+			});
+			console.log('swipteListUuids = ',this.swipteListUuids)
 			// 左右滑动事件
 			let zeptoEvent = this.$zepto('.detail.child-view');
 			zeptoEvent.on('swipeLeft', (event) => {
 				if (this.initialSwipe < this.swipteListUuids.length - 1) {
 					this.activeUuid = this.swipteListUuids[++this.initialSwipe];
-
+					console.log('left = ',this.initialSwipe, require,this.activeUuid);
 					if (!require) {
 						this.appFindFn(this.activeUuid);
 					}
@@ -197,7 +197,7 @@ export default {
 			zeptoEvent.on('swipeRight', (event) => {
 				if (this.initialSwipe > 0) {
 					this.activeUuid = this.swipteListUuids[--this.initialSwipe];
-
+					console.log('right = ',this.initialSwipe, require,this.activeUuid);
 					if (!require) {
 						this.appFindFn(this.activeUuid);
 					}
@@ -244,9 +244,14 @@ export default {
 		},
 		// 设置当前显示的发票
 		setLocalDataFn(item) {
+			this.localData = {};
+			console.log(1, JSON.stringify(item));
+			// let
 			for (let key in item) {
+				console.log(key)
 				this.$set(this.localData, key, item[key]);
 			}
+			console.log(2, JSON.stringify(this.localData));
 		},
 		// 表单初始化验证
 		formDataInitValidateFn() {
@@ -348,7 +353,7 @@ export default {
 					uuid,
 				}
 			}).then(resolve => {
-				console.log('resolve = ', resolve.data);
+				// console.log('resolve = ', resolve.data);
 				// this.$set(this.$data, 'localData', resolve.data);
 				this.setLocalDataFn(resolve.data)
 				this.onResetFormDataFn();
@@ -364,7 +369,7 @@ export default {
 					uuid,
 				}
 			}).then(resolve => {
-				console.log('resolve = ', resolve);
+				// console.log('resolve = ', resolve);
 				if (resolve.status) {
 					this.setBase64Fn('data:image/png;base64,' + resolve.data);
 				} else {

@@ -107,11 +107,10 @@ export default {
 	},
 	watch: {},
 	created() {
-		console.log('调用')
 
 	},
 	mounted() {
-
+		console.log('调用')
 		// let img1 = document.createElement("img");
 		// let img2 = document.createElement("img");
 
@@ -136,7 +135,7 @@ export default {
 
 		// }, 2000);
 		// this.localItemData
-		console.log(8, this.data)
+		// console.log(8, this.data)
 		for (let key in this.data) {
 			this.$set(this.localItemData, key, this.data[key] === void 0 || this.data[key] === null ? '' : this.data[key]);
 		}

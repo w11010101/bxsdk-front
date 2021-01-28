@@ -24,11 +24,11 @@ export default {
 	],
 
 	// 增值税专用发票、机动车销售统一发票、货运运输业增值税专用发票
-	VATGOption: [
+	VATGOptions: [
 		{ key: 'invoiceCode', required: true }, // 发票代码
 		{ key: 'invoiceNo', required: true }, // 发票号码
 		{ key: 'invoiceDate', required: true, type: 'date' }, // 开票日期
-		{ key: 'invoiceAmount', required: true, label: '金额(不含税)' }, // 金额
+		{ key: 'totalAmount', required: true, label: '金额' }, // 金额
 
 		{ key: 'reimbursementNote', }, // 报销说明
 		{ key: 'checkState', type: 'state' }, // 查验状态

@@ -12,12 +12,12 @@
 							<van-pull-refresh v-model="isLoading" @refresh="pullDownFn">
 								<van-checkbox-group v-model="checkboxGroup" ref='checkboxGroup' @change='checkChangeFn'>
 									<van-swipe-cell v-for="(item,i) in listData" :key="i" :title="item">
-										<div class='list-item' @click='goDetailFn(item,i)'>
+										<div class='list-item' >
 											<van-row type="flex">
 												<van-col span='4' class='checkbox-box'>
 													<van-checkbox :name='i' class='checkbox-btn' shape="square"></van-checkbox>
 												</van-col>
-												<van-col span='20'>
+												<van-col span='20' @click='goDetailFn(item,i)'>
 													<h2><label class='van-ellipsis'>{{getInvoiceTypeTextFn(item.invoiceTypeCode)}}</label><span>￥{{item.totalAmount}}</span></h2>
 													<template v-if='VATsAllClass.includes(item.invoiceTypeCode)'>
 														<div class='list-detial'>

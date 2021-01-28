@@ -1,3 +1,4 @@
+// 个性化定制
 export default {
 	totalNum: {
         label: '总张数',
