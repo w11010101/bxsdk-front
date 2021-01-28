@@ -69,7 +69,7 @@
 </template>
 <script>
 import httpApi from '@/common/js/httpApi.js'
-import { getInvoiceTypeText, formatDate } from '@/common/js/common.js';
+import { getInvoiceTypeTextFn, formatDate } from '@/common/js/common.js';
 import DetailComponent from '@/views/pc/detail.vue'
 export default {
 	components:{
@@ -96,7 +96,7 @@ export default {
 					key: 'invoiceTypeCode',
 					width: 200,
 					render: (h, params) => {
-						return h('span', getInvoiceTypeText(params.row.invoiceTypeCode));
+						return h('span', getInvoiceTypeTextFn(params.row.invoiceTypeCode));
 					}
 				},
 				{
@@ -216,11 +216,11 @@ export default {
 
 	},
 	methods: {
-		getInvoiceTypeText,
+		getInvoiceTypeTextFn,
 		formatDate,
 		select() {
 			this.axios({
-				url: httpApi.pc.select,
+				url: httpApi.web.select,
 				data: {
 					startTime: this.searchObj.searchStartDate || '', //发票开始时间
 					endTime: this.searchObj.searchEndDate || '', //发票结束时间
