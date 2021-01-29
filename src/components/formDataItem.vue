@@ -57,7 +57,7 @@
 </template>
 <script>
 import { mapState, mapMutations } from 'vuex';
-import { isToString, compress, base64ToFile, formatDate, getCheckStateFn, getReimburseStateFn } from '@/common/js/common';
+import { isToString, compress, base64ToFile, formatDate, getCheckStateFn, getReimburseStateFn ,inputDebounce} from '@/common/js/common';
 import { formDataConfig } from '@/common/js/formDataConfig';
 
 export default {
@@ -118,7 +118,7 @@ export default {
 
 	},
 	mounted() {
-		console.log('调用', this.showOptions)
+		console.log('调用', this.showOptions);
 		// let img1 = document.createElement("img");
 		// let img2 = document.createElement("img");
 		// img1.src = require('@/assets/E3767164-FC3A-49B2-9717-E131179E1291_1_105_c.jpeg');
@@ -175,7 +175,6 @@ export default {
 			for (let key in this.data) {
 				this.$set(this.localItemData, key, this.data[key] === void 0 || this.data[key] === null ? '' : this.data[key]);
 			}
-			// console.log(3, JSON.stringify(this.localItemData));
 		},
 		// 日期选择
 		selectDateFn(type) {
@@ -187,6 +186,7 @@ export default {
 			console.log('日期选择')
 			this.$set(this.localItemData, this.currentType, formatDate(new Date(date).toLocaleDateString()));
 			this.calendarShow = false;
+			this.$emit('onDateConfirmFn');
 		},
 		onCancelFn() {
 			this.calendarShow = false;
@@ -198,7 +198,10 @@ export default {
 					this.localItemData[key] = this.localItemData[key].replace(this.formDataConfig[key].reg, '$1');
 				}
 			}
-			this.$emit('onInputFn', key, this.localItemData[key]);
+			inputDebounce(function(){
+				this.$emit('onInputFn', key, this.localItemData[key])
+			},3000)
+			
 		},
 		onBlurFn(key) {
 			this.$emit('onBlurFn', key, this.formDataConfig[key])

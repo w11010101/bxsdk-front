@@ -5,7 +5,9 @@ export let formDataConfig = {
         label: '发票代码',
         placeholder: '请输入发票代码',
         required: true,
-        rules: [{ required: true, validator: valueValidator, label: '发票代码', message: '发票代码不能为空', maxLength: 12, }],
+        rules: [
+            { required: true, validator: valueValidator, label: '发票代码', message: '发票代码不能为空', maxLength: 12, }
+        ],
         maxLength: 12,
         reg: /\D/g,
         readonly: false,
@@ -66,7 +68,10 @@ export let formDataConfig = {
         label: '票价',
         placeholder: '最多11位数字(含小数点后2位)',
         required: true,
-        rules: [{ required: true, validator: valueValidator, label: '票价', message: '票价不能为空' }],
+        rules: [
+            { required: true, validator: valueValidator, label: '票价', message: '票价不能为空' },
+            { required: true, validator: numberValidator, label: '票价', message: '票价不能为0' }
+        ],
         maxLength: 12,
         reg: /^\D*(\d*(?:\.\d{0,2})?).*$/g,
         readonly: false,
@@ -93,7 +98,10 @@ export let formDataConfig = {
         label: '票面金额',
         placeholder: '最多11位数字(含小数点后2位)',
         required: true,
-        rules: [{ required: true, validator: valueValidator, label: '票面金额', message: '票面金额不能为空' }],
+        rules: [
+            { required: true, validator: valueValidator, label: '票面金额', message: '票面金额不能为空' },
+            { required: true, validator: numberValidator, label: '票价', message: '票价不能为0' }
+        ],
         maxLength: 12,
         reg: /^\D*(\d*(?:\.\d{0,2})?).*$/g,
         readonly: false,
@@ -102,7 +110,10 @@ export let formDataConfig = {
         label: '金额',
         placeholder: '最多11位数字(含小数点后2位)',
         required: true,
-        rules: [{ required: true, validator: valueValidator, label: '金额', message: '金额不能为空' }],
+        rules: [
+            { required: true, validator: valueValidator, label: '金额', message: '金额不能为空' },
+            { required: true, validator: numberValidator, label: '票价', message: '票价不能为0' }
+        ],
         maxLength: 12,
         reg: /^\D*(\d*(?:\.\d{0,2})?).*$/g,
         readonly: false,
@@ -268,5 +279,19 @@ function valueValidator(value, item) {
         } else {
             return true;
         }
+    }
+}
+
+function numberValidator(value, item) {
+    if (item.required) {
+        if(parseFloat(value) ==0){
+            _Toast({
+                message: item.message
+            });
+            return false;
+        }else{
+            return true;
+        }
+        console.log(5,value, item)
     }
 }

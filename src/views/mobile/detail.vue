@@ -26,7 +26,7 @@
 		<!-- 表单 -->
 		<div class='detail-form'>
 			<van-form @failed='onFailedFn' ref='formData' :show-error-message='false' :show-error='false' >
-				<FormDataItem ref='formDataItem' v-if='showOptions.length' :showOptions='showOptions' :uuid='localData.uuid' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn'></FormDataItem>
+				<FormDataItem ref='formDataItem' v-if='showOptions.length' :showOptions='showOptions' :uuid='localData.uuid' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn' @onDateConfirmFn='onDateConfirmFn'></FormDataItem>
 				<!--  -->
 				<div class='form-submit'>
 					<!-- <van-button block type='info' @click='onSubmitFn' >保存</van-button> -->
@@ -124,14 +124,12 @@ export default {
 					this.detailListUuid.forEach(item => {
 						this.swipteListUuids.push(item);
 					})
-					this.getInvoiceImg(item[index].uuid)
 				} else {
 					item.forEach(item => {
 						this.swipteListUuids.push(item.uuid);
 					});
 					// 归集发票的混扫情况，默认去第一条信息
 					this.setDataFn(item[0]);
-					this.getInvoiceImg(item[0].uuid);
 				}
 
 			} else {
@@ -140,6 +138,7 @@ export default {
 				});
 				this.activeUuid = item.uuid;
 				this.appFindFn(item.uuid);
+
 			}
 			this.onZeptoEventFn(require);
 
@@ -156,7 +155,6 @@ export default {
 				this.setDataFn(item);
 
 			}
-			this.getInvoiceImg(item.uuid);
 		}
 		
 	},
@@ -188,7 +186,8 @@ export default {
 			this.setShowOptionsFn(this.localData.invoiceTypeCode);
 			this.$nextTick().then(()=>{
 				this.formDataInitValidateFn();
-			})
+				if(this.localData.uuid) this.getInvoiceImg(this.localData.uuid);
+			});
 			
 		},
 		// 表单初始化验证
@@ -329,18 +328,12 @@ export default {
 			});
 		},
 		onInputFn(key, value) {
-			// console.log(arguments)
 			this.formDataInitValidateFn();
 		},
 		onBlurFn(key,config) {
-			// console.log('onBlur = ',arguments);
-			// this.$refs.formData.validate().then(res=>{
-			// 	console.log('res = ',res);
-			// }).catch(err=>{
-			// 	console.log('err = ',err);
-			// })
-			
-			// this.$toast(config.placeholder);
+			// this.formDataInitValidateFn();
+		},
+		onDateConfirmFn(){
 			this.formDataInitValidateFn();
 		},
 		// 左右滑动事件
@@ -355,7 +348,6 @@ export default {
 					if (!require) {
 						this.appFindFn(this.activeUuid);
 					}
-					this.getInvoiceImg(this.activeUuid)
 				} else {
 					this.$toast('已是最后一条');
 				}
@@ -369,8 +361,6 @@ export default {
 					if (!require) {
 						this.appFindFn(this.activeUuid);
 					}
-					this.getInvoiceImg(this.activeUuid)
-
 				} else {
 					this.$toast('已是第一条');
 				}

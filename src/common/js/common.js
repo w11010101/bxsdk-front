@@ -348,7 +348,7 @@ export function formatDate(data) {
             }
         }).join('-');
     } else {
-        
+
         return data.substr(0,8).split('').map((item, index) => {
             return [3, 5].includes(index) ? item + '-' : item;
         }).join('');
@@ -357,6 +357,18 @@ export function formatDate(data) {
 // 随机数
 export function randomFn() {
     return parseInt(Math.random(1) * 100000000);
+}
+
+// 输入防抖
+export function inputDebounce(fn,delay) {
+    console.log(6,fn)
+    let timer = null;
+    return function() {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(function() {
+            fn();
+        }, delay);
+    }
 }
 // _this.replaceAndSetPosMoney(e.target,/\d+\.?\d{0,2}/,"")
 // function replaceAndSetPosMoney(obj, pattern, text) {
