@@ -1,0 +1,105 @@
+.pc-index {
+
+	.invoice {
+		text-align: left;
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+
+	div.inline {
+		display: inline-block;
+		width: 300px;
+		margin-bottom: 10px;
+	}
+
+	.filter-items {
+		display: inline-block;
+		max-width: 900px;
+	}
+
+	.filter-btn {
+		display: inline-block;
+		vertical-align: top;
+	}
+
+
+
+	.filter-part {
+		label {
+			display: inline-block;
+			width: 80px;
+			text-align: left;
+		}
+
+		label+div {
+			width: calc(100% - 100px);
+		}
+	}
+
+	.tools-part {
+		height: 60px;
+		padding-top: 15px;
+		margin-top: 15px;
+		border-top: 1px dashed rgb(217, 217, 217);
+
+		&>div {
+			display: inline-block;
+			width: 50%;
+		}
+
+		.tips-text {
+			display: inline-block;
+			padding: 10px 0;
+
+			span {
+				font-size: 14px;
+				padding-left: 15px;
+				border-left: 3px solid #2db7f5
+			}
+		}
+
+		.tools-btns {
+			text-align: right;
+
+			.btn {
+				display: inline-block;
+				margin-left: 10px;
+			}
+		}
+	}
+
+	.table-container-part {
+		flex: auto;
+		padding: 20px 0;
+
+	}
+
+
+
+	.tips-text {
+		display: inline-block;
+		vertical-align: middle;
+	}
+
+	.floor-page-part {
+
+		height: 40px;
+
+		.floor-page {
+			text-align: right;
+		}
+	}
+
+}
+
+.vertical-center-modal {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	.ivu-modal {
+		top: 0;
+	}
+}
+

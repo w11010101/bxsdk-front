@@ -1,3 +1,4 @@
+
 .mobile-index {
 	position: absolute;
 	width: 100%;
@@ -15,7 +16,7 @@
 	position: absolute;
 	top: 60px;
 	bottom: 0;
-	z-index: 1
+	z-index: 1;
 }
 
 .container {
@@ -102,17 +103,6 @@
 	transform: translateX(100%);
 }
 
-/* slide-fadeY */
-/*.slide-fadeY-enter-active,
-.slide-fadeY-leave-active {
-	transition: all .3s ease;
-}*/
-
-/*.slide-fadeY-enter,
-.slide-fadeY-leave-to {
-	transform: translateY(-100%);
-}*/
-
 /* slide-fadeX */
 .slide-fadeX-enter-active,
 .slide-fadeX-leave-active {
@@ -132,5 +122,32 @@
 }
 
 .van-overlay {
-	background: rgba(0,0,0,0.3)!important;
+	background: rgba(0, 0, 0, 0.3) !important;
+}
+
+div.inline {
+	display: inline-block;
+	width: 400px;
+}
+.add-invoice-item{
+	height: 45px;
+	line-height: 45px;
+	color:#646566;
+	font-size: 16px;
+	border-bottom:1px solid #f7f8fa;
+}
+.add-invoice-item button{
+	font-size: 16px;
+	color:#646566;
+	border:0;
+	transition: background .1s ease;
+}
+
+.add-invoice-item:active button{
+	background: #e9e9e9;
+}
+
+.upload-item,.van-uploader__input-wrapper{
+	display: block;
+	width:100%;
 }

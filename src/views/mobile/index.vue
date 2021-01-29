@@ -8,18 +8,18 @@
 			<div class='container'>
 				<van-tabs v-model="active" color='#229FFF' title-active-color='#229FFF' class='container-tabs' @change='tabChangeFn'>
 					<van-tab :title="tab.name" v-for='(tab,index) in tabs' :name='tab.active' :key='index'>
-						<van-list v-model="loading" :finished="finished" class='list' finished-text="没有更多了" @load="pullUpFn" :immediate-check='false' :offset='0' >
+						<van-list v-model="loading" :finished="finished" class='list' finished-text="没有更多了" @load="pullUpFn" :immediate-check='false' :offset='0'>
 							<van-pull-refresh v-model="isLoading" @refresh="pullDownFn">
 								<van-checkbox-group v-model="checkboxGroup" ref='checkboxGroup' @change='checkChangeFn'>
 									<van-swipe-cell v-for="(item,i) in listData" :key="i" :title="item">
-										<div class='list-item' @click='goDetailFn(item,i)'>
+										<div class='list-item' >
 											<van-row type="flex">
 												<van-col span='4' class='checkbox-box'>
 													<van-checkbox :name='i' class='checkbox-btn' shape="square"></van-checkbox>
 												</van-col>
-												<van-col span='20'>
-													<h2><label class='van-ellipsis'>{{getInvoiceTypeText(item.invoiceTypeCode)}}</label><span>￥{{item.totalAmount}}</span></h2>
-													<template v-if='invoiceCodeClass.ZZSInvoiceCodes.includes(item.invoiceTypeCode)'>
+												<van-col span='20' @click='goDetailFn(item,i)'>
+													<h2><label class='van-ellipsis'>{{getInvoiceTypeTextFn(item.invoiceTypeCode)}}</label><span>￥{{item.totalAmount}}</span></h2>
+													<template v-if='VATsAllClass.includes(item.invoiceTypeCode)'>
 														<div class='list-detial'>
 															<div>
 																<label>购方信息：</label>
@@ -72,12 +72,27 @@
 						<van-button class='floor-btn' block>提交复核</van-button>
 					</van-col>
 					<van-col span='10'>
-						<van-button class='floor-btn' block color='#229FFF'>添加发票</van-button>
+						<van-button class='floor-btn' block color='#229FFF' @click='addInvoiceShow=true'>添加发票</van-button>
 					</van-col>
 				</van-row>
 			</div>
 		</div>
-		<!--  -->
+		<!-- 添加发票 -->
+		<van-action-sheet :round='false' v-model="addInvoiceShow" @select="onSelect" cancel-text="取消">
+			<template v-for='item in addInvoiceType'>
+				<van-button block v-if='item.value=="QRcode"' class='add-invoice-item'>{{item.name}}</van-button>
+				<van-uploader class='add-invoice-item upload-item' :name='item.value' :max-size="maxSize * 1024" v-else-if='item.value=="camera"' capture='camera' :after-read='onAfterReadFn' @oversize="onOversize" :multiple='item.multiple'>
+					<van-button block>{{item.name}}</van-button>
+				</van-uploader>
+				<van-uploader class='add-invoice-item upload-item' :name='item.value' :max-size="maxSize * 1024" v-else-if='item.value=="picture"' :after-read='onAfterReadFn' @oversize="onOversize" :multiple='item.multiple'>
+					<van-button block>{{item.name}}</van-button>
+				</van-uploader>
+				<van-uploader class='add-invoice-item upload-item' :name='item.value' :max-size="maxSize * 1024" v-else accept='.pdf' :after-read='onAfterReadFn' @oversize="onOversize" :multiple='item.multiple'>
+					<van-button block>{{item.name}}</van-button>
+				</van-uploader>
+			</template>
+		</van-action-sheet>
+		<!-- 跳转路由容器 -->
 		<transition name="slide-fade">
 			<router-view class='child-view' name='detailView' ref='child'></router-view>
 		</transition>
@@ -86,8 +101,7 @@
 <script>
 // @ is an alias to /src
 import SearchTool from '@/components/search'
-
-import { getInvoiceTypeText, getCheckStateFn, formatDate } from '@/common/js/common';
+import { getInvoiceTypeTextFn, getCheckStateFn, formatDate, invoiceCodeClass, compressFilesFn, isToString } from '@/common/js/common';
 import { mapState, mapMutations } from 'vuex';
 import httpApi from '@/common/js/httpApi.js'
 export default {
@@ -96,10 +110,11 @@ export default {
 		SearchTool
 	},
 	computed: {
-		...mapState(['invoiceCodeClass']),
+
 	},
 	data() {
 		return {
+			...invoiceCodeClass,
 			checked: '',
 			allChecked: false, // 全选按钮状态
 			checkboxGroup: [], // 全选集合
@@ -122,84 +137,116 @@ export default {
 			}],
 			active: 0,
 			height: window.innerHeight,
-			
+
 			searchObj: {
 
 			},
 			page: 1,
 			rows: 20,
-			dateRank:2
+			dateRank: 2,
+			addInvoiceShow: false,
+			addInvoiceType: [{
+					name: '扫一扫',
+					value: 'QRcode',
+					className: 'add-invoiceType'
+				},
+				{
+					name: '拍照',
+					value: 'camera',
+					className: 'add-invoiceType',
+					multiple: false
+				},
+				{
+					name: '相册',
+					value: 'picture',
+					className: 'add-invoiceType',
+					multiple: true
+				},
+				{
+					name: 'PDF',
+					value: 'PDF',
+					className: 'add-invoiceType',
+					multiple: false
+				}
+			],
+			maxSize: 5000
 		}
 	},
+	created() {
+		console.log('app created')
+		let mobileCss = require('@/common/css/mobile.css');
+		let listCss = require('@/common/css/list.css');
+	},
 	mounted() {
-		
-		console.log(1, this.invoiceCodeClass);
-		console.log(2, this.axios);
-		console.log(3, httpApi);
-		
-		this.selectList();
+
+		this.appSelectFn();
 	},
 	methods: {
 		...mapMutations(['getDetailListUuidFn']),
-		selectList(isRefresh = false){
+		getInvoiceTypeTextFn,
+		getCheckStateFn,
+		formatDate,
+		compressFilesFn,
+		appSelectFn(isRefresh = false) {
 			this.loading = true;
-            if (this.finished) return false;
+			if (this.finished) return false;
 			this.axios({
-				url: httpApi.mobile.selectList,
+				url: httpApi.app.appSelect,
 				data: {
-					startTime: this.searchObj.searchStartDate||'', //发票开始时间
-					endTime: this.searchObj.searchEndDate||'', //发票结束时间
+					startTime: this.searchObj.searchStartDate || '', //发票开始时间
+					endTime: this.searchObj.searchEndDate || '', //发票结束时间
 					reimburseState: this.active, //报销状态
-					invoiceTypeCode: this.searchObj.searchInvoiceType||'', //发票类型串
+					invoiceTypeCode: this.searchObj.searchInvoiceType || '', //发票类型串
 					dateRank: this.dateRank, //开票时间排序
-					dimParam: this.searchObj.searchVal||'', //模糊参数
+					dimParam: this.searchObj.searchVal || '', //模糊参数
 					page: this.page, //页码
 					rows: this.rows //条数	
 				}
 			}).then(resolve => {
-				console.log('resolve = ', resolve);
-				if (resolve.length) {
+				if (resolve.data.length) {
 					if (isRefresh) {
-                        console.log(' 刷新 赋值');
-                        this.$set(this.$data, 'listData', []);
-                    }else{
-                    	this.$set(this.$data, 'listData', this.listData.concat(resolve));
+						console.log(' 刷新 赋值');
+						this.$set(this.$data, 'listData', []);
+					} else {
+						this.$set(this.$data, 'listData', this.listData.concat(resolve.data));
 						this.page++;
-                    }
-					this.getDetailListUuidFn(this.listData.map(item=>item.uuid))
+					}
+					this.getDetailListUuidFn(this.listData.map(item => item.uuid))
 					this.finished = false;
 					this.isLoading = false;
-                    this.loading = false;
+					this.loading = false;
 				} else {
-					this.$toast({
-						message: '暂无数据',
-						duration: 1500,
-					});
+					// this.$toast({
+					// 	message: '暂无数据',
+					// 	duration: 1500,
+					// });
 					// 数据全部加载完成
-	                this.loading = false;
-	                this.isLoading = false;
-	                this.isRefresh = false;
+					this.loading = true;
+					this.isLoading = true;
+					this.isRefresh = true;
+					this.finished = true;
 				}
 			}).catch(reject => {
 				console.log('reject = ', reject);
 				// 数据全部加载完成
-                this.loading = false;
-                this.isLoading = false;
-                this.isRefresh = false;
+				this.loading = false;
+				this.isLoading = false;
+				this.isRefresh = false;
+				this.finished = true;
 			});
 		},
 		// 上划加载
 		pullUpFn() {
 			// 异步更新数据
-			this.selectList();
+			this.appSelectFn();
 		},
 		// 下划刷新
 		pullDownFn() {
 			this.isRefresh = true;
-            this.finished = false;
-            this.page = 1;
-            this.finished = false;
-			this.selectList(true);
+			this.finished = false;
+			this.page = 1;
+			this.finished = false;
+			this.appSelectFn(true);
 		},
 		// 单选
 		checkChangeFn(arr) {
@@ -219,33 +266,116 @@ export default {
 		tabChangeFn(index) {
 			this.listData = [];
 			this.finished = false;
-			this.pullUpFn();
+
+			this.appSelectFn();
 		},
-		//
-		goDetailFn(item, index) {
-			console.log('goDetailFn')
+		/**
+		 * [goDetailFn 跳转详情页面方法]
+		 * @param  {[type]}  item    [发票信息]
+		 * @param  {[type]}  index   [发票下标]
+		 * @param  {Boolean} require [是请求信息（true），还是详情信息（false）]
+		 * @return {[type]}          []
+		 */
+		goDetailFn(item, index, require = false) {
+			console.log(2, arguments)
 			this.$router.push({
 				name: 'detail',
 				params: {
 					type: 'detail',
-					index,
-					item
+					index: isToString(arguments[1]) == 'Number' ? index : void 0,
+					item,
+					require: isToString(arguments[1]) == 'Number' ? arguments[2] === void 0 ? false : arguments[2] : arguments[1],
 				}
 			})
 		},
-		getInvoiceTypeText,
-		getCheckStateFn,
-		formatDate,
+
 		onSearchCallBackFn(obj) {
-			console.log(obj)
 			this.searchObj = obj;
-		}
+		},
+		onSelect(item, index) {
+
+			this.addInvoiceShow = false;
+			switch (item.value) {
+				case 'QRcode':
+
+					break;
+				case 'camera':
+
+					break;
+				case 'picture':
+
+					break;
+				case 'PDF':
+
+					break;
+			}
+		},
+		// 添加图片后，返回图片压缩结果，类型是file
+		onAfterReadFn(file, item) {
+
+			this.compressFilesFn(file).then(resolve => {
+				this.addInvoiceShow = false;
+				// resolve.file : 单张时是Object，多张时是Array 
+				// resolve.type : true：单张；false：多张
+				this.appCollectByPicFn(resolve, 'base64');
+			});
+
+		},
+		/**
+		 * [appCollectByPicFn 图片归集接口]
+		 * @param  {[type]} filesRes   [压缩后的图片对象，不仅仅是包含file对象，还有base64]
+		 * @param  {String} paramsType [上传方式：base、file]
+		 * @return {[type]}            []
+		 */
+		appCollectByPicFn(filesRes, paramsType = 'base64') {
+			let fd = '',
+				data = {}
+			if (paramsType == 'base64') {
+				data = { picture: filesRes.file.base64.split(',')[1] }
+			} else if (paramsType == 'file') {
+				data = new FormData();
+				if (filesRes.type) {
+					data.append('file', filesRes.file.file);
+				} else {
+					filesRes.file.forEach(file => {
+						data.append('file', filesRes.file.file);
+					})
+				}
+			}
+
+			this.axios({
+				url: httpApi.app.appCollectByPic,
+				file: paramsType == 'base64' ? false : true,
+				data
+			}).then(resolve => {
+				console.log(9, resolve)
+				if (!resolve.code) {
+					if (resolve.data.length > 1) {
+						// 混扫
+						this.goDetailFn(resolve.data, 0, true);
+					} else {
+						// 单张
+						this.goDetailFn(resolve.data[0], true);
+					}
+
+				}
+
+			})
+		},
+
+		onOversize() {
+			this.$toast({
+				message: `文件大小不能超过 ${this.maxSize/1000}M`,
+				duration: 1500,
+			});
+		},
+
 
 	},
 
 }
 </script>
 <style>
-@import '../../common/css/index.css';
-@import '../../common/css/list.css';
+/*@import '../../common/css/index.css';
+@import '../../common/css/list.css';*/
 </style>

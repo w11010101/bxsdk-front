@@ -1,5 +1,5 @@
 export default {
-    pc: {
+    web: {
         //1获取发票列表
         select: '/rest/web/common/invoice/select',
         //2查看发票详情
@@ -15,7 +15,7 @@ export default {
         //7.获取发票图片
         getImg: '/rest/web/common/invoice/getImg',
         //8.图片归集接口
-        collectByPic: '/rest/web/common/invoice/collectByPic',
+        webCollectByPic: '/rest/web/common/invoice/collectByPic',
         //9.PDF归集接口
         collectByPdf: '/rest/web/common/invoice/collectByPdf',
         //10.获取发票管理列表
@@ -71,11 +71,11 @@ export default {
         // 上传附件
         uploadFile: '/web/common/invoice/uploadFile',
     },
-    mobile: {
+    app: {
         //生产环境
-        selectList: '/rest/app/common/invoice/select',
+        appSelect: '/rest/app/common/invoice/select',
         //查看发票详情
-        findDetail: '/rest/app/common/invoice/find',
+        appFind: '/rest/app/common/invoice/find',
         //删除发票信息
         deleteInvoice: '/rest/app/common/invoice/delete',
         //其他发票保存接口
@@ -87,7 +87,7 @@ export default {
         //获取发票图片
         getInvoiceImg: '/rest/app/common/invoice/getImg',
         //图片方式归集发票
-        collectByPic1: '/rest/app/common/invoice/collectByPic',
+        appCollectByPic: '/rest/app/common/invoice/collectByPic',
         //二维码方式归集发票
         collectByQrcode: '/rest/app/common/invoice/collectByQrcode',
         //二维码上传发票图片

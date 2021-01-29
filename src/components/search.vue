@@ -13,7 +13,7 @@
 				<van-search v-model="searchVal" placeholder="请输入搜索关键词" clearable show-action @cancel="onCancel" />
 				<!-- 开票日期 -->
 				<div class='search-dates'>
-					<h2>开票日期{{activeDateMonth}}</h2>
+					<h2>开票日期</h2>
 					<van-row justify='space-around' type="flex" gutter="5">
 						<!-- 年 -->
 						<van-col v-for='(item,index) in years' span='6'>
@@ -27,12 +27,14 @@
 				</div>
 				<!-- 发票类型 -->
 				<div class="search-invoiceType">
-					<h2>发票类型{{activeInvoiceTypeIndex}}</h2>
-					<van-row justify='space-around' type="flex" gutter="10">
-						<van-col v-for='(item,index) in invoiceType' span='12'>
-							<van-button :type="activeInvoiceTypeIndex === index?'info':'default'" block size='small' @click='onChangeTypeFn(item,index)'>{{item.invoiceTypeName}}</van-button>
-						</van-col>
-					</van-row>
+					<h2>发票类型</h2>
+					<div class='search-invoiceType-list'>
+						<van-row justify='space-around' type="flex" gutter="10">
+							<van-col v-for='(item,index) in invoiceType' span='12'>
+								<van-button :type="activeInvoiceTypeIndex === index?'info':'default'" block size='small' @click='onChangeTypeFn(item,index)'>{{item.invoiceTypeName}}</van-button>
+							</van-col>
+						</van-row>
+					</div>
 				</div>
 				<div class="search-floor-btn">
 					<van-row justify='space-around' type="flex" gutter="10">
@@ -154,7 +156,6 @@ export default {
 .search-invoiceType {
 	padding: 0px 20px;
 	text-align: left;
-
 }
 
 .search-dates h2,
@@ -174,9 +175,10 @@ export default {
 	width: 80px;
 }
 
-.search-invoiceType {
-	/*height:200px;*/
+.search-invoiceType-list {
+	height:30vh;
 	overflow-y: auto;
+	
 }
 
 .search-invoiceType .van-col {

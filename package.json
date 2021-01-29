@@ -12,6 +12,8 @@
     "babel-polyfill": "^6.26.0",
     "core-js": "^3.6.5",
     "es6-promise": "^4.2.8",
+    "exif-js": "^2.3.0",
+    "iview": "^3.5.4",
     "vant": "^2.11.3",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
