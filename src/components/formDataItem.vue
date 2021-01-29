@@ -5,7 +5,7 @@
 			<template v-for='(item,index) in showOptions'>
 				<!-- 日期 -->
 				<template v-if='item.type == "date"'>
-					<van-field v-model="localItemData[item.key]" :name='item.key' label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' readonly @click='selectDateFn' :key='index' />
+					<van-field v-model="localItemData[item.key]" :name='item.key' label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' :readonly='formDataConfig[item.key].readonly' @click='selectDateFn(item.key)' :key='index' />
 				</template>
 				<!-- 附件 -->
 				<template v-else-if='item.type == "files"'>
@@ -28,7 +28,7 @@
 				</template>
 				<!-- 其他 -->
 				<template v-else>
-					<van-field v-model="localItemData[item.key]" :name='item.key' label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' :readonly='formDataConfig[item.key].readonly' :maxLength='formDataConfig[item.key].maxLength' @input='onInputFn(item.key)' :type='formDataConfig[item.key].type||"text"' :key='index' @blur='onBlurFn' />
+					<van-field v-model="localItemData[item.key]" :name='item.key' label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' :readonly='formDataConfig[item.key].readonly' :maxLength='formDataConfig[item.key].maxLength' :type='formDataConfig[item.key].type||"text"' :key='index' @input='onInputFn(item.key)' @blur='onBlurFn(item.key)' />
 				</template>
 			</template>
 		</template>
@@ -97,6 +97,7 @@ export default {
 			minDate: new Date(2017, 0, 1),
 			maxDate: new Date(2030, 10, 1),
 			currentDate: new Date(),
+			currentType:'',
 			// 
 			fileList: [],
 			localItemData: {},
@@ -109,8 +110,7 @@ export default {
 	},
 	watch: {
 		uuid() {
-			console.log(3, this.uuid, this.data.uuid);
-
+			// 由于传data是Object类型，可能导致表单数据无法重新刷新渲染，所以通过监听uuid的变化重置localData;
 			this.resetLocalDataFn();
 		}
 	},
@@ -121,10 +121,8 @@ export default {
 		console.log('调用', this.showOptions)
 		// let img1 = document.createElement("img");
 		// let img2 = document.createElement("img");
-
 		// img1.src = require('@/assets/E3767164-FC3A-49B2-9717-E131179E1291_1_105_c.jpeg');
 		// img2.src = require('@/assets/F7BD5EC2-58BF-4C13-8E93-D61808FAC18E_1_105_c.jpeg');
-
 		// let baseImg1 = compress(img1);
 		// let baseImg2 = compress(img2);
 		// setTimeout(() => {
@@ -140,9 +138,7 @@ export default {
 		// 		message: "",
 		// 		status: ""
 		// 	});
-
 		// }, 2000);
-		// this.localItemData
 
 		this.resetLocalDataFn();
 		this.initFormDataItem();
@@ -157,10 +153,9 @@ export default {
 			let keys = Object.keys(this.formDataConfig);
 			keys.forEach(k => {
 				this.showOptions.forEach(item => {
-
 					if (item.key == k) {
-						if ('invoiceDate' == k) {
-							this.$set(this.localItemData, 'invoiceDate', formatDate(this.localItemData.invoiceDate));
+						if(item.type == 'date'){
+							this.$set(this.localItemData, item.key, formatDate(this.localItemData[item.key]));
 						}
 						// 必填项根据config.js的自定义配置进行重新设置
 						// 如果有 required 属性，则进行重新配置，如果没有 required 属性，则按照formDataConfig.js的默认配置
@@ -177,19 +172,19 @@ export default {
 			this.setResetFormDataConfig(this.formDataConfig);
 		},
 		resetLocalDataFn() {
-			console.log(4, this.data)
 			for (let key in this.data) {
 				this.$set(this.localItemData, key, this.data[key] === void 0 || this.data[key] === null ? '' : this.data[key]);
 			}
 			// console.log(3, JSON.stringify(this.localItemData));
 		},
 		// 日期选择
-		selectDateFn() {
+		selectDateFn(type) {
 			this.calendarShow = true;
+			this.currentType = type;
 		},
 		// 开票日期选择
 		confirmFn(date) {
-			this.$set(this.localItemData, 'invoiceDate', new Date(date).toLocaleDateString());
+			this.$set(this.localItemData, this.currentType, new Date(date).toLocaleDateString());
 			this.calendarShow = false;
 		},
 		onCancelFn() {
@@ -204,8 +199,8 @@ export default {
 			}
 			this.$emit('onInputFn', key, this.localItemData[key]);
 		},
-		onBlurFn() {
-			// this.$emit('onBlurFn')
+		onBlurFn(key) {
+			this.$emit('onBlurFn', key, this.formDataConfig[key])
 		}
 	},
 

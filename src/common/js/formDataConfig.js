@@ -1,6 +1,5 @@
 // 个性化定制
 import myselfFormDataItemConfig from '../myself/myselfFormDataItemConfig.js';
-
 export let formDataConfig = {
     invoiceCode: {
         label: '发票代码',
@@ -8,7 +7,7 @@ export let formDataConfig = {
         required: true,
         rules: [{ required: true, validator: valueValidator, label: '发票代码', message: '发票代码不能为空', maxLength: 12, }],
         maxLength: 12,
-        type: 'number',
+        // type: 'number',
         reg: /\D/g,
         readonly: false,
     },
@@ -19,7 +18,7 @@ export let formDataConfig = {
         required: true,
         rules: [{ required: true, validator: valueValidator, label: '发票号码', message: '发票号码不能为空', maxLength: 8, }],
         maxLength: 8,
-        type: 'number',
+        // type: 'number',
         readonly: false,
     },
 
@@ -28,7 +27,7 @@ export let formDataConfig = {
         placeholder: '请选择开票日期',
         required: true,
         rules: [{ required: true, validator: valueValidator, label: '开票日期', message: '开票日期不能为空' }],
-        type: 'date',
+        // type: 'date',
         readonly: false,
     },
 
@@ -210,7 +209,6 @@ export let formDataConfig = {
         label: '座位等级',
         placeholder: '请输入座位等级',
         required: false,
-        // rules: [{ required: false, validator: valueValidator,label: '座位等级',message: '车次、班次不能为空' }],
         readonly: false,
     },
     riderValue: {
@@ -260,7 +258,7 @@ export let formDataConfig = {
         required: false,
         readonly: true
     },
-    ...myselfFormDataItemConfig
+    ...myselfFormDataItemConfig,
 
 }
 // 正则判断

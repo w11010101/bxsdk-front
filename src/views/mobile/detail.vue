@@ -25,7 +25,7 @@
 		</div>
 		<!-- 表单 -->
 		<div class='detail-form'>
-			<van-form @failed='onFailedFn' ref='formData' :show-error-message='false'>
+			<van-form @failed='onFailedFn' ref='formData' :show-error-message='false' >
 				<FormDataItem ref='formDataItem' v-if='showOptions.length' :showOptions='showOptions' :uuid='localData.uuid' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn'></FormDataItem>
 				<!--  -->
 				<div class='form-submit'>
@@ -40,13 +40,13 @@
 			<van-picker show-toolbar :columns="localInvoiceType" @confirm="onConfirm" @cancel="onCancel" />
 		</van-popup>
 		<!-- 图片浏览 -->
-		<van-image-preview v-model="previewShow" :images="images" :showIndex="false" @change="onpPreviewImgChangeFn"></van-image-preview>
+		<van-image-preview v-model="previewShow" :images="images" :showIndex="false"></van-image-preview>
 	</div>
 </template>
 <script>
 import { mapState, mapMutations } from 'vuex';
 import FormDataItem from '@/components/formDataItem'
-import { uploadFileFn, getInvoiceTypeTextFn, invoiceCodeClass, getCheckStateFn, filterInvoiceClassFn, randomFn, isToString } from '@/common/js/common.js';
+import { uploadFileFn, getInvoiceTypeTextFn, invoiceCodeClass, getCheckStateFn, filterInvoiceClassFn, isToString } from '@/common/js/common.js';
 import httpApi from '@/common/js/httpApi.js'
 import { formDataConfig } from '@/common/js/formDataConfig';
 import config from '@/common/js/config'
@@ -104,7 +104,7 @@ export default {
 		}
 	},
 	created() {
-		this.random = this.randomFn();
+
 	},
 	mounted() {
 
@@ -141,25 +141,28 @@ export default {
 				this.activeUuid = item.uuid;
 				this.appFindFn(item.uuid);
 			}
-
-
 			this.onZeptoEventFn(require);
 
 		} else {
 			console.log('单张', item, require)
 			// 单张
-			
 			if (!require) {
 
 				this.detailListUuid.forEach(item => {
 					this.swipteListUuids.push(item);
 				})
 				this.appFindFn(item.uuid)
-			}else{
+			} else {
 				this.setDataFn(item);
+
 			}
 			this.getInvoiceImg(item.uuid);
 		}
+
+		// this.$nextTick().then(()=>{
+			
+		// })
+		
 	},
 	methods: {
 		// 发票类型转换
@@ -168,7 +171,6 @@ export default {
 		getCheckStateFn,
 		// 过滤当前发票属于哪种类
 		filterInvoiceClassFn,
-		randomFn,
 		setBase64Fn(base64) {
 			this.images = [];
 			if (base64) {
@@ -180,33 +182,35 @@ export default {
 			}
 
 		},
-		// 设置当前显示的发票
+		// 设置当前显示的发票信息
 		setDataFn(item) {
-			
 			this.localData = {};
 			let keys = Object.keys(item);
 			keys.forEach(key => {
 				this.$set(this.localData, key, item[key]);
 			});
 			this.setShowOptionsFn(this.localData.invoiceTypeCode);
+			this.formDataInitValidateFn();
 		},
 		// 表单初始化验证
 		formDataInitValidateFn() {
-			this.currentInvoiceClass = this.filterInvoiceClassFn(this.localData.invoiceTypeCode);
-
-			let keys = Object.keys(this.resetFormDataConfig);
-			keys.forEach(key => {
-				if (this.resetFormDataConfig[key].required) {
-					this.rules.push(this.resetFormDataConfig[key].rules[0])
-				}
-			});
+			// this.currentInvoiceClass = this.filterInvoiceClassFn(this.localData.invoiceTypeCode);
+			console.log('表单初始化验证');
+			// let keys = Object.keys(this.resetFormDataConfig);
+			// keys.forEach(key => {
+			// 	if (this.resetFormDataConfig[key].required) {
+			// 		this.rules.push(this.resetFormDataConfig[key].rules[0])
+			// 	}
+			// });
 
 			this.$refs.formData.validate().then(state => {
+				// console.log('arguments = ', arguments);
 				console.log('state = ', state);
+				this.validateState = true;
 			}).catch(error => {
 				console.log('error = ', error);
 				if (error.length) {
-					// this.validateState = false;
+					this.validateState = false;
 				}
 			});
 
@@ -223,11 +227,13 @@ export default {
 			this.selectState = false;
 			this.selectInvoiceShow = true;
 		},
-		// 弹窗 发票类型 确定
+		// 修改发票类型的弹窗确定方法
 		onConfirm(item) {
 			this.$set(this.localData, 'invoiceTypeCode', item.invoiceTypeCode);
 			this.selectInvoiceShow = false;
+			this.setShowOptionsFn(this.localData.invoiceTypeCode);
 			this.onResetFormDataFn();
+
 		},
 		// 弹窗 发票类型 取消
 		onCancel() {
@@ -237,10 +243,7 @@ export default {
 		previewImgFn() {
 			this.previewShow = true;
 		},
-		onpPreviewImgChangeFn() {
-
-		},
-		// 修改发票类型时导入表单变化，并重置表单必填项和校验状态
+		// 修改发票类型时表单变化，并重置表单必填项和校验状态
 		onResetFormDataFn() {
 			this.$nextTick().then(() => {
 				this.$refs.formDataItem.initFormDataItem();
@@ -250,7 +253,7 @@ export default {
 		// 提交表单
 		onSubmitFn() {
 			let _this = this;
-			console.log('onSubmitFn');
+			console.log('onSubmitFn',arguments);
 			// this.$refs.formData.validate().then(state=>{
 			// 	console.log('state = ',state)
 			// })
@@ -284,7 +287,6 @@ export default {
 		},
 		// 查询详情
 		appFindFn(uuid) {
-			console.log(2,uuid)
 			this.axios({
 				url: httpApi.app.appFind,
 				data: {
@@ -299,11 +301,12 @@ export default {
 						this.initialSwipe = index;
 					}
 				});
-				this.onResetFormDataFn();
+				// this.onResetFormDataFn();
 			}).catch(reject => {
 
 			});
 		},
+		// 获取发票图片
 		getInvoiceImg(uuid) {
 			this.axios({
 				url: httpApi.app.getInvoiceImg,
@@ -318,7 +321,6 @@ export default {
 					this.setBase64Fn();
 				}
 
-
 			}).catch(reject => {
 
 			});
@@ -326,16 +328,24 @@ export default {
 		onInputFn(key, value) {
 			console.log(arguments)
 		},
-		onBlurFn() {
-			// this.formDataInitValidateFn()
+		onBlurFn(key,config) {
+			// console.log('onBlur = ',arguments);
+			// this.$refs.formData.validate().then(res=>{
+			// 	console.log('res = ',res);
+			// }).catch(err=>{
+			// 	console.log('err = ',err);
+			// })
+			
+			// this.$toast(config.placeholder);
+			this.formDataInitValidateFn();
 		},
 		// 左右滑动事件
 		onZeptoEventFn(require) {
 			let zeptoEvent = this.$zepto('.detail.child-view');
 			zeptoEvent.on('swipeLeft', (event) => {
-				
+
 				if (this.initialSwipe < this.swipteListUuids.length - 1) {
-					this.random = this.randomFn();
+
 					this.activeUuid = this.swipteListUuids[++this.initialSwipe];
 					console.log('left = ', this.initialSwipe, require, this.activeUuid);
 					if (!require) {
@@ -347,9 +357,9 @@ export default {
 				}
 			});
 			zeptoEvent.on('swipeRight', (event) => {
-				
+
 				if (this.initialSwipe > 0) {
-					this.random = this.randomFn();
+
 					this.activeUuid = this.swipteListUuids[--this.initialSwipe];
 					console.log('right = ', this.initialSwipe, require, this.activeUuid);
 					if (!require) {
@@ -362,11 +372,9 @@ export default {
 				}
 			});
 		},
-		// 
+		// 根据类型区分表单显示字段
 		setShowOptionsFn(invoiceTypeCode) {
-			this.showOptions = []
-			// console.log('swipteListUuids = ', this.swipteListUuids)
-			// console.log(4, invoiceTypeCode)
+			this.showOptions = [];
 			if (this.VATGClass.includes(invoiceTypeCode)) {
 				// console.log('增值税专用发票、机动车销售统一发票、货运运输业增值税专用发票')
 				this.showOptions = this.VATGOptions;
@@ -392,7 +400,6 @@ export default {
 				// console.log('其他')
 				this.showOptions = this.otherShowOptions;
 			}
-			// console.log(this.showOptions)
 		}
 
 	},

@@ -5,6 +5,8 @@ export default {
 	// required：必填项，默认按照formDataConfig.js的配置
 	// type：个别渲染组件
 	// label：个性化修改表单名
+	// ...
+
 	showOptions: [
 		{ key: 'invoiceCode', required: true }, // 发票代码
 		{ key: 'invoiceNo', required: true }, // 发票号码
@@ -68,8 +70,8 @@ export default {
 		{ key: 'departCity', }, // 出发城市
 		{ key: 'arriveCity', }, // 到达城市
 
-		{ key: 'startDate' }, // 出发时间
-		{ key: 'endDate' }, // 到达时间
+		{ key: 'startDate', type: 'date' }, // 出发时间
+		{ key: 'endDate', type: 'date' }, // 到达时间
 
 		{ key: 'totalAmount', }, // 票面金额
 		{ key: 'reimbursementNote' }, // 报销说明
@@ -90,8 +92,8 @@ export default {
 		{ key: 'departCity', }, // 出发城市
 		{ key: 'arriveCity', }, // 到达城市
 
-		{ key: 'startDate' }, // 出发时间
-		{ key: 'endDate' }, // 到达时间
+		{ key: 'startDate', type: 'date' }, // 出发时间
+		{ key: 'endDate', type: 'date' }, // 到达时间
 
 		{ key: 'fare', }, // 票价
 		{ key: 'fuelSurcharge', }, // 燃油附加费
@@ -121,8 +123,8 @@ export default {
 		{ key: 'departCity', }, // 出发城市
 		{ key: 'arriveCity', }, // 到达城市
 
-		{ key: 'startDate' }, // 出发时间
-		{ key: 'endDate' }, // 到达时间
+		{ key: 'startDate', type: 'date' }, // 出发时间
+		{ key: 'endDate', type: 'date' }, // 到达时间
 		{ key: 'totalAmount', }, // 票面金额
 
 		{ key: 'reimbursementNote' }, // 报销说明
@@ -154,6 +156,6 @@ export default {
 		{ key: 'files', type: 'files' }, // 附件
 
 	],
-	
+
 
 }

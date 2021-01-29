@@ -337,7 +337,6 @@ export function getReimburseStateFn(value) {
 }
 // 日期格式化 20201212 => 2020-12-12
 export function formatDate(data) {
-
     if (!data) return '';
     if (data.includes('-')) return data;
     if (data.includes('/')) {
@@ -349,11 +348,11 @@ export function formatDate(data) {
             }
         }).join('-');
     } else {
-        return data.split('').map((item, index) => {
+        
+        return data.substr(0,8).split('').map((item, index) => {
             return [3, 5].includes(index) ? item + '-' : item;
         }).join('');
     }
-
 }
 // 随机数
 export function randomFn() {
