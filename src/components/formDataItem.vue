@@ -182,9 +182,10 @@ export default {
 			this.calendarShow = true;
 			this.currentType = type;
 		},
-		// 开票日期选择
+		// 日期选择
 		confirmFn(date) {
-			this.$set(this.localItemData, this.currentType, new Date(date).toLocaleDateString());
+			console.log('日期选择')
+			this.$set(this.localItemData, this.currentType, formatDate(new Date(date).toLocaleDateString()));
 			this.calendarShow = false;
 		},
 		onCancelFn() {

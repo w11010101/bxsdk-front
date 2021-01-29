@@ -25,7 +25,7 @@
 		</div>
 		<!-- 表单 -->
 		<div class='detail-form'>
-			<van-form @failed='onFailedFn' ref='formData' :show-error-message='false' >
+			<van-form @failed='onFailedFn' ref='formData' :show-error-message='false' :show-error='false' >
 				<FormDataItem ref='formDataItem' v-if='showOptions.length' :showOptions='showOptions' :uuid='localData.uuid' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn'></FormDataItem>
 				<!--  -->
 				<div class='form-submit'>
@@ -158,10 +158,6 @@ export default {
 			}
 			this.getInvoiceImg(item.uuid);
 		}
-
-		// this.$nextTick().then(()=>{
-			
-		// })
 		
 	},
 	methods: {
@@ -190,12 +186,15 @@ export default {
 				this.$set(this.localData, key, item[key]);
 			});
 			this.setShowOptionsFn(this.localData.invoiceTypeCode);
-			this.formDataInitValidateFn();
+			this.$nextTick().then(()=>{
+				this.formDataInitValidateFn();
+			})
+			
 		},
 		// 表单初始化验证
 		formDataInitValidateFn() {
 			// this.currentInvoiceClass = this.filterInvoiceClassFn(this.localData.invoiceTypeCode);
-			console.log('表单初始化验证');
+			console.log('表单初始化验证',this.$refs.formData);
 			// let keys = Object.keys(this.resetFormDataConfig);
 			// keys.forEach(key => {
 			// 	if (this.resetFormDataConfig[key].required) {
@@ -253,6 +252,7 @@ export default {
 		// 提交表单
 		onSubmitFn() {
 			let _this = this;
+			this.formDataInitValidateFn();
 			console.log('onSubmitFn',arguments);
 			// this.$refs.formData.validate().then(state=>{
 			// 	console.log('state = ',state)
@@ -270,9 +270,12 @@ export default {
 
 		},
 		// 表单验证失败
-		onFailedFn() {
-			console.log('表单验证失败');
-			// this.$toast('表单验证失败');
+		onFailedFn(item) {
+			console.log('表单验证失败',item);
+			if(item.errors.length){
+				this.$toast(item.errors[0].message);
+			}
+			
 		},
 		// vant上传组件
 		beforeRead(files) {
@@ -326,7 +329,8 @@ export default {
 			});
 		},
 		onInputFn(key, value) {
-			console.log(arguments)
+			// console.log(arguments)
+			this.formDataInitValidateFn();
 		},
 		onBlurFn(key,config) {
 			// console.log('onBlur = ',arguments);

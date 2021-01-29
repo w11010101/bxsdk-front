@@ -7,7 +7,6 @@ export let formDataConfig = {
         required: true,
         rules: [{ required: true, validator: valueValidator, label: '发票代码', message: '发票代码不能为空', maxLength: 12, }],
         maxLength: 12,
-        // type: 'number',
         reg: /\D/g,
         readonly: false,
     },
@@ -16,9 +15,8 @@ export let formDataConfig = {
         label: '发票号码',
         placeholder: '请输入发票号码',
         required: true,
-        rules: [{ required: true, validator: valueValidator, label: '发票号码', message: '发票号码不能为空', maxLength: 8, }],
+        rules: [{ required: true, label: '发票号码', message: '发票号码不能为空', maxLength: 8, }],
         maxLength: 8,
-        // type: 'number',
         readonly: false,
     },
 
@@ -26,8 +24,7 @@ export let formDataConfig = {
         label: '开票日期',
         placeholder: '请选择开票日期',
         required: true,
-        rules: [{ required: true, validator: valueValidator, label: '开票日期', message: '开票日期不能为空' }],
-        // type: 'date',
+        rules: [{ required: true, label: '开票日期', message: '开票日期不能为空' }],
         readonly: false,
     },
 
@@ -35,7 +32,7 @@ export let formDataConfig = {
         label: '开票日期时间',
         placeholder: '请选择开票日期时间',
         required: true,
-        rules: [{ required: true, validator: valueValidator, label: '开票日期时间', message: '开票日期时间不能为空' }],
+        rules: [{ required: true, label: '开票日期时间', message: '开票日期时间不能为空' }],
         readonly: false,
     },
 
@@ -45,6 +42,7 @@ export let formDataConfig = {
         required: true,
         rules: [{ required: true, validator: valueValidator, label: '校验码', message: '校验码不能为空' }],
         readonly: false,
+        maxLength: 6
     },
 
     buyerName: {
@@ -147,7 +145,6 @@ export let formDataConfig = {
         label: '销售方',
         placeholder: '',
         required: false,
-        // rules: [{ required: false, validator: valueValidator, message: '' }],
         readonly: true
     },
     remark: {
@@ -161,7 +158,7 @@ export let formDataConfig = {
         label: '报销说明',
         placeholder: '请输入报销说明',
         required: false,
-        rules: [{ required: false, validator: valueValidator, label: '报销说明', message: '报销说明不能为空' }],
+        rules: [{ required: false, label: '报销说明', message: '报销说明不能为空' }],
         readonly: false,
     },
     reimburseState: {
@@ -180,28 +177,27 @@ export let formDataConfig = {
         label: '附件张数',
         placeholder: '最多4位数字',
         required: false,
-        // rules: [{ required: false, validator: valueValidator, message: '' }],
         readonly: false,
     },
     departCity: {
         label: '出发',
         placeholder: '请输入出发城市',
         required: true,
-        rules: [{ required: true, validator: valueValidator, label: '出发城市', message: '出发城市不能为空' }],
+        rules: [{ required: true, label: '出发城市', message: '出发城市不能为空' }],
         readonly: false,
     },
     arriveCity: {
         label: '到达',
         placeholder: '请输入到达城市',
         required: true,
-        rules: [{ required: true, validator: valueValidator, label: '到达城市', message: '到达城市不能为空' }],
+        rules: [{ required: true, label: '到达城市', message: '到达城市不能为空' }],
         readonly: false,
     },
     trainNumber: {
         label: '车次/班次',
         placeholder: '请输入车次',
         required: true,
-        rules: [{ required: true, validator: valueValidator, label: '车次/班次', message: '车次、班次不能为空' }],
+        rules: [{ required: true, label: '车次/班次', message: '车次、班次不能为空' }],
         readonly: false,
     },
 
@@ -215,28 +211,28 @@ export let formDataConfig = {
         label: '乘坐人',
         placeholder: '请输入乘坐人',
         required: true,
-        rules: [{ required: true, validator: valueValidator, label: '乘坐人', message: '乘坐人不能为空' }],
+        rules: [{ required: true, label: '乘坐人', message: '乘坐人不能为空' }],
         readonly: false,
     },
     idNumber: {
         label: '证件号',
         placeholder: '请输入证件号后4位',
         required: true,
-        rules: [{ required: true, validator: valueValidator, label: '证件号', message: '证件号不能为空' }],
+        rules: [{ required: true, label: '证件号', message: '证件号不能为空' }],
         readonly: false,
     },
     startDate: {
         label: '出发时间',
         placeholder: '请选择出发时间',
         required: true,
-        rules: [{ required: true, validator: valueValidator, label: '出发时间', message: '出发时间不能为空' }],
+        rules: [{ required: true, label: '出发时间', message: '出发时间不能为空' }],
         readonly: false,
     },
     endDate: {
         label: '到达时间',
         placeholder: '请输入到达时间',
         required: true,
-        rules: [{ required: true, validator: valueValidator, label: '到达时间', message: '到达时间不能为空' }],
+        rules: [{ required: true, label: '到达时间', message: '到达时间不能为空' }],
         readonly: false,
     },
     sourceFile: {
