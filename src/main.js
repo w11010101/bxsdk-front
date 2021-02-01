@@ -35,6 +35,7 @@ function debounce(delay) {
 	return function() {
 		if (timer) clearTimeout(timer);
 		timer = setTimeout(function() {
+			console.log(5,VM.$route.meta.parent)
 			if(IsPC()){
 				if(VM.$route.meta.parent !== 'pc'){
 					VM.$router.replace('pcIndex');

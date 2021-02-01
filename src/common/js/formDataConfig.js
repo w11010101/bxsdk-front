@@ -17,7 +17,7 @@ export let formDataConfig = {
         label: '发票号码',
         placeholder: '请输入发票号码',
         required: true,
-        rules: [{ required: true, label: '发票号码', message: '发票号码不能为空', maxLength: 8, }],
+        rules: [{ required: true, validator: valueValidator, label: '发票号码', message: '发票号码不能为空', maxLength: 8, }],
         maxLength: 8,
         readonly: false,
     },
@@ -284,14 +284,14 @@ function valueValidator(value, item) {
 
 function numberValidator(value, item) {
     if (item.required) {
-        if(parseFloat(value) ==0){
+        if (parseFloat(value) == 0) {
             _Toast({
                 message: item.message
             });
             return false;
-        }else{
+        } else {
             return true;
         }
-        console.log(5,value, item)
+        console.log(5, value, item)
     }
 }

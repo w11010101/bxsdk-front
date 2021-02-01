@@ -41,7 +41,7 @@ export function onCompressFn(file) {
                 // compress 图片压缩 
                 let base64 = compressFn(imgObj, transformImgFn(imgObj));
                 let _file = base64ToFileFn(base64, file.file.name);
-                resolve({file:_file,base64});
+                resolve({ file: _file, base64 });
             }
 
         }
@@ -82,7 +82,7 @@ export function compressFn(img, Orientation = null) {
     // } else {
     //     ratio = 1;
     // }
-    
+
     canvas.width = width;
     canvas.height = height;
     // // 铺底色
@@ -303,6 +303,8 @@ export function isToString(value) {
         case "[object Function]":
             return 'Function';
             break;
+        default: return undefined;
+
     }
 
 }
@@ -349,7 +351,7 @@ export function formatDate(data) {
         }).join('-');
     } else {
 
-        return data.substr(0,8).split('').map((item, index) => {
+        return data.substr(0, 8).split('').map((item, index) => {
             return [3, 5].includes(index) ? item + '-' : item;
         }).join('');
     }
@@ -360,24 +362,10 @@ export function randomFn() {
 }
 
 // 输入防抖
-export function inputDebounce(fn,delay) {
-    console.log(6,fn)
+export function inputDebounce(fn, value, delay) {
     let timer = null;
-    return function() {
+    return (function() {
         if (timer) clearTimeout(timer);
-        timer = setTimeout(function() {
-            fn();
-        }, delay);
-    }
+        timer = setTimeout(fn, !value ? 0 : delay);
+    })()
 }
-// _this.replaceAndSetPosMoney(e.target,/\d+\.?\d{0,2}/,"")
-// function replaceAndSetPosMoney(obj, pattern, text) {
-//  // var pos = this.getCursorPos(obj); //保存原始光标位置
-//  var temp = obj.value; //保存原始值
-//  // obj.value=temp.replace(pattern,text);//替换掉非法值
-//  obj.value = temp.match(/\d+\.?\d{0,2}/, '')
-//  this.value = obj.value;
-//  this.$emit('input', obj.value);
-//  pos = pos - (temp.length - obj.value.length); //当前光标位置
-//  this.setCursorPos(obj, pos); //设置光标
-// }

@@ -93,7 +93,7 @@ export default {
         //二维码上传发票图片
         uploadImg1: '/rest/app/common/invoice/uploadImg',
         //二维码删除发票图片
-        deleteImg1: '/rest/app/common/invoice/deleteImg',
+        deleteImg: '/rest/app/common/invoice/deleteImg',
         //手动录入发票保存接口
         collectByHand: '/rest/app/common/invoice/collectByHand',
         //H5票夹接口url

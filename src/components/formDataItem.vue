@@ -57,7 +57,7 @@
 </template>
 <script>
 import { mapState, mapMutations } from 'vuex';
-import { isToString, compress, base64ToFile, formatDate, getCheckStateFn, getReimburseStateFn ,inputDebounce} from '@/common/js/common';
+import { isToString, compress, base64ToFile, formatDate, getCheckStateFn, getReimburseStateFn, inputDebounce } from '@/common/js/common';
 import { formDataConfig } from '@/common/js/formDataConfig';
 
 export default {
@@ -97,7 +97,7 @@ export default {
 			minDate: new Date(2017, 0, 1),
 			maxDate: new Date(2030, 10, 1),
 			currentDate: new Date(),
-			currentType:'',
+			currentType: '',
 			// 
 			fileList: [],
 			localItemData: {},
@@ -154,7 +154,7 @@ export default {
 			keys.forEach(k => {
 				this.showOptions.forEach(item => {
 					if (item.key == k) {
-						if(item.type == 'date'){
+						if (item.type == 'date') {
 							this.$set(this.localItemData, item.key, formatDate(this.localItemData[item.key]));
 						}
 						// 必填项根据config.js的自定义配置进行重新设置
@@ -183,10 +183,11 @@ export default {
 		},
 		// 日期选择
 		confirmFn(date) {
-			console.log('日期选择')
-			this.$set(this.localItemData, this.currentType, formatDate(new Date(date).toLocaleDateString()));
+			let key = this.currentType,
+				value = formatDate(new Date(date).toLocaleDateString());
+			this.$set(this.localItemData, key, value);
 			this.calendarShow = false;
-			this.$emit('onDateConfirmFn');
+			this.$emit('onDateConfirmFn', key, value);
 		},
 		onCancelFn() {
 			this.calendarShow = false;
@@ -198,14 +199,14 @@ export default {
 					this.localItemData[key] = this.localItemData[key].replace(this.formDataConfig[key].reg, '$1');
 				}
 			}
-			inputDebounce(function(){
+			inputDebounce(() => {
 				this.$emit('onInputFn', key, this.localItemData[key])
-			},3000)
-			
+			}, this.localItemData[key], 1000);
+
 		},
 		onBlurFn(key) {
 			this.$emit('onBlurFn', key, this.formDataConfig[key])
-		}
+		},
 	},
 
 };

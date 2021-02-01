@@ -12,7 +12,7 @@
 							<van-pull-refresh v-model="isLoading" @refresh="pullDownFn">
 								<van-checkbox-group v-model="checkboxGroup" ref='checkboxGroup' @change='checkChangeFn'>
 									<van-swipe-cell v-for="(item,i) in listData" :key="i" :title="item">
-										<div class='list-item' >
+										<div class='list-item'>
 											<van-row type="flex">
 												<van-col span='4' class='checkbox-box'>
 													<van-checkbox :name='i' class='checkbox-btn' shape="square"></van-checkbox>
@@ -45,7 +45,7 @@
 											</van-row>
 										</div>
 										<template #right>
-											<van-button square type="danger" text="删除" class="delete-button" />
+											<van-button square type="danger" text="删除" class="delete-button" @click='deleteInvoiceFn(item,i)' />
 										</template>
 									</van-swipe-cell>
 									<!-- <van-cell v-for="item in list" :key="item" :title="item" /> -->
@@ -172,6 +172,15 @@ export default {
 			maxSize: 5000
 		}
 	},
+	watch: {
+		'$route'(to, form) {
+			if (to.name == 'mobileIndex') {
+				console.log(123, to);
+				this.appSelectFn(true);
+			}
+
+		}
+	},
 	created() {
 		console.log('app created')
 		let mobileCss = require('@/common/css/mobile.css');
@@ -206,7 +215,7 @@ export default {
 				if (resolve.data.length) {
 					if (isRefresh) {
 						console.log(' 刷新 赋值');
-						this.$set(this.$data, 'listData', []);
+						this.$set(this.$data, 'listData', resolve.data);
 					} else {
 						this.$set(this.$data, 'listData', this.listData.concat(resolve.data));
 						this.page++;
@@ -369,7 +378,23 @@ export default {
 				duration: 1500,
 			});
 		},
+		deleteInvoiceFn(item, index) {
+			console.log(123, item)
+			this.axios({
+				url: httpApi.app.deleteInvoice,
+				data: {
+					uuid: item.uuid
+				}
+			}).then(resolve => {
+				console.log(99, resolve);
+				if (resolve.status) {
+					this.listData.splice(index, 1)
+				}
+			}).catch(reject => {
+				console.log(98, reject);
+			});
 
+		}
 
 	},
 

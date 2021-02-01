@@ -25,7 +25,7 @@
 		</div>
 		<!-- 表单 -->
 		<div class='detail-form'>
-			<van-form @failed='onFailedFn' ref='formData' :show-error-message='false' :show-error='false' >
+			<van-form @failed='onFailedFn' ref='formData' :show-error-message='false' :show-error='false'>
 				<FormDataItem ref='formDataItem' v-if='showOptions.length' :showOptions='showOptions' :uuid='localData.uuid' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn' @onDateConfirmFn='onDateConfirmFn'></FormDataItem>
 				<!--  -->
 				<div class='form-submit'>
@@ -156,7 +156,7 @@ export default {
 
 			}
 		}
-		
+
 	},
 	methods: {
 		// 发票类型转换
@@ -184,16 +184,16 @@ export default {
 				this.$set(this.localData, key, item[key]);
 			});
 			this.setShowOptionsFn(this.localData.invoiceTypeCode);
-			this.$nextTick().then(()=>{
+			this.$nextTick().then(() => {
 				this.formDataInitValidateFn();
-				if(this.localData.uuid) this.getInvoiceImg(this.localData.uuid);
+				if (this.localData.uuid) this.getInvoiceImg(this.localData.uuid);
 			});
-			
+
 		},
 		// 表单初始化验证
-		formDataInitValidateFn() {
+		formDataInitValidateFn(key = '') {
 			// this.currentInvoiceClass = this.filterInvoiceClassFn(this.localData.invoiceTypeCode);
-			console.log('表单初始化验证',this.$refs.formData);
+			console.log('表单初始化验证', this.$refs.formData);
 			// let keys = Object.keys(this.resetFormDataConfig);
 			// keys.forEach(key => {
 			// 	if (this.resetFormDataConfig[key].required) {
@@ -207,8 +207,13 @@ export default {
 				this.validateState = true;
 			}).catch(error => {
 				console.log('error = ', error);
-				if (error.length) {
+				if (isToString(error) == 'Array') {
+					if (error.length) {
+						this.validateState = false;
+					}
+				} else {
 					this.validateState = false;
+					// console.log()
 				}
 			});
 
@@ -252,7 +257,10 @@ export default {
 		onSubmitFn() {
 			let _this = this;
 			this.formDataInitValidateFn();
-			console.log('onSubmitFn',arguments);
+			console.log('onSubmitFn', arguments);
+			if (this.validateState) {
+				this.invoiceComplianceCheckFn(this.localData)
+			}
 			// this.$refs.formData.validate().then(state=>{
 			// 	console.log('state = ',state)
 			// })
@@ -270,11 +278,11 @@ export default {
 		},
 		// 表单验证失败
 		onFailedFn(item) {
-			console.log('表单验证失败',item);
-			if(item.errors.length){
+			console.log('表单验证失败', item);
+			if (item.errors.length) {
 				this.$toast(item.errors[0].message);
 			}
-			
+
 		},
 		// vant上传组件
 		beforeRead(files) {
@@ -328,12 +336,15 @@ export default {
 			});
 		},
 		onInputFn(key, value) {
-			this.formDataInitValidateFn();
+			this.$set(this.localData, key, value);
+			this.formDataInitValidateFn(key);
+			console.log(5)
 		},
-		onBlurFn(key,config) {
+		onBlurFn(key, config) {
 			// this.formDataInitValidateFn();
 		},
-		onDateConfirmFn(){
+		onDateConfirmFn(key, value) {
+			this.$set(this.localData, key, value);
 			this.formDataInitValidateFn();
 		},
 		// 左右滑动事件
@@ -394,6 +405,52 @@ export default {
 				// console.log('其他')
 				this.showOptions = this.otherShowOptions;
 			}
+		},
+		// 发票查验
+		invoiceComplianceCheckFn() {
+			console.log(90, this.localData);
+			this.axios({
+				url: httpApi.app.invoiceComplianceCheck,
+				data: this.localData
+			}).then(resolve => {
+				console.log(99, resolve);
+				if (resolve.status) {
+					this.$toast('查验成功');
+					this.updateInvoiceFn(this.localData);
+				} else {
+					this.$toast(resolve.message);
+				}
+			}).catch(reject => {
+				console.log(98, isToString(reject), reject)
+				if (isToString(reject) === 'Object' && !reject.status) {
+					this.$toast(reject.message);
+				}
+			});
+		},
+		// 发票保存或更新
+		updateInvoiceFn(data) {
+			this.axios({
+				url: httpApi.app.updateInvoice,
+				data
+			}).then(resolve => {
+				console.log(99, resolve);
+				if (resolve.status) {
+					this.$toast({
+						message: '保存成功',
+						duration: 1000,
+						onClose: () => {
+							this.$router.back();
+						}
+					});
+				} else {
+					this.$toast(resolve.message);
+				}
+			}).catch(reject => {
+				console.log(98, isToString(reject), reject)
+				if (isToString(reject) === 'Object' && !reject.status) {
+					this.$toast(reject.message);
+				}
+			});
 		}
 
 	},
