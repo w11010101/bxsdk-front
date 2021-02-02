@@ -6,13 +6,13 @@ import MobileRouters from './mobile/mobileRouter';
 Vue.use(VueRouter)
 
 const routes = [
-  ...PCRouters,
-  ...MobileRouters,
+	...PCRouters,
+	...MobileRouters,
 ]
 const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes
+	mode: process.env.NODE_ENV !== 'development' ? 'hash' : 'history',
+	base: process.env.BASE_URL,
+	routes
 })
 
 export default router

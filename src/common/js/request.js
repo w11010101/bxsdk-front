@@ -17,8 +17,9 @@ export var _axios = function(option) {
         overlay: true,
         duration: 0
     });
-
-    axios.defaults.baseURL = '/api';
+    console.log('process = ', process.env.NODE_ENV)
+    
+    setBaseUrlFn();
 
     // 添加请求拦截器
     axios.interceptors.request.use(function(config) {
@@ -85,4 +86,17 @@ export var _axios = function(option) {
             }
         });
     });
+}
+function setBaseUrlFn(){
+    switch (process.env.NODE_ENV) {
+        case 'development' :
+            axios.defaults.baseURL = '/api';
+        break;
+        case 'production' :
+            axios.defaults.baseURL = '/production';
+        break;
+        case 'produce' :
+            axios.defaults.baseURL = '/produce';
+        break;
+    }
 }
