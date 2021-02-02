@@ -145,13 +145,13 @@ export default {
 }
 
 .search-tools .search-filter-btn {
-
+	padding:0 10px;
 	border: 0;
 }
 
 .search-tools .search-filter-btn i {
-
-	line-height: 55px;
+	margin-top:12px;
+	/*line-height: 55px;*/
 }
 
 .search-dates,

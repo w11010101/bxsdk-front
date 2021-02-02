@@ -8,47 +8,48 @@
 			<div class='container'>
 				<van-tabs v-model="active" color='#229FFF' title-active-color='#229FFF' class='container-tabs' @change='tabChangeFn'>
 					<van-tab :title="tab.name" v-for='(tab,index) in tabs' :name='tab.active' :key='index'>
-						<van-list v-model="loading" :finished="finished" class='list' finished-text="没有更多了" @load="pullUpFn" :immediate-check='false' :offset='0'>
+						<van-list class='list' v-model="loading" :finished="finished" :finished-text="finishedText" :error.sync="error" error-text="请求失败，点击重新加载" @load="pullUpFn" :immediate-check='false' :offset='0'>
 							<van-pull-refresh v-model="isLoading" @refresh="pullDownFn">
+								<!-- 多选容器 -->
 								<!-- <van-checkbox-group v-model="checkboxGroup" ref='checkboxGroup' @change='checkChangeFn'> -->
-									<van-swipe-cell v-for="(item,i) in listData" :key="i" :title="item">
-										<div class='list-item'>
-											<van-row type="flex">
-												<!-- <van-col span='4' class='checkbox-box'>
+								<van-swipe-cell v-for="(item,i) in $data['listData_'+active]" :key="i" :title="item">
+									<div class='list-item'>
+										<van-row type="flex">
+											<!-- 多选框 -->
+											<!-- <van-col span='4' class='checkbox-box'>
 													<van-checkbox :name='i' class='checkbox-btn' shape="square"></van-checkbox>
 												</van-col> -->
-												<van-col span='24' @click='goDetailFn(item,i)'>
-													<h2><label class='van-ellipsis'>{{getInvoiceTypeTextFn(item.invoiceTypeCode)}}</label><span>￥{{item.totalAmount}}</span></h2>
-													<template v-if='VATsAllClass.includes(item.invoiceTypeCode)'>
-														<div class='list-detial'>
-															<div>
-																<label>购方信息：</label>
-																<span class='van-ellipsis'>{{item.buyerName}}</span>
-															</div>
-															<div>
-																<label>销方信息：</label>
-																<span class='van-ellipsis'>{{item.salerName}}</span>
-															</div>
-															<div>
-																<label>查验状态：</label>
-																<span class='van-ellipsis'>{{getCheckStateFn(item.checkState)}}</span>
-															</div>
-														</div>
-													</template>
-													<div class='list-detial list-detial-other' v-else>
+											<van-col span='24' @click='goDetailFn(item,i)'>
+												<h2><label class='van-ellipsis'>{{getInvoiceTypeTextFn(item.invoiceTypeCode)}}</label><span>￥{{item.totalAmount}}</span></h2>
+												<template v-if='VATsAllClass.includes(item.invoiceTypeCode)'>
+													<div class='list-detial'>
 														<div>
-															<label>开票日期</label>
-															<span class='van-ellipsis'>{{formatDate(item.invoiceDate)}}</span>
+															<label>购方信息：</label>
+															<span class='van-ellipsis'>{{item.buyerName}}</span>
+														</div>
+														<div>
+															<label>销方信息：</label>
+															<span class='van-ellipsis'>{{item.salerName}}</span>
+														</div>
+														<div>
+															<label>查验状态：</label>
+															<span class='van-ellipsis'>{{getCheckStateFn(item.checkState)}}</span>
 														</div>
 													</div>
-												</van-col>
-											</van-row>
-										</div>
-										<template #right>
-											<van-button square type="danger" text="删除" class="delete-button" @click='deleteInvoiceFn(item,i)' />
-										</template>
-									</van-swipe-cell>
-									<!-- <van-cell v-for="item in list" :key="item" :title="item" /> -->
+												</template>
+												<div class='list-detial list-detial-other' v-else>
+													<div>
+														<label>开票日期</label>
+														<span class='van-ellipsis'>{{formatDate(item.invoiceDate)}}</span>
+													</div>
+												</div>
+											</van-col>
+										</van-row>
+									</div>
+									<template #right>
+										<van-button square type="danger" text="删除" class="delete-button" @click='deleteInvoiceFn(item,i)' />
+									</template>
+								</van-swipe-cell>
 								<!-- </van-checkbox-group> -->
 							</van-pull-refresh>
 						</van-list>
@@ -114,12 +115,18 @@ export default {
 			checked: '',
 			allChecked: false, // 全选按钮状态
 			checkboxGroup: [], // 全选集合
-			listData: [],
+			listData_0: [], // 未报销
+			listData_2: [], // 报销中
+			listData_3: [], // 已报销
+			// reimbursementListData_1: [], // 报销中
+			// reimbursedListData: [], // 已报销
 			// 上划和下划
 			loading: false, // 上划加载状态
 			finished: false, // 上划完成状态
 			count: 0, //
 			isLoading: false, // 下划加载状态
+			error: false,
+			finishedText: '没有更多数据',
 			// 
 			tabs: [{
 				name: '未报销',
@@ -131,7 +138,7 @@ export default {
 				name: '已报销',
 				active: 3
 			}],
-			active: 0,
+			active: 0, // tab 下标
 			height: window.innerHeight,
 			searchToolShow: false,
 			searchObj: {
@@ -165,7 +172,8 @@ export default {
 					multiple: false
 				}
 			],
-			maxSize: 5000
+			maxSize: 5000,
+
 		}
 	},
 	watch: {
@@ -194,10 +202,9 @@ export default {
 		compressFilesFn,
 		appSelectFn(isRefresh = false) {
 			this.loading = true;
-			if(isRefresh){
+			if (isRefresh) {
 				this.page = 1;
 			}
-			// if (this.finished) return false;
 			this.axios({
 				url: httpApi.app.appSelect,
 				data: {
@@ -211,48 +218,49 @@ export default {
 					rows: this.rows //条数
 				}
 			}).then(resolve => {
+				let activeListDate = 'listData_' + this.active;
+				console.log('isRefresh = ',isRefresh)
 				if (resolve.data.length) {
 					if (isRefresh) {
+
 						console.log('刷新 赋值');
-						this.$set(this.$data, 'listData', resolve.data);
+						this.$set(this.$data, activeListDate, resolve.data);
 					} else {
-						this.$set(this.$data, 'listData', this.listData.concat(resolve.data));
-						this.page++;
+						this.$set(this.$data, activeListDate, this[activeListDate].concat(resolve.data));
+						
 					}
-					this.getDetailListUuidFn(this.listData.map(item => item.uuid))
+					this.page++;
+					this.getDetailListUuidFn(this[activeListDate].map(item => item.uuid))
 					this.finished = false;
 					this.isLoading = false;
 					this.loading = false;
 				} else {
 					console.log('无数据')
-					this.$set(this.$data, 'listData', []);
+					this.$set(this.$data, activeListDate, this[activeListDate].concat(resolve.data));
 					// 数据全部加载完成
-					this.loading = true;
-					this.isLoading = true;
-					this.isRefresh = false;
+					this.loading = false;
+					this.isLoading = false;
 					this.finished = true;
 				}
-				// this.finished = false;
-				// this.isLoading = false;
-				// this.loading = false;
-				console.log('this.loading = ', this.loading, ' | this.isLoading = ', this.isLoading, ' | this.isRefresh = ', this.isRefresh, ' | this.finished = ', this.finished)
+				console.log('this.loading = ', this.loading, ' | this.isLoading = ', this.isLoading, ' | this.finished = ', this.finished)
 			}).catch(reject => {
 				console.log('reject = ', reject);
+				this.error = true;
 				// 数据全部加载完成
 				this.loading = false;
-				this.isLoading = false;
-				this.isRefresh = false;
+				this.isLoading = true;
 				this.finished = false;
+				this.finishedText = '';
 			});
 		},
 		// 上划加载
 		pullUpFn() {
+			console.log(123);
 			// 异步更新数据
 			this.appSelectFn();
 		},
 		// 下划刷新
 		pullDownFn() {
-			this.isRefresh = true;
 			this.finished = false;
 			this.page = 1;
 			this.appSelectFn(true);
@@ -260,7 +268,7 @@ export default {
 		// 单选
 		checkChangeFn(arr) {
 			this.checkboxGroup = arr;
-			if (arr.length == this.listData.length) {
+			if (arr.length == this.listData_0.length) {
 				this.allChecked = true;
 			} else {
 				this.allChecked = false;
@@ -273,9 +281,11 @@ export default {
 		},
 		// 选项卡切换
 		tabChangeFn(index) {
-			this.listData = [];
+			console.log('listData_' + this.active)
 			this.finished = false;
-			this.appSelectFn();
+			if (!this['listData_' + this.active].length) {
+				this.appSelectFn(true);
+			}
 		},
 		/**
 		 * [goDetailFn 跳转详情页面方法]
@@ -300,7 +310,7 @@ export default {
 		onSearchCallBackFn(obj) {
 			this.searchObj = obj;
 			this.appSelectFn(true);
-			console.log('obj = ',obj)
+			console.log('obj = ', obj)
 		},
 		onSelect(item, index) {
 
@@ -389,7 +399,7 @@ export default {
 			}).then(resolve => {
 				console.log(99, resolve);
 				if (resolve.status) {
-					this.listData.splice(index, 1)
+					this['listData_' + this.active].splice(index, 1)
 				}
 			}).catch(reject => {
 				console.log(98, reject);

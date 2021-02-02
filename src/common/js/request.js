@@ -78,6 +78,7 @@ export var _axios = function(option) {
             }
         }).catch(err => {
             console.log('err = ', err);
+            reject(err);
             toast.clear();
             if (option.isTips !== false) {
                 setTimeout(() => {
