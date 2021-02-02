@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import httpApi from '@/common/js/httpApi.js'
 import EXIF from 'exif-js';
-
+// 判断是否是PC
 export function IsPC() {
     var userAgentInfo = navigator.userAgent;
     var Agents = new Array("Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod");
@@ -11,7 +11,12 @@ export function IsPC() {
     }
     return flag;
 }
-// 上传前压缩
+/**
+ * [compressFilesFn 上传前压缩]
+ * @param  {[type]} file [file类型的文件，可能表示多张]
+ * @param  {[type]} uuid []
+ * @return {[type]} file [返回一个压缩后，再转成file格式的文件，可能表示多张]
+ */
 export async function compressFilesFn(file, uuid) {
 
     let files = [],
@@ -27,7 +32,11 @@ export async function compressFilesFn(file, uuid) {
     }
     return { file: _isObject ? _files[0] : _files, type: _isObject }
 }
-// 文件压缩和转换
+/**
+ * [onCompressFn 文件压缩和转换]
+ * @param  {[type]} file [file类型的文件]
+ * @return {[type]} file [返回一个压缩后，再转成file格式的文件]
+ */
 export function onCompressFn(file) {
     return new Promise((resolve, reject) => {
         let fr = new FileReader();
@@ -47,6 +56,11 @@ export function onCompressFn(file) {
         }
     })
 }
+/**
+ * [transformImgFn 获取判断图片是否需要旋转的参数]
+ * @param  {[type]} imgObj [Image对象]
+ * @return {[Number]} Orientation [旋转参数]
+ */
 export function transformImgFn(imgObj) {
     let Orientation = null;
     EXIF.getData(imgObj, function() {
@@ -62,51 +76,19 @@ export function transformImgFn(imgObj) {
  */
 export function compressFn(img, Orientation = null) {
 
-    // console.log('img = ',img);
     let canvas = document.createElement("canvas");
     let ctx = canvas.getContext('2d');
-    //瓦片canvas
-    // let tCanvas = document.createElement("canvas");
-    // let tctx = tCanvas.getContext("2d");
+
     let initSize = img.src.length;
     let width = img.width;
     let height = img.height;
-    //如果图片大于100w像素，计算压缩比并将大小压至400万以下
-    // let ratio;
-    // // console.log(width ,height)
-    // if ((ratio = width * height / 100000) > 1) {
-    //     // console.log("大于10万像素")
-    //     ratio = Math.sqrt(ratio);
-    //     width /= ratio;
-    //     height /= ratio;
-    // } else {
-    //     ratio = 1;
-    // }
 
     canvas.width = width;
     canvas.height = height;
     // // 铺底色
     ctx.fillStyle = "#fff";
     ctx.fillRect(img, 0, 0, canvas.width, canvas.height);
-    // //如果图片像素大于100万则使用瓦片绘制
-    // let count;
-    // if ((count = width * height / 50000) > 1) {
-    //     // console.log("超过5W像素");
-    //     count = ~~(Math.sqrt(count) + 1); //计算要分成多少块瓦片
-    //     // 计算每块瓦片的宽和高
-    //     let nw = ~~(width / count);
-    //     let nh = ~~(height / count);
-    //     tCanvas.width = nw;
-    //     tCanvas.height = nh;
-    //     for (let i = 0; i < count; i++) {
-    //         for (let j = 0; j < count; j++) {
-    //             tctx.drawImage(img, i * nw * ratio, j * nh * ratio, nw * ratio, nh * ratio, 0, 0, nw, nh);
-    //             ctx.drawImage(tCanvas, i * nw, j * nh, nw, nh);
-    //         }
-    //     }
-    // } else {
-    //     ctx.drawImage(img, 0, 0, width, height);
-    // }
+
     ctx.drawImage(img, 0, 0, width, height);
     //修复ios上传图片的时候 被旋转的问题
     if (Orientation != "" && Orientation != 1) {
@@ -228,18 +210,6 @@ export function getInvoiceTypeTextFn(invoiceType) {
     if (invoiceType == "98") return "政府非税收收入一般缴款书";
     if (invoiceType == "00") return "其他";
 }
-/*//专用增值税类型、机动车销售统一发票
-this.majioAddTaxValue = ['01', '03'].indexOf(this.invoiceTypeCode) > -1 ? true : false;
-//火车票、飞机行程单、公路、水路、其他客票
-this.trainAndAirRoadWater = ['90', '93', '92', '87', '88', '89'].indexOf(this.invoiceTypeCode) > -1 ? true : false;
-//普通增值税类型
-this.normalAddTaxValue = ['04', '10', '11', '14'].indexOf(this.invoiceTypeCode) > -1 ? true : false;
-//出租车、定额发票等其他发票
-this.taxiAndQuota = ['51', '91', '94', '95', '97', '98'].indexOf(this.invoiceTypeCode) > -1 ? true : false;
-//货物运输业增值税普通发票
-this.transportAddTaxValue = this.invoiceTypeCode == '02' ? true : false;
-//其他
-this.otherValue = this.invoiceTypeCode == '00' ? true : false;*/
 // 发票分类
 export let invoiceCodeClass = {
 
@@ -282,9 +252,14 @@ export function filterInvoiceClassFn(code) {
     return filterInvoiceClass;
 
 }
-export function isToString(value) {
+/**
+ * [isToString 类型判断]
+ * @param  {[type]}  obj [任何对象]
+ * @return {Boolean}     [返回类型，一般情况以字符串形式返回]
+ */
+export function isToString(obj) {
     let _toString = Object.prototype.toString;
-    switch (_toString.call(value)) {
+    switch (_toString.call(obj)) {
         case "[object String]":
             return 'String';
             break;
@@ -321,6 +296,8 @@ export function getCheckStateFn(value) {
         case "2":
             return '查验失败';
             break;
+        default:
+            return '查验成功'
     }
 }
 // 报销状态

@@ -1,5 +1,10 @@
 import axios from 'axios';
 import { IsPC } from '@/common/js/common';
+/**
+ * [_axios 接口请求方式]
+ * @param  {[type]} option [接口参数Object类型，包括的字段：url、data、loading 、type、file]
+ * @return {[type]} Promise [返回为Promise对象]
+ */
 export var _axios = function(option) {
     let toast,
         _this = this,
@@ -50,7 +55,6 @@ export var _axios = function(option) {
             method: option.type || 'post',
             headers: { 'content-type': option.file ? 'application/x-www-form-urlencoded' : 'application/json' },
             // timeout: option.timeout || 10000,
-            // cancelToken: source.token,
         }).then(res => {
 
             console.log(999, res)
@@ -81,6 +85,4 @@ export var _axios = function(option) {
             }
         });
     });
-
-
 }

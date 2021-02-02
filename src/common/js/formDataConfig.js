@@ -1,5 +1,4 @@
-// 个性化定制
-import myselfFormDataItemConfig from '../myself/myselfFormDataItemConfig.js';
+import myselfFormDataItemConfig from '../myself/myselfFormDataItemConfig.js'; // 个性化定制
 export let formDataConfig = {
     invoiceCode: {
         label: '发票代码',

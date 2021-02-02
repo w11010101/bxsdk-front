@@ -34,13 +34,16 @@ export default new Vuex.Store({
 		resetFormDataConfig:{}
 	},
 	mutations: {
+		// 保存token
 		saveToken(state,token){
 			state.token = token;
-			localStorage.setItem('token',token)
+			localStorage.setItem('token',token);
 		},
+		// 保存当前列表的uuid
 		getDetailListUuidFn(state,list){
 			state.detailListUuid = list;
 		},
+		// 
 		setResetFormDataConfig(state,object){
 			state.resetFormDataConfig = object;
 		}

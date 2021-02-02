@@ -1,7 +1,7 @@
 <template>
 	<div class="mobile-index">
 		<!-- 头部搜索框 和 筛选条件 -->
-		<SearchTool @onSearchCallBack='onSearchCallBackFn'></SearchTool>
+		<SearchTool :hide='searchToolShow' @onSearchCallBack='onSearchCallBackFn'></SearchTool>
 		<!-- 内容 -->
 		<div class="content">
 			<!-- 列表或tabs -->
@@ -10,14 +10,14 @@
 					<van-tab :title="tab.name" v-for='(tab,index) in tabs' :name='tab.active' :key='index'>
 						<van-list v-model="loading" :finished="finished" class='list' finished-text="没有更多了" @load="pullUpFn" :immediate-check='false' :offset='0'>
 							<van-pull-refresh v-model="isLoading" @refresh="pullDownFn">
-								<van-checkbox-group v-model="checkboxGroup" ref='checkboxGroup' @change='checkChangeFn'>
+								<!-- <van-checkbox-group v-model="checkboxGroup" ref='checkboxGroup' @change='checkChangeFn'> -->
 									<van-swipe-cell v-for="(item,i) in listData" :key="i" :title="item">
 										<div class='list-item'>
 											<van-row type="flex">
-												<van-col span='4' class='checkbox-box'>
+												<!-- <van-col span='4' class='checkbox-box'>
 													<van-checkbox :name='i' class='checkbox-btn' shape="square"></van-checkbox>
-												</van-col>
-												<van-col span='20' @click='goDetailFn(item,i)'>
+												</van-col> -->
+												<van-col span='24' @click='goDetailFn(item,i)'>
 													<h2><label class='van-ellipsis'>{{getInvoiceTypeTextFn(item.invoiceTypeCode)}}</label><span>￥{{item.totalAmount}}</span></h2>
 													<template v-if='VATsAllClass.includes(item.invoiceTypeCode)'>
 														<div class='list-detial'>
@@ -49,21 +49,17 @@
 										</template>
 									</van-swipe-cell>
 									<!-- <van-cell v-for="item in list" :key="item" :title="item" /> -->
-								</van-checkbox-group>
+								<!-- </van-checkbox-group> -->
 							</van-pull-refresh>
 						</van-list>
 					</van-tab>
 				</van-tabs>
 			</div>
 			<!-- 底部按钮 原版 -->
-			<!-- <div class="floor-old">
-				<van-row type="flex" justify="center">
-					<van-col span='4'><van-checkbox class='checkbox-btn' shape="square" v-model="allChecked"></van-checkbox></van-col>
-					<van-col span='10'><van-button class='floor-btn floor-btn-000' block color='#ddd'>提交复核</van-button></van-col>
-					<van-col span='10'><van-button class='floor-btn' block type="info">添加发票</van-button></van-col>
-				</van-row>
-			</div> -->
-			<div class="floor">
+			<div class="floor-old">
+				<van-button class='floor-btn' block type="info">添加发票</van-button>
+			</div>
+			<!-- <div class="floor">
 				<van-row gutter="10">
 					<van-col span='4'>
 						<van-checkbox class='checkbox-btn' shape="square" v-model="allChecked" @click='allCheckedChangeFn'></van-checkbox>
@@ -75,7 +71,7 @@
 						<van-button class='floor-btn' block color='#229FFF' @click='addInvoiceShow=true'>添加发票</van-button>
 					</van-col>
 				</van-row>
-			</div>
+			</div> -->
 		</div>
 		<!-- 添加发票 -->
 		<van-action-sheet :round='false' v-model="addInvoiceShow" @select="onSelect" cancel-text="取消">
@@ -137,7 +133,7 @@ export default {
 			}],
 			active: 0,
 			height: window.innerHeight,
-
+			searchToolShow: false,
 			searchObj: {
 
 			},
@@ -198,7 +194,10 @@ export default {
 		compressFilesFn,
 		appSelectFn(isRefresh = false) {
 			this.loading = true;
-			if (this.finished) return false;
+			if(isRefresh){
+				this.page = 1;
+			}
+			// if (this.finished) return false;
 			this.axios({
 				url: httpApi.app.appSelect,
 				data: {
@@ -209,12 +208,12 @@ export default {
 					dateRank: this.dateRank, //开票时间排序
 					dimParam: this.searchObj.searchVal || '', //模糊参数
 					page: this.page, //页码
-					rows: this.rows //条数	
+					rows: this.rows //条数
 				}
 			}).then(resolve => {
 				if (resolve.data.length) {
 					if (isRefresh) {
-						console.log(' 刷新 赋值');
+						console.log('刷新 赋值');
 						this.$set(this.$data, 'listData', resolve.data);
 					} else {
 						this.$set(this.$data, 'listData', this.listData.concat(resolve.data));
@@ -225,23 +224,25 @@ export default {
 					this.isLoading = false;
 					this.loading = false;
 				} else {
-					// this.$toast({
-					// 	message: '暂无数据',
-					// 	duration: 1500,
-					// });
+					console.log('无数据')
+					this.$set(this.$data, 'listData', []);
 					// 数据全部加载完成
 					this.loading = true;
 					this.isLoading = true;
-					this.isRefresh = true;
+					this.isRefresh = false;
 					this.finished = true;
 				}
+				// this.finished = false;
+				// this.isLoading = false;
+				// this.loading = false;
+				console.log('this.loading = ', this.loading, ' | this.isLoading = ', this.isLoading, ' | this.isRefresh = ', this.isRefresh, ' | this.finished = ', this.finished)
 			}).catch(reject => {
 				console.log('reject = ', reject);
 				// 数据全部加载完成
 				this.loading = false;
 				this.isLoading = false;
 				this.isRefresh = false;
-				this.finished = true;
+				this.finished = false;
 			});
 		},
 		// 上划加载
@@ -254,7 +255,6 @@ export default {
 			this.isRefresh = true;
 			this.finished = false;
 			this.page = 1;
-			this.finished = false;
 			this.appSelectFn(true);
 		},
 		// 单选
@@ -275,7 +275,6 @@ export default {
 		tabChangeFn(index) {
 			this.listData = [];
 			this.finished = false;
-
 			this.appSelectFn();
 		},
 		/**
@@ -300,6 +299,8 @@ export default {
 
 		onSearchCallBackFn(obj) {
 			this.searchObj = obj;
+			this.appSelectFn(true);
+			console.log('obj = ',obj)
 		},
 		onSelect(item, index) {
 

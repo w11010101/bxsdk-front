@@ -21,7 +21,7 @@
 		<div class='check-status' :class='localData.checkState!="2"?"check-success":"check-fail"' v-if='localData.checkState!="0"&&VATsAllClass.includes(localData.invoiceTypeCode)'>
 			<van-icon name="checked" v-if='localData.checkState!="2"' />
 			<van-icon name="clear" v-else />
-			查验结果(<span>{{getCheckStateFn(localData.checkState)}}</span>){{localData.uuid}}
+			查验结果(<span>{{getCheckStateFn(localData.checkState)}}</span>)
 		</div>
 		<!-- 表单 -->
 		<div class='detail-form'>

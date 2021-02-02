@@ -36,15 +36,16 @@
 
 .floor-old {
 	height: 50px;
-	background: #ddd;
+	background: #fff;
 	border-top: 1px solid #ddd;
+	padding:10px;
 }
 
 .floor-old .floor-btn {
-	height: 50px;
-	border: 0;
+	/*height: 50px;
+	border: 0;*/
 	font-size: 16px;
-	border-radius: 0;
+	/*border-radius: 0;*/
 }
 
 .floor-btn-000 .van-button__text {

@@ -69,13 +69,13 @@ export default {
 			activeInvoiceTypeIndex: '',
 		}
 	},
+
 	computed: {
 		...mapState(['invoiceType']),
 
 	},
 	mounted() {
-		this.getYears()
-
+		this.getYears();
 	},
 	methods: {
 		getYears() {
@@ -103,6 +103,7 @@ export default {
 				searchEndDate: this.transformDate('end', parseInt(this.activeDateMonth) + 1),
 				searchInvoiceType: this.activeInvoiceType
 			});
+			this.filterShow = false;
 		},
 		onChangeYearFn(item, index) {
 			this.activeDate = item.value;
@@ -117,12 +118,12 @@ export default {
 			this.activeInvoiceTypeIndex = index;
 
 		},
-		transformDate(type, date) {
+		transformDate(type, month) {
 			if (this.activeDate !== 'all') {
 				if (type == 'start') {
-					return this.activeDate + '-' + date + '-1';
+					return this.activeDate + '-' + (month < 10 ? '0' + month : month) + '-01';
 				} else {
-					return new Date(new Date(this.activeDate + '-' + date).getTime() - 1000 * 60 * 60 * 24).toLocaleDateString().replace(/\//g, '-');
+					return new Date(new Date(month >= 12 ? this.activeDate + 1 + '-01-01' : this.activeDate + '-' + month + '-01').getTime() - 1000 * 60 * 60 * 24).toLocaleDateString().replace(/\//g, '-');
 				}
 			} else {
 				return ''
@@ -132,6 +133,7 @@ export default {
 	}
 }
 </script>
+<!-- 儿童医院 -->
 <style scoped="scoped">
 .search-tools {
 	height: 55px;
@@ -176,9 +178,9 @@ export default {
 }
 
 .search-invoiceType-list {
-	height:30vh;
+	height: 30vh;
 	overflow-y: auto;
-	
+
 }
 
 .search-invoiceType .van-col {
