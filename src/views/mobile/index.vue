@@ -24,17 +24,17 @@
 												<template v-if='VATsAllClass.includes(item.invoiceTypeCode)'>
 													<div class='list-detial'>
 														<div>
-															<label>购方信息：</label>
-															<span class='van-ellipsis'>{{item.buyerName}}</span>
+															<label>开票日期：</label>
+															<span class='van-ellipsis'>{{formatDate(item.invoiceDate)}}</span>
 														</div>
 														<div>
 															<label>销方信息：</label>
 															<span class='van-ellipsis'>{{item.salerName}}</span>
 														</div>
-														<div>
+														<!-- <div>
 															<label>查验状态：</label>
 															<span class='van-ellipsis'>{{getCheckStateFn(item.checkState)}}</span>
-														</div>
+														</div> -->
 													</div>
 												</template>
 												<div class='list-detial list-detial-other' v-else>
@@ -295,7 +295,7 @@ export default {
 		 * @return {[type]}          []
 		 */
 		goDetailFn(item, index, require = false) {
-			console.log(2, arguments)
+			console.log(2, arguments);
 			this.$router.push({
 				name: 'detail',
 				params: {

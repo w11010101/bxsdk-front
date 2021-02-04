@@ -2,13 +2,15 @@
 	position: relative;
 	font-size: 12px;
 	text-align: left;
-	padding:10px 20px;
+	padding: 10px 20px;
 	background: #fff;
-	height:85px;
+	height: 65px;
 }
-.list-item > .van-row{
+
+.list-item>.van-row {
 	height: inherit;
 }
+
 .list-item:after {
 	content: ' ';
 	position: absolute;
@@ -26,44 +28,52 @@
 	font-weight: normal;
 	margin: 0 0 5px 0;
 }
-.list-detial-other{
+
+.list-detial-other {
 	/*margin-top: 15px;*/
 }
-.list-item .checkbox-box{
+
+.list-item .checkbox-box {
 	position: relative;
 }
+
 .list-item .checkbox-btn {
 	position: absolute;
-	top:50%;
-	left:50%;
-	transform: translate(-50% ,-50%);
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 }
-.list-item h2 label{
+
+.list-item h2 label {
 	display: inline-block;
-	width:60%;
+	width: 60%;
 	font-size: 15px
 }
+
 .list-item h2 span {
 	float: right;
-	font-size: 18px
+	font-size: 18px;
+	font-weight: 500;
 }
 
 .delete-button {
 	height: 100%;
 }
-.list-detial{
 
-}
-.list-detial div{
+.list-detial {}
+
+.list-detial div {
 	line-height: 20px;
-	color:#777;
+	color: #777;
 }
-.list-detial div label{
+
+.list-detial div label {
 	display: inline-block;
-	width:70px;
+	width: 70px;
 }
-.list-detial div span{
+
+.list-detial div span {
 	display: inline-block;
-	width:calc(100% - 80px);
+	width: calc(100% - 80px);
 	vertical-align: middle;
 }

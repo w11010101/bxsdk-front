@@ -30,10 +30,17 @@ export default {
 		{ key: 'invoiceCode', required: true }, // 发票代码
 		{ key: 'invoiceNo', required: true }, // 发票号码
 		{ key: 'invoiceDate', required: true, type: 'date' }, // 开票日期
-		{ key: 'totalAmount', required: true, label: '金额' }, // 金额
+		
+		{ key: 'buyerName', }, // 购买方
+		{ key: 'goodsName', required: false }, // 货物或应税劳务
+		{ key: 'totalAmount', required: true, label: '价税合计' }, // 金额
+		{ key: 'invoiceAmount' }, // 金额
+		{ key: 'taxAmount' }, // 税额
+		{ key: 'salerName', required: false }, // 销售方
+		{ key: 'remark',  }, // 备注
+		
 
 		{ key: 'reimbursementNote', }, // 报销说明
-		{ key: 'checkState', type: 'state' }, // 查验状态
 		{ key: 'reimburseState', type: 'state' }, // 报销状态
 
 		{ key: 'sourceFile', required: false }, // 电子源文件

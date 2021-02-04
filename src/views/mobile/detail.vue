@@ -156,7 +156,10 @@ export default {
 
 			}
 		}
-
+		console.log(this.VATsAllClass)
+		if (this.VATsAllClass.includes(item.invoiceTypeCode) && item.checkState === "1") {
+			this.isReadOnly = true;
+		}
 	},
 	methods: {
 		// 发票类型转换
