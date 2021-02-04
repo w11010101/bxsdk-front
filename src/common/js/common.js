@@ -302,6 +302,7 @@ export function getCheckStateFn(value) {
 }
 // 报销状态
 export function getReimburseStateFn(value) {
+    console.log('报销状态 = ',value)
     switch (value) {
         case "0":
             return '未报销';

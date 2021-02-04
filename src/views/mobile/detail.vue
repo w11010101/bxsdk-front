@@ -29,9 +29,13 @@
 				<FormDataItem ref='formDataItem' v-if='showOptions.length' :showOptions='showOptions' :uuid='localData.uuid' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn' @onDateConfirmFn='onDateConfirmFn'></FormDataItem>
 				<!--  -->
 				<div class='form-submit'>
-					<!-- <van-button block type='info' @click='onSubmitFn' >保存</van-button> -->
-					<van-button block color='#229FFF' @click='onSubmitFn' v-if='validateState'>保存</van-button>
-					<van-button block color='#ccc' @click='onSubmitFn' v-else>保存</van-button>
+					<template v-if='localData.checkState ==="1"'>
+						<van-button block color='#229FFF' @click='goBackFn'>返回</van-button>
+					</template>
+					<template v-else>
+						<van-button block color='#229FFF' @click='onSubmitFn' v-if='validateState'>保存</van-button>
+						<van-button block color='#ccc' @click='onSubmitFn' v-else>保存</van-button>
+					</template>
 				</div>
 			</van-form>
 		</div>
@@ -235,6 +239,7 @@ export default {
 		},
 		// 修改发票类型的弹窗确定方法
 		onConfirm(item) {
+			
 			this.$set(this.localData, 'invoiceTypeCode', item.invoiceTypeCode);
 			this.selectInvoiceShow = false;
 			this.setShowOptionsFn(this.localData.invoiceTypeCode);
@@ -296,7 +301,7 @@ export default {
 		},
 		// 返回
 		goBackFn() {
-			this.$route.back()
+			this.$router.back()
 		},
 		// 查询详情
 		appFindFn(uuid) {
@@ -359,9 +364,11 @@ export default {
 
 					this.activeUuid = this.swipteListUuids[++this.initialSwipe];
 					console.log('left = ', this.initialSwipe, require, this.activeUuid);
+					this.setShowOptionsFn(this.localData.invoiceTypeCode);
 					if (!require) {
 						this.appFindFn(this.activeUuid);
 					}
+
 				} else {
 					this.$toast('已是最后一条');
 				}
@@ -372,9 +379,11 @@ export default {
 
 					this.activeUuid = this.swipteListUuids[--this.initialSwipe];
 					console.log('right = ', this.initialSwipe, require, this.activeUuid);
+					this.setShowOptionsFn(this.localData.invoiceTypeCode);
 					if (!require) {
 						this.appFindFn(this.activeUuid);
 					}
+
 				} else {
 					this.$toast('已是第一条');
 				}
@@ -382,6 +391,8 @@ export default {
 		},
 		// 根据类型区分表单显示字段
 		setShowOptionsFn(invoiceTypeCode) {
+			this.isReadOnly = this.localData.checkState === '1' ? true : false;
+			console.log(12, invoiceTypeCode)
 			this.showOptions = [];
 			if (this.VATGClass.includes(invoiceTypeCode)) {
 				// console.log('增值税专用发票、机动车销售统一发票、货运运输业增值税专用发票')

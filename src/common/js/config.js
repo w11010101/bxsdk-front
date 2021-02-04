@@ -30,15 +30,15 @@ export default {
 		{ key: 'invoiceCode', required: true }, // 发票代码
 		{ key: 'invoiceNo', required: true }, // 发票号码
 		{ key: 'invoiceDate', required: true, type: 'date' }, // 开票日期
-		
+
 		{ key: 'buyerName', }, // 购买方
 		{ key: 'goodsName', required: false }, // 货物或应税劳务
 		{ key: 'totalAmount', required: true, label: '价税合计' }, // 金额
 		{ key: 'invoiceAmount' }, // 金额
 		{ key: 'taxAmount' }, // 税额
 		{ key: 'salerName', required: false }, // 销售方
-		{ key: 'remark',  }, // 备注
-		
+		{ key: 'remark', }, // 备注
+
 
 		{ key: 'reimbursementNote', }, // 报销说明
 		{ key: 'reimburseState', type: 'state' }, // 报销状态
@@ -53,15 +53,23 @@ export default {
 		{ key: 'invoiceCode', required: true }, // 发票代码
 		{ key: 'invoiceNo', required: true }, // 发票号码
 		{ key: 'invoiceDate', required: true, type: 'date' }, // 开票日期
-		{ key: 'invoiceAmount', required: true, }, // 金额
-		{ key: 'verifyCode', }, // 校验码
+		{ key: 'verifyCode' }, // 校验码
+
+		{ key: 'buyerName', }, // 购买方
+		{ key: 'goodsName', required: false }, // 货物或应税劳务
+		{ key: 'totalAmount', required: true, label: '价税合计' }, // 金额
+		{ key: 'invoiceAmount' }, // 金额
+		{ key: 'taxAmount' }, // 税额
+		{ key: 'salerName', required: false }, // 销售方
+		{ key: 'remark', }, // 备注
+
 
 		{ key: 'reimbursementNote', }, // 报销说明
-		{ key: 'checkState', type: 'state' }, // 查验状态
 		{ key: 'reimburseState', type: 'state' }, // 报销状态
 
 		{ key: 'sourceFile', required: false }, // 电子源文件
 		{ key: 'files', type: 'files' }, // 附件
+
 
 	],
 	// 火车票、公路、水路、其他（实名）
@@ -113,10 +121,12 @@ export default {
 	],
 	// 出租车
 	taxiShowOptions: [
-		{ key: 'totalAmount', required: true, label: '总金额' }, // 票面金额
-		{ key: 'totalNum', required: true, label: '总张数' },
-		{ key: 'reimbursementNote', required: true }, // 报销说明
-		{ key: 'sourceFile', required: false }, // 电子源文件
+		{ key: 'invoiceNo', }, // 发票号码
+		{ key: 'invoiceDate', type: 'date' }, // 开票日期
+		{ key: 'startDate', required: false, type: 'date' }, // 出发时间
+		{ key: 'endDate', required: false, type: 'date' }, // 到达时间
+		{ key: 'totalAmount', required: true, }, // 票面金额
+		{ key: 'reimbursementNote', required: false }, // 报销说明
 		{ key: 'files', required: false, type: 'files' }, // 附件
 
 	],

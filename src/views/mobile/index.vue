@@ -8,8 +8,8 @@
 			<div class='container'>
 				<van-tabs v-model="active" color='#229FFF' title-active-color='#229FFF' class='container-tabs' @change='tabChangeFn'>
 					<van-tab :title="tab.name" v-for='(tab,index) in tabs' :name='tab.active' :key='index'>
-						<van-list class='list' v-model="loading" :finished="finished" :finished-text="finishedText" :error.sync="error" error-text="请求失败，点击重新加载" @load="pullUpFn" :immediate-check='false' :offset='0'>
-							<van-pull-refresh v-model="isLoading" @refresh="pullDownFn">
+						<van-pull-refresh v-model="isLoading" @refresh="pullDownFn">
+							<van-list class='list' v-model="loading" :finished="finished" :finished-text="finishedText" :error.sync="error" error-text="请求失败，点击重新加载" @load="pullUpFn" :immediate-check='false' :offset='0'>
 								<!-- 多选容器 -->
 								<!-- <van-checkbox-group v-model="checkboxGroup" ref='checkboxGroup' @change='checkChangeFn'> -->
 								<van-swipe-cell v-for="(item,i) in $data['listData_'+active]" :key="i" :title="item">
@@ -51,8 +51,8 @@
 									</template>
 								</van-swipe-cell>
 								<!-- </van-checkbox-group> -->
-							</van-pull-refresh>
-						</van-list>
+							</van-list>
+						</van-pull-refresh>
 					</van-tab>
 				</van-tabs>
 			</div>
@@ -219,7 +219,7 @@ export default {
 				}
 			}).then(resolve => {
 				let activeListDate = 'listData_' + this.active;
-				console.log('isRefresh = ',isRefresh)
+				console.log('isRefresh = ', isRefresh)
 				if (resolve.data.length) {
 					if (isRefresh) {
 
@@ -227,7 +227,7 @@ export default {
 						this.$set(this.$data, activeListDate, resolve.data);
 					} else {
 						this.$set(this.$data, activeListDate, this[activeListDate].concat(resolve.data));
-						
+
 					}
 					this.page++;
 					this.getDetailListUuidFn(this[activeListDate].map(item => item.uuid))

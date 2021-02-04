@@ -22,7 +22,6 @@
 					</van-cell>
 				</template>
 				<template v-else-if='item.type == "state"'>
-					<!-- <van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" :key='index' :value='getCheckStateFn(localItemData[item.key])' title-class='cell-label-style' value-class='cell-value-style' v-if='item.key == "checkState"'></van-cell> -->
 					<!-- 报销状态 -->
 					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" :key='index' :value='getReimburseStateFn(localItemData[item.key])' title-class='cell-label-style' value-class='cell-value-style' v-if='item.key == "reimburseState"'></van-cell>
 				</template>
@@ -34,19 +33,52 @@
 		</template>
 		<!-- 只读 -->
 		<template v-else>
-			<!-- 附件 -->
 			<template v-for='(item,index) in showOptions'>
-				<template v-if='item.type == "files"'>
-					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" title-class='cell-label-style' :key='index'>
-						<div class='readonly-fileList'>
-							<div class='readonly-fileList-item' v-for='file in fileList'>
-								<label class='van-ellipsis'>{{ file.split('.')[0] }}</label><span>.{{file.split('.')[1]}}</span>
-							</div>
+				<!-- 货物或应税劳务 -->
+				<van-collapse v-if='item.key == "goodsName"' v-model="activeCollapse" class='list-collapse'>
+					<van-collapse-item :title="item.label||formDataConfig[item.key].label" :key='index' name="1" :value='localItemData.detailList?localItemData.detailList[0].goodsName:""'>
+						<div class='collapse-content'>
+							<van-row v-for='(todo,index) in localItemData.detailList'>
+								<van-col span="10">
+									<div v-if='index == 0'>名称</div>
+									<div>{{todo.goodsName}}</div>
+								</van-col>
+								<van-col span="6">
+									<div v-if='index == 0'>金额</div>
+									<div>{{todo.noTaxAmount}}</div>
+								</van-col>
+								<van-col span="4">
+									<div v-if='index == 0'>税率</div>
+									<div>{{todo.taxRate+'%'}}</div>
+								</van-col>
+								<van-col span="4">
+									<div v-if='index == 0'>税额</div>
+									<div>{{todo.taxAmount}}</div>
+								</van-col>
+							</van-row>
 						</div>
+					</van-collapse-item>
+				</van-collapse>
+				<!-- 附件 -->
+				<template v-else-if='item.type == "files"'>
+					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" title-class='cell-label-style' :key='index'>
+						<template #right-icon>
+							<van-icon name="photo-o" size='24' color='#ccc'>
+								<van-uploader v-model="fileList" class='upload-btn' multiple>
+									<template #preview-cover="{ file }">
+										<div class="preview-cover van-ellipsis">{{ file?file.name:null }}</div>
+									</template>
+								</van-uploader>
+							</van-icon>
+						</template>
 					</van-cell>
 				</template>
+				<!-- 报销状态 -->
+				<template v-else-if='item.type == "state"'>
+					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" :key='index' :value='getReimburseStateFn(localItemData[item.key])' title-class='cell-label-style' value-class='cell-value-style' v-if='item.key == "reimburseState"'></van-cell>
+				</template>
 				<!-- 其他 -->
-				<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" :key='index' :value='localItemData[item.key]' title-class='cell-label-style' value-class='cell-value-style' v-else></van-cell>
+				<van-cell label-width='100' v-else :title="item.label||formDataConfig[item.key].label" :key='index' :value='localItemData[item.key]' title-class='cell-label-style' value-class='cell-value-style'></van-cell>
 			</template>
 		</template>
 		<!-- 开票日期 -->
@@ -101,7 +133,7 @@ export default {
 			// 
 			fileList: [],
 			localItemData: {},
-
+			activeCollapse: [1]
 
 		}
 	},
@@ -231,8 +263,11 @@ export default {
 .preview-cover {
 	color: #595959;
 	font-size: 12px;
-	text-align: center;
-	line-height: 20px
+	vertical-align: top;
+	width: 70%;
+	display: inline-block;
+	text-align: right;
+	padding-right: 10px;
 }
 
 .cell-label-style {
@@ -252,12 +287,19 @@ export default {
 	width: 100%;
 }
 
-.preview-cover {
-	width: 70%;
-	display: inline-block;
-	text-align: right;
-	padding-right: 10px
+.list-collapse /deep/ .van-cell__title {
+	text-align: left
 }
+
+.list-collapse /deep/ .van-collapse-item__content {
+	padding: 0 !important;
+}
+
+.collapse-content {
+	padding: 5px;
+	background: #eee
+}
+
 
 .van-icon-photo-o {
 	display: inline-block;
@@ -286,6 +328,7 @@ export default {
 	height: 20px;
 	line-height: 20px;
 	vertical-align: middle;
+
 }
 
 .upload-btn /deep/ .van-uploader__preview-delete-icon {
@@ -304,6 +347,7 @@ export default {
 	font-size: 12px;
 	height: 20px;
 	color: #595959;
+	color: red;
 }
 
 .upload-btn /deep/ .van-uploader__preview {

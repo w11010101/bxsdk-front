@@ -39,7 +39,7 @@
 				<div class='search-invoiceType-list'>
 					<van-row justify='space-around' type="flex" gutter="10">
 						<van-col v-for='(item,index) in invoiceType' span='12'>
-							<van-button :type="activeInvoiceTypeIndex === index?'info':'default'" block size='small' @click='onChangeTypeFn(item,index)'>{{item.invoiceTypeName}}</van-button>
+							<van-button :type="activeInvoiceType.includes(item.invoiceTypeCode)?'info':'default'" block size='small' @click='onChangeTypeFn(item,index)'>{{item.invoiceTypeName}}</van-button>
 						</van-col>
 					</van-row>
 				</div>
@@ -72,8 +72,7 @@ export default {
 			activeDate: '',
 			activeDateIndex: 0,
 			activeDateMonth: "1",
-			activeInvoiceType: '',
-			activeInvoiceTypeIndex: '',
+			activeInvoiceType: [],
 		}
 	},
 
@@ -108,7 +107,7 @@ export default {
 				searchVal: this.searchVal,
 				searchStartDate: this.transformDate('start', this.activeDateMonth),
 				searchEndDate: this.transformDate('end', parseInt(this.activeDateMonth) + 1),
-				searchInvoiceType: this.activeInvoiceType
+				searchInvoiceType: this.activeInvoiceType.join(',')
 			});
 			this.filterShow = false;
 		},
@@ -121,9 +120,11 @@ export default {
 			this.activeDateMonth = item;
 		},
 		onChangeTypeFn(item, index) {
-			this.activeInvoiceType = item.invoiceTypeCode;
-			this.activeInvoiceTypeIndex = index;
-
+			if (!this.activeInvoiceType.includes(item.invoiceTypeCode)) {
+				this.activeInvoiceType.push(item.invoiceTypeCode);
+			} else {
+				this.activeInvoiceType = this.activeInvoiceType.filter(code => item.invoiceTypeCode != code)
+			}
 		},
 		transformDate(type, month) {
 			if (this.activeDate !== 'all') {
@@ -137,8 +138,8 @@ export default {
 			}
 
 		},
-		
-		deleteFn(){
+
+		deleteFn() {
 
 		}
 	}
