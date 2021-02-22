@@ -35,7 +35,7 @@
 		<template v-else>
 			<template v-for='(item,index) in showOptions'>
 				<!-- 货物或应税劳务 -->
-				<van-collapse v-if='item.key == "goodsName"' v-model="activeCollapse" class='list-collapse'>
+				<van-collapse v-if='item.key == "goodsName"' v-model="activeCollapse" class='list-collapse' :border='false'>
 					<van-collapse-item :title="item.label||formDataConfig[item.key].label" :key='index' name="1" :value='localItemData.detailList?localItemData.detailList[0].goodsName:""'>
 						<div class='collapse-content'>
 							<van-row v-for='(todo,index) in localItemData.detailList'>
@@ -61,7 +61,7 @@
 				</van-collapse>
 				<!-- 附件 -->
 				<template v-else-if='item.type == "files"'>
-					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" title-class='cell-label-style' :key='index'>
+					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" title-class='cell-label-style' :key='index' :border='false'>
 						<template #right-icon>
 							<van-icon name="photo-o" size='24' color='#ccc'>
 								<van-uploader v-model="fileList" class='upload-btn' multiple>
@@ -75,10 +75,10 @@
 				</template>
 				<!-- 报销状态 -->
 				<template v-else-if='item.type == "state"'>
-					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" :key='index' :value='getReimburseStateFn(localItemData[item.key])' title-class='cell-label-style' value-class='cell-value-style' v-if='item.key == "reimburseState"'></van-cell>
+					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" :key='index' :value='getReimburseStateFn(localItemData[item.key])' title-class='cell-label-style' value-class='cell-value-style' v-if='item.key == "reimburseState"' :border='false'></van-cell>
 				</template>
 				<!-- 其他 -->
-				<van-cell label-width='100' v-else :title="item.label||formDataConfig[item.key].label" :key='index' :value='localItemData[item.key]' title-class='cell-label-style' value-class='cell-value-style'></van-cell>
+				<van-cell label-width='100' v-else :title="item.label||formDataConfig[item.key].label" :key='index' :value='localItemData[item.key]' title-class='cell-label-style' value-class='cell-value-style' :border='false'></van-cell>
 			</template>
 		</template>
 		<!-- 开票日期 -->
@@ -243,6 +243,7 @@ export default {
 
 };
 </script>
+
 <style scoped="scoped">
 .form-items {
 	position: absolute;

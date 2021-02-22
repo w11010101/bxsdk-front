@@ -54,6 +54,7 @@ import { uploadFileFn, getInvoiceTypeTextFn, invoiceCodeClass, getCheckStateFn, 
 import httpApi from '@/common/js/httpApi.js'
 import { formDataConfig } from '@/common/js/formDataConfig';
 import config from '@/common/js/config'
+// import 'vant/lib/index.less';
 export default {
 	name: '',
 	mixins: [],
@@ -471,6 +472,7 @@ export default {
 
 };
 </script>
+
 <style scoped="scoped">
 .detail {
 	background: #F5F5F5;

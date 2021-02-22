@@ -8,8 +8,8 @@
 			<div class='container'>
 				<van-tabs v-model="active" color='#229FFF' title-active-color='#229FFF' class='container-tabs' @change='tabChangeFn'>
 					<van-tab :title="tab.name" v-for='(tab,index) in tabs' :name='tab.active' :key='index'>
-						<van-pull-refresh v-model="isLoading" @refresh="pullDownFn">
-							<van-list class='list' v-model="loading" :finished="finished" :finished-text="finishedText" :error.sync="error" error-text="请求失败，点击重新加载" @load="pullUpFn" :immediate-check='false' :offset='0'>
+						<van-list class='list' v-model="loading" :finished="finished" :finished-text="finishedText" :error.sync="error" error-text="请求失败，点击重新加载" @load="pullUpFn" :immediate-check='false' :offset='0'>
+							<van-pull-refresh v-model="isLoading" @refresh="pullDownFn">
 								<!-- 多选容器 -->
 								<!-- <van-checkbox-group v-model="checkboxGroup" ref='checkboxGroup' @change='checkChangeFn'> -->
 								<van-swipe-cell v-for="(item,i) in $data['listData_'+active]" :key="i" :title="item">
@@ -51,14 +51,14 @@
 									</template>
 								</van-swipe-cell>
 								<!-- </van-checkbox-group> -->
-							</van-list>
-						</van-pull-refresh>
+							</van-pull-refresh>
+						</van-list>
 					</van-tab>
 				</van-tabs>
 			</div>
 			<!-- 底部按钮 原版 -->
 			<div class="floor-old">
-				<van-button class='floor-btn' block type="info">添加发票</van-button>
+				<van-button class='floor-btn' block type="info" @click='addInvoiceShow=true'>添加发票</van-button>
 			</div>
 			<!-- <div class="floor">
 				<van-row gutter="10">
@@ -262,10 +262,10 @@ export default {
 		// 下划刷新
 		pullDownFn() {
 			this.finished = false;
-			this.page = 1;
+			this.loading = true;
 			this.appSelectFn(true);
 		},
-		// 单选
+		// 单选切换
 		checkChangeFn(arr) {
 			this.checkboxGroup = arr;
 			if (arr.length == this.listData_0.length) {
@@ -337,7 +337,7 @@ export default {
 				this.addInvoiceShow = false;
 				// resolve.file : 单张时是Object，多张时是Array 
 				// resolve.type : true：单张；false：多张
-				this.appCollectByPicFn(resolve, 'base64');
+				this.appCollectByPicFn(resolve);
 			});
 
 		},

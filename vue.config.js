@@ -104,15 +104,42 @@ module.exports = {
             // 为开发环境修改配置...
 
         }
+        // config.module
+        //     .rule('less')
+        // //     .test(/\.less$/i)
+        //     // .use('style-loader')
+        //     .use('less-loader')
+        //     // .tap(options => {
+        //     //     console.log(option)
+        //     //     // 修改它的选项...
+        //     //     return options.lessOptions = {
+        //     //         strictMath: true,
+        //     //     }
+        //     // })
 
         // 添加别名
         config.resolve.alias
             .set('@', resolve('./src'))
             .set('assets', resolve('./src/assets'))
-            .end();
+            .end()
+
 
     },
     css: {
-        sourceMap: process.env.NODE_ENV == 'development' ? true : false
+        sourceMap: process.env.NODE_ENV == 'development' ? true : false,
+        loaderOptions: {
+            less: {
+                // 若 less-loader 版本小于 6.0，请移除 lessOptions 这一级，直接配置选项。
+                lessOptions: {
+                    modifyVars: {
+                        // 直接覆盖变量
+                        // 'text-color': '#111',
+                        'border-color': 'red',
+                        // 或者可以通过 less 文件覆盖（文件路径为绝对路径）
+                        hack: `true; @import "src/common/css/mobile.less";`,
+                    },
+                },
+            },
+        }
     }
 }
