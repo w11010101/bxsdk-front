@@ -8,15 +8,23 @@ import { IsPC } from '@/common/js/common';
 export var _axios = function(option) {
     let toast,
         _this = this,
-        _default = {};
-
+        _default = {
+            loading:true
+        };
+    console.log('option = ',option)
+    for(let key in option){
+        _default[key] = option[key];
+    }
     // this.$toast.setDefaultOptions({ duration: 0 });
-    toast = this.$toast.loading({
-        message: option.loading ? option.loading.msg : '加载中',
-        className: 'loading-toast ' + (option.loading ? option.loading.className : ''),
-        overlay: true,
-        duration: 0
-    });
+    if(_default.loading){
+        toast = this.$toast.loading({
+            message: option.loading ? option.loading.msg : '加载中',
+            className: 'loading-toast ' + (option.loading ? option.loading.className : ''),
+            overlay: true,
+            duration: 0
+        }); 
+    }
+    
     console.log('process = ', process.env.NODE_ENV)
     
     setBaseUrlFn();
@@ -64,22 +72,23 @@ export var _axios = function(option) {
                 if (data.status) {
                     let response = data.data;
                     resolve(data);
-                    toast.clear();
+
+                    if(_default.loading) toast.clear();
 
                 } else {
-                    toast.clear();
+                    if(_default.loading) toast.clear();
                     if (option.isTips !== false) {
                         reject(data);
                     }
                 }
             } else {
-                toast.clear();
+                if(_default.loading) toast.clear();
                 reject(res);
             }
         }).catch(err => {
             console.log('err = ', err);
             reject(err);
-            toast.clear();
+            if(_default.loading) toast.clear();
             if (option.isTips !== false) {
                 setTimeout(() => {
                     _this.$toast(err.errMsg || '数据请求失败');

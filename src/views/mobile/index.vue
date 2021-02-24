@@ -58,7 +58,7 @@
 			</div>
 			<!-- 底部按钮 原版 -->
 			<div class="floor-old">
-				<van-button class='floor-btn' block type="info" @click='addInvoiceShow=true'>添加发票</van-button>
+				<van-button class='floor-btn' block  color='#229FFF' @click='addInvoiceShow=true'>添加发票</van-button>
 			</div>
 			<!-- <div class="floor">
 				<van-row gutter="10">
@@ -100,7 +100,8 @@
 import SearchTool from '@/components/search'
 import { getInvoiceTypeTextFn, getCheckStateFn, formatDate, invoiceCodeClass, compressFilesFn, isToString } from '@/common/js/common';
 import { mapState, mapMutations } from 'vuex';
-import httpApi from '@/common/js/httpApi.js'
+import httpApi from '@/common/js/httpApi.js';
+
 export default {
 	name: 'Home',
 	components: {
@@ -179,19 +180,17 @@ export default {
 	watch: {
 		'$route'(to, form) {
 			if (to.name == 'mobileIndex') {
-				console.log(123, to);
 				this.appSelectFn(true);
 			}
 
 		}
 	},
 	created() {
-		console.log('app created')
+		
 		let mobileCss = require('@/common/css/mobile.css');
 		let listCss = require('@/common/css/list.css');
 	},
 	mounted() {
-
 		this.appSelectFn();
 	},
 	methods: {
@@ -242,7 +241,6 @@ export default {
 					this.isLoading = false;
 					this.finished = true;
 				}
-				console.log('this.loading = ', this.loading, ' | this.isLoading = ', this.isLoading, ' | this.finished = ', this.finished)
 			}).catch(reject => {
 				console.log('reject = ', reject);
 				this.error = true;
@@ -255,7 +253,6 @@ export default {
 		},
 		// 上划加载
 		pullUpFn() {
-			console.log(123);
 			// 异步更新数据
 			this.appSelectFn();
 		},
@@ -281,7 +278,7 @@ export default {
 		},
 		// 选项卡切换
 		tabChangeFn(index) {
-			console.log('listData_' + this.active)
+			
 			this.finished = false;
 			if (!this['listData_' + this.active].length) {
 				this.appSelectFn(true);
@@ -295,7 +292,6 @@ export default {
 		 * @return {[type]}          []
 		 */
 		goDetailFn(item, index, require = false) {
-			console.log(2, arguments);
 			this.$router.push({
 				name: 'detail',
 				params: {
@@ -310,7 +306,6 @@ export default {
 		onSearchCallBackFn(obj) {
 			this.searchObj = obj;
 			this.appSelectFn(true);
-			console.log('obj = ', obj)
 		},
 		onSelect(item, index) {
 
@@ -349,7 +344,7 @@ export default {
 		 */
 		appCollectByPicFn(filesRes, paramsType = 'base64') {
 			let fd = '',
-				data = {}
+				data = {};
 			if (paramsType == 'base64') {
 				data = { picture: filesRes.file.base64.split(',')[1] }
 			} else if (paramsType == 'file') {
@@ -368,7 +363,6 @@ export default {
 				file: paramsType == 'base64' ? false : true,
 				data
 			}).then(resolve => {
-				console.log(9, resolve)
 				if (!resolve.code) {
 					if (resolve.data.length > 1) {
 						// 混扫
@@ -390,7 +384,6 @@ export default {
 			});
 		},
 		deleteInvoiceFn(item, index) {
-			console.log(123, item)
 			this.axios({
 				url: httpApi.app.deleteInvoice,
 				data: {

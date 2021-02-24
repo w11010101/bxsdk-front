@@ -10,15 +10,18 @@
 				<!-- 附件 -->
 				<template v-else-if='item.type == "files"'>
 					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" title-class='cell-label-style' :key='index'>
-						<template #right-icon>
-							<van-icon name="photo-o" size='24' color='#ccc'>
-								<van-uploader v-model="fileList" class='upload-btn' multiple>
-									<template #preview-cover="{ file }">
-										<div class="preview-cover van-ellipsis">{{ file?file.name:null }}</div>
-									</template>
-								</van-uploader>
-							</van-icon>
-						</template>
+						<div class='preview-imgs' v-for='(file,index) in fileList'>
+							<!-- <div>{{JSON.stringify(file.file)}}</div> -->
+							<div class='preview-img-name' @click='onClickPreviewFn(file,index)'>
+								<van-icon name="photo" size='24' color='#595959' class='' /><span>{{file.file?file.file.name:file.fileName}}</span>
+							</div>
+							<van-button type='danger' size='mini' @click='onDeleteFileFn(file,index)'>删除</van-button>
+						</div>
+						<van-uploader v-model="fileList" class='upload-btn' :preview-image='false' :after-read='onAfterReadFn' multiple>
+							<van-button size='small'>
+								<van-icon name="photo-o" size='30' color='#595959' />
+							</van-button>
+						</van-uploader>
 					</van-cell>
 				</template>
 				<template v-else-if='item.type == "state"'>
@@ -35,7 +38,7 @@
 		<template v-else>
 			<template v-for='(item,index) in showOptions'>
 				<!-- 货物或应税劳务 -->
-				<van-collapse v-if='item.key == "goodsName"' v-model="activeCollapse" class='list-collapse' :border='false'>
+				<van-collapse v-if='item.key == "goodsName"' v-model="activeCollapse" class='list-collapse readonly-style' :border='false'>
 					<van-collapse-item :title="item.label||formDataConfig[item.key].label" :key='index' name="1" :value='localItemData.detailList?localItemData.detailList[0].goodsName:""'>
 						<div class='collapse-content'>
 							<van-row v-for='(todo,index) in localItemData.detailList'>
@@ -61,37 +64,40 @@
 				</van-collapse>
 				<!-- 附件 -->
 				<template v-else-if='item.type == "files"'>
-					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" title-class='cell-label-style' :key='index' :border='false'>
-						<template #right-icon>
-							<van-icon name="photo-o" size='24' color='#ccc'>
-								<van-uploader v-model="fileList" class='upload-btn' multiple>
-									<template #preview-cover="{ file }">
-										<div class="preview-cover van-ellipsis">{{ file?file.name:null }}</div>
-									</template>
-								</van-uploader>
-							</van-icon>
-						</template>
+					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" title-class='cell-label-style' :key='index'>
+						<div class='preview-imgs' v-for='(file,index) in fileList' @click='onClickPreviewFn(file,index)'>
+							<div class='preview-img-name'>
+								<van-icon name="photo" size='24' color='#595959' class='' /><span>{{file.fileName}}</span></div>
+							<van-button type='danger' size='mini'>删除</van-button>
+						</div>
+						<van-uploader v-model="fileList" class='upload-btn' :preview-image='false' :after-read='onAfterReadFn' multiple>
+							<van-button size='small'>
+								<van-icon name="photo-o" size='30' color='#595959' />
+							</van-button>
+						</van-uploader>
 					</van-cell>
 				</template>
 				<!-- 报销状态 -->
 				<template v-else-if='item.type == "state"'>
-					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" :key='index' :value='getReimburseStateFn(localItemData[item.key])' title-class='cell-label-style' value-class='cell-value-style' v-if='item.key == "reimburseState"' :border='false'></van-cell>
+					<van-cell label-width='100' class='readonly-style' :title="item.label||formDataConfig[item.key].label" :key='index' :value='getReimburseStateFn(localItemData[item.key])' title-class='cell-label-style' value-class='cell-value-style' v-if='item.key == "reimburseState"' :border='false'></van-cell>
 				</template>
 				<!-- 其他 -->
-				<van-cell label-width='100' v-else :title="item.label||formDataConfig[item.key].label" :key='index' :value='localItemData[item.key]' title-class='cell-label-style' value-class='cell-value-style' :border='false'></van-cell>
+				<van-cell label-width='100' class='readonly-style' v-else :title="item.label||formDataConfig[item.key].label" :key='index' :value='localItemData[item.key]' title-class='cell-label-style' value-class='cell-value-style' :border='false'></van-cell>
 			</template>
 		</template>
 		<!-- 开票日期 -->
 		<van-popup v-model="calendarShow" position="bottom" :style="{ height: '50%' }" get-container="body">
 			<van-datetime-picker v-model="currentDate" type="date" :min-date="minDate" :max-date="maxDate" @confirm='confirmFn' @cancel='onCancelFn' />
 		</van-popup>
+		<!-- 预览图片 -->
+		<van-image-preview v-model="previewShow" :images="previewFileList" :start-position='previewIndex' :loop='false' @change='onPreviewChangeFn' />
 	</div>
 </template>
 <script>
 import { mapState, mapMutations } from 'vuex';
-import { isToString, compress, base64ToFile, formatDate, getCheckStateFn, getReimburseStateFn, inputDebounce } from '@/common/js/common';
+import { isToString, compressFn, base64ToFileFn, formatDate, getCheckStateFn, getReimburseStateFn, inputDebounce, compressFilesFn } from '@/common/js/common';
 import { formDataConfig } from '@/common/js/formDataConfig';
-
+import httpApi from '@/common/js/httpApi.js'
 export default {
 	name: 'formDataItem',
 	mixins: [],
@@ -112,7 +118,7 @@ export default {
 		uuid: {
 			type: String,
 			default: 0,
-		}
+		},
 	},
 
 	data() {
@@ -124,6 +130,7 @@ export default {
 			photoUrl: '', //压缩后图片base64
 			bigPhotoSrc: '', //放大图片url
 
+			previewFileList: [], // 预览图片集合
 			// 日期控件显示
 			calendarShow: false,
 			minDate: new Date(2017, 0, 1),
@@ -133,8 +140,10 @@ export default {
 			// 
 			fileList: [],
 			localItemData: {},
-			activeCollapse: [1]
-
+			activeCollapse: [1],
+			previewShow: false,
+			loadedPreviewName: [],
+			previewIndex: 0
 		}
 	},
 	computed: {
@@ -144,6 +153,7 @@ export default {
 		uuid() {
 			// 由于传data是Object类型，可能导致表单数据无法重新刷新渲染，所以通过监听uuid的变化重置localData;
 			this.resetLocalDataFn();
+			this.initFormDataItem();
 		}
 	},
 	created() {
@@ -151,26 +161,6 @@ export default {
 	},
 	mounted() {
 		console.log('调用', this.showOptions);
-		// let img1 = document.createElement("img");
-		// let img2 = document.createElement("img");
-		// img1.src = require('@/assets/E3767164-FC3A-49B2-9717-E131179E1291_1_105_c.jpeg');
-		// img2.src = require('@/assets/F7BD5EC2-58BF-4C13-8E93-D61808FAC18E_1_105_c.jpeg');
-		// let baseImg1 = compress(img1);
-		// let baseImg2 = compress(img2);
-		// setTimeout(() => {
-		// 	this.fileList.push({
-		// 		content: compress(img1),
-		// 		file: base64ToFile(baseImg1, 'E3767164-FC3A-49B2-9717-E131179E1291_1_105_c.jpeg'),
-		// 		message: "",
-		// 		status: ""
-		// 	});
-		// 	this.fileList.push({
-		// 		content: compress(img1),
-		// 		file: base64ToFile(baseImg2, 'F7BD5EC2-58BF-4C13-8E93-D61808FAC18E_1_105_c.jpeg'),
-		// 		message: "",
-		// 		status: ""
-		// 	});
-		// }, 2000);
 
 		this.resetLocalDataFn();
 		this.initFormDataItem();
@@ -180,6 +170,7 @@ export default {
 		isToString,
 		getCheckStateFn,
 		getReimburseStateFn,
+		compressFilesFn,
 		// 初始化表单参数
 		initFormDataItem() {
 			let keys = Object.keys(this.formDataConfig);
@@ -202,6 +193,7 @@ export default {
 				});
 			});
 			this.setResetFormDataConfig(this.formDataConfig);
+			this.previewFilesFn(this.localItemData.files);
 		},
 		resetLocalDataFn() {
 			for (let key in this.data) {
@@ -239,36 +231,193 @@ export default {
 		onBlurFn(key) {
 			this.$emit('onBlurFn', key, this.formDataConfig[key])
 		},
+		// 添加图片后，返回图片压缩结果，类型是file
+		onAfterReadFn(file, item) {
+
+			console.log(file, item)
+			this.compressFilesFn(file).then(resolve => {
+				this.addInvoiceShow = false;
+				console.log(3, resolve);
+				this.fileList.forEach(file => {
+
+					if (file.fileName) {
+						this.previewFileList.push('')
+					} else {
+						if(!this.loadedPreviewName.includes(file.file.name)){
+
+						}
+						this.loadedPreviewName.push(file.file.name)
+						this.previewFileList.push(file.content)
+					}
+
+				})
+				console.log(5, this.fileList);
+				console.log(6, this.loadedPreviewName);
+				console.log(7, this.previewFileList)
+				this.$emit('afterFileFn', resolve);
+
+				// resolve.file : 单张时是Object，多张时是Array 
+				// resolve.type : true：单张；false：多张
+				// this.appCollectByPicFn(resolve);
+			});
+
+		},
+		// 提前 获取附件预览图片
+		previewFilesFn(files) {
+			console.log(4, files)
+			// 图片图片先用假图片做展示，当点击查看时，再用接口获取查看原图
+			this.fileList = [];
+			this.loadedPreviewName = []
+			this.previewFileList = []
+			files.forEach(file => {
+				// this.pushPreviewFileFn(file, true, index)
+				let img = document.createElement("img");
+				img.src = require('@/assets/logo.png');
+				let baseImg = compressFn(img);
+				setTimeout(() => {
+					this.fileList.push({
+						content: baseImg,
+						file: base64ToFileFn(baseImg, file.fileName),
+						message: "",
+						status: "",
+						fileName: file.fileName,
+						filePath: file.filePath,
+						id: file.id
+					});
+				}, 1000);
+
+			});
+
+		},
+		// _previewFileFn(data, file, index) {
+		// 	console.log(92, data, file);
+		// 	this.previewShow = true;
+		// 	if (this.loadedPreviewName.includes(file.fileName)) {
+		// 		return;
+		// 	} else {
+		// 		this.previewFileList = [];
+		// 		this.previewFileList.push('');
+		// 	}
+		// 	let fd = new FormData();
+		// 	fd.append('filePath', file.filePath);
+		// 	fd.append('fileName', file.fileName);
+		// 	this.previewIndex = index
+		// 	console.log(this.loadedPreviewName)
+		// 	return this.axios({
+		// 		url: httpApi.previewFile,
+		// 		file: true,
+		// 		data
+		// 	}).then(resolve => {
+		// 		console.log(resolve);
+		// 		this.loadedPreviewName.push(file.fileName);
+		// 		this.$set(this.previewFileList, index, resolve.data)
+		// 		this.fileList.push(resolve);
+
+		// 	})
+		// },
+		// 点击查看预览图
+		onClickPreviewFn(file, index, type = 'click') {
+			console.log('查看预览图', arguments);
+			if (type == 'click') {
+				console.log(8, 'click')
+				this.previewShow = true;
+				this.previewIndex = index;
+				console.log(6.2,this.loadedPreviewName)
+				console.log(7.2,this.previewFileList)
+			}
+
+			if (this.loadedPreviewName.includes(file.file.name)) {
+				console.log('有')
+				console.log(6.1, this.loadedPreviewName);
+				console.log(7.1, this.previewFileList)
+				// this.$set(this.previewFileList, index, file.content)
+				return;
+			} else {
+				// this.previewFileList = [];
+				// this.previewFileList.push('');
+				this.$set(this.previewFileList, index, '')
+			}
+			let fd = new FormData();
+			fd.append('filePath', file.filePath);
+			fd.append('fileName', file.fileName);
+
+			
+			return this.axios({
+				url: httpApi.previewFile,
+				file: true,
+				data: fd
+			}).then(resolve => {
+				console.log(resolve);
+				if(!this.loadedPreviewName.includes(file.fileName)){
+					this.loadedPreviewName.push(file.fileName);
+				}
+				
+				this.$set(this.previewFileList, index, resolve.data)
+			})
+		},
+		// getPreviewFileFn(file, index) {
+		// 	let fd = new FormData();
+		// 	fd.append('filePath', file.filePath);
+		// 	fd.append('fileName', file.fileName);
+
+		// 	console.log(this.loadedPreviewName)
+		// 	return this.axios({
+		// 		url: httpApi.previewFile,
+		// 		file: true,
+		// 		data: fd
+		// 	}).then(resolve => {
+		// 		console.log(resolve);
+		// 		this.loadedPreviewName.push(file.fileName);
+		// 		this.$set(this.previewFileList, index, resolve.data)
+		// 	})
+		// },
+		onDeleteFileFn(file, index) {
+			console.log(file, index)
+			if (this.loadedPreviewName.length) {
+				this.loadedPreviewName = this.loadedPreviewName.filter(item => item.fileName == file.fileName);
+				this.loadedPreviewName.splice(index, 1);
+
+				console.log(1, this.loadedPreviewName)
+				console.log(1, this.previewFileList)
+			} else {
+				this.fileList.splice(index, 1);
+				console.log(2, this.fileList)
+			}
+			this.$emit('deleteFile', file)
+		},
+		// 预览图片切换到未获取的图片是，直接获取图片
+		onPreviewChangeFn(index) {
+			console.log(this.fileList)
+			console.log(arguments);
+			if (this.fileList[index].fileName) {
+				this.onClickPreviewFn(this.fileList[index], index, 'change')
+			}
+
+		}
+
 	},
 
 };
 </script>
-
 <style scoped="scoped">
+.readonly-style {
+	line-height: 18px
+}
+
 .form-items {
 	position: absolute;
 	width: 100%;
 	top: 0;
-	bottom: 50px;
+	bottom: 65px;
 	left: 0;
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
 }
 
+/* 附件 样式重置 */
 .cell-label-style {
 	text-align: left;
 	color: #595959;
-}
-
-/* 附件 样式重置 */
-.preview-cover {
-	color: #595959;
-	font-size: 12px;
-	vertical-align: top;
-	width: 70%;
-	display: inline-block;
-	text-align: right;
-	padding-right: 10px;
 }
 
 .cell-label-style {
@@ -284,6 +433,7 @@ export default {
 	color: #595959;
 }
 
+/**/
 .upload-btn {
 	width: 100%;
 }
@@ -302,101 +452,27 @@ export default {
 }
 
 
-.van-icon-photo-o {
+.preview-imgs {
+	margin: 5px 0;
+}
+
+.preview-imgs .preview-img-name {
 	display: inline-block;
-	width: calc(100% - 50px);
+	line-height: 24px;
+	vertical-align: bottom;
+	margin-right: 10px;
 }
 
-.van-icon-photo-o::before {
-	position: absolute;
-	bottom: 0;
-	right: 0;
-}
-
-.upload-btn /deep/ .van-uploader__wrapper {
-	padding-bottom: 30px
-}
-
-.upload-btn /deep/ .van-image img {
-	display: none;
-}
-
-.upload-btn /deep/ .van-uploader__preview-delete {
-	position: static;
-	background: none;
-	display: inline-block;
-	width: 30px;
-	height: 20px;
-	line-height: 20px;
+.preview-imgs .preview-img-name .van-icon-photo {
 	vertical-align: middle;
-
+	margin-right: 5px
 }
 
-.upload-btn /deep/ .van-uploader__preview-delete-icon {
-	transform: scale(1);
-	position: static;
-	width: 30px;
-	height: 20px;
-}
+.preview-imgs .preview-img-name span {}
 
-.upload-btn /deep/ .van-uploader__preview-delete i {
-	float: left;
-}
-
-.upload-btn /deep/ .van-uploader__preview-delete i:before {
-	content: '删除';
-	font-size: 12px;
-	height: 20px;
-	color: #595959;
-	color: red;
-}
-
-.upload-btn /deep/ .van-uploader__preview {
-	width: 100%;
-	margin: 0;
-	text-align: right
-}
-
-.upload-btn /deep/ .van-uploader__preview-cover {
-	position: static;
-}
-
-.upload-btn /deep/ .van-uploader__preview-image {
-	width: calc(100% - 30px);
-	display: inline-block;
-	height: 20px;
-	line-height: 20px;
-	vertical-align: middle;
-}
-
-.upload-btn /deep/ .van-uploader__upload {
-	height: 100%;
-	width: 24px;
-	height: 24px;
-	margin: 0;
-	float: right;
-	position: absolute;
-	right: 0;
-	bottom: 0;
-	z-index: 2;
-	opacity: 0;
-}
-
-.readonly-fileList-item {
-	display: flex;
-	color: #595959;
-}
-
-.readonly-fileList-item>* {
-	display: inline-block;
-}
-
-.readonly-fileList-item label {
-	flex: 1;
-}
-
-.readonly-fileList-item span {
-	min-width: 30px;
+.upload-btn button {
+	border: 0;
+	padding: 0;
 }
 
 /* 附件 样式重置 end */

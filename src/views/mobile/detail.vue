@@ -10,8 +10,12 @@
 						</div>
 					</van-col>
 					<van-col span='6' class='detail-thumbnail-box'>
-						<img class='detail-header-img detail-thumbnail-image' :src="image" alt="">
-						<van-image class='detail-header-img' width="60" height="60" lazy-load :src="image" @click='previewImgFn' />
+						<!-- <img class='detail-header-img detail-thumbnail-image' :src="image" alt=""> -->
+						<van-image class='detail-header-img' width="60" height="60" :src="image" @click='previewImgFn'>
+							<template v-slot:loading>
+								<van-loading type="spinner" size="20" />
+							</template>
+						</van-image>
 					</van-col>
 				</van-row>
 			</div>
@@ -26,16 +30,23 @@
 		<!-- 表单 -->
 		<div class='detail-form'>
 			<van-form @failed='onFailedFn' ref='formData' :show-error-message='false' :show-error='false'>
-				<FormDataItem ref='formDataItem' v-if='showOptions.length' :showOptions='showOptions' :uuid='localData.uuid' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn' @onDateConfirmFn='onDateConfirmFn'></FormDataItem>
+				<FormDataItem ref='formDataItem' v-if='showOptions.length' :showOptions='showOptions' :uuid='localData.uuid' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn' @onDateConfirmFn='onDateConfirmFn' @afterFileFn='onAfterFileFn' @deleteFile='onSaveDelFileFn'></FormDataItem>
 				<!--  -->
 				<div class='form-submit'>
-					<template v-if='localData.checkState ==="1"'>
-						<van-button block color='#229FFF' @click='goBackFn'>返回</van-button>
-					</template>
-					<template v-else>
-						<van-button block color='#229FFF' @click='onSubmitFn' v-if='validateState'>保存</van-button>
-						<van-button block color='#ccc' @click='onSubmitFn' v-else>保存</van-button>
-					</template>
+					<van-row gutter='10'>
+						<van-col span='6'>
+							<van-button block color='#229FFF' @click='onShareFn'>分享</van-button>
+						</van-col>
+						<van-col span='18'>
+							<template v-if='localData.checkState ==="1"'>
+								<van-button block color='#229FFF' @click='goBackFn'>返回</van-button>
+							</template>
+							<template v-else>
+								<van-button block color='#229FFF' @click='onSubmitFn' v-if='validateState'>保存</van-button>
+								<van-button block color='#ccc' @click='onSubmitFn' v-else>保存</van-button>
+							</template>
+						</van-col>
+					</van-row>
 				</div>
 			</van-form>
 		</div>
@@ -45,16 +56,27 @@
 		</van-popup>
 		<!-- 图片浏览 -->
 		<van-image-preview v-model="previewShow" :images="images" :showIndex="false"></van-image-preview>
+		<!-- 分享面板（旧） -->
+		<van-dialog v-model="shareDialogShow" class='share-dialog' :show-confirm-button='false' :close-on-click-overlay='true' width='240'>
+			<van-button color='#229FFF' @click='onQRCodeFn'>二维码</van-button><br>
+			<van-button color='#229FFF'>好友分享</van-button>
+		</van-dialog>
+		<van-dialog v-model="QRCodeShow" class='share-dialog-QRCode' :show-confirm-button='false' :close-on-click-overlay='true' width='128'>
+			<van-loading v-if='!qrcode' />
+			<div id='QRCode-box'></div>
+		</van-dialog>
+		<!-- 分享面板（新） -->
+		<van-share-sheet v-model="showShare" title="立即分享给好友" :options="shareOptions" @select="onShareSelectFn" />
 	</div>
 </template>
 <script>
 import { mapState, mapMutations } from 'vuex';
 import FormDataItem from '@/components/formDataItem'
-import { uploadFileFn, getInvoiceTypeTextFn, invoiceCodeClass, getCheckStateFn, filterInvoiceClassFn, isToString } from '@/common/js/common.js';
+import { getInvoiceTypeTextFn, invoiceCodeClass, getCheckStateFn, filterInvoiceClassFn, isToString } from '@/common/js/common.js';
 import httpApi from '@/common/js/httpApi.js'
 import { formDataConfig } from '@/common/js/formDataConfig';
 import config from '@/common/js/config'
-// import 'vant/lib/index.less';
+
 export default {
 	name: '',
 	mixins: [],
@@ -80,7 +102,7 @@ export default {
 			previewShow: false,
 			image: '',
 			images: [],
-
+			uploadfiles: [], // 上传的附件base64
 			isReadOnly: false,
 			// 压缩有的图片集合
 			uploadFileList: [],
@@ -97,7 +119,26 @@ export default {
 			swipteListUuids: [], // 从vuex（首页列表数据）或混扫归集的列表中提取
 			currentInvoiceClass: '', // 当前发票分类
 			random: '',
-			showOptions: []
+			showOptions: [],
+			shareDialogShow: false,
+			showShare: false,
+			shareOptions: [
+				[
+					{ name: '微信', icon: 'wechat' },
+					{ name: '朋友圈', icon: 'wechat-moments' },
+					{ name: '微博', icon: 'weibo' },
+					{ name: 'QQ', icon: 'qq' },
+				],
+				[
+					{ name: '复制链接', icon: 'link' },
+					{ name: '分享海报', icon: 'poster' },
+					{ name: '二维码', icon: 'qrcode' },
+					{ name: '小程序码', icon: 'weapp-qrcode' },
+				],
+			],
+			QRCodeShow: false,
+			qrcode: null,
+			deleteFileList: []
 		}
 	},
 	computed: {
@@ -112,8 +153,13 @@ export default {
 
 	},
 	mounted() {
-
 		this.formatInvoiceOptionFn();
+
+		if (this.$route.query.uuid) {
+			this.appFindFn(this.$route.query.uuid);
+			return;
+		}
+
 		// item：发票信息；
 		// index：发票对应下标；
 		// require：是否是请求的（true/false）；
@@ -191,10 +237,14 @@ export default {
 			keys.forEach(key => {
 				this.$set(this.localData, key, item[key]);
 			});
+			if (this.localData.files.length) {
+				console.log(this.localData.files);
+
+			}
 			this.setShowOptionsFn(this.localData.invoiceTypeCode);
 			this.$nextTick().then(() => {
 				this.formDataInitValidateFn();
-				if (this.localData.uuid) this.getInvoiceImg(this.localData.uuid);
+				if (this.localData.uuid) this.getImg(this.localData.uuid);
 			});
 
 		},
@@ -240,7 +290,6 @@ export default {
 		},
 		// 修改发票类型的弹窗确定方法
 		onConfirm(item) {
-			
 			this.$set(this.localData, 'invoiceTypeCode', item.invoiceTypeCode);
 			this.selectInvoiceShow = false;
 			this.setShowOptionsFn(this.localData.invoiceTypeCode);
@@ -293,13 +342,13 @@ export default {
 			}
 
 		},
-		// vant上传组件
-		beforeRead(files) {
-			let that = this;
-			uploadFileFn(files).then(resolve => {
-				console.log(3, resolve)
-			})
-		},
+		// // vant上传组件
+		// beforeRead(files) {
+		// 	let that = this;
+		// 	uploadFileFn(files).then(resolve => {
+		// 		console.log(3, resolve)
+		// 	})
+		// },
 		// 返回
 		goBackFn() {
 			this.$router.back()
@@ -326,12 +375,13 @@ export default {
 			});
 		},
 		// 获取发票图片
-		getInvoiceImg(uuid) {
+		getImg(uuid) {
 			this.axios({
-				url: httpApi.app.getInvoiceImg,
+				url: httpApi.app.getImg,
 				data: {
 					uuid,
-				}
+				},
+				loading: false
 			}).then(resolve => {
 				// console.log('resolve = ', resolve);
 				if (resolve.status) {
@@ -347,7 +397,6 @@ export default {
 		onInputFn(key, value) {
 			this.$set(this.localData, key, value);
 			this.formDataInitValidateFn(key);
-			console.log(5)
 		},
 		onBlurFn(key, config) {
 			// this.formDataInitValidateFn();
@@ -393,7 +442,7 @@ export default {
 		// 根据类型区分表单显示字段
 		setShowOptionsFn(invoiceTypeCode) {
 			this.isReadOnly = this.localData.checkState === '1' ? true : false;
-			console.log(12, invoiceTypeCode)
+
 			this.showOptions = [];
 			if (this.VATGClass.includes(invoiceTypeCode)) {
 				// console.log('增值税专用发票、机动车销售统一发票、货运运输业增值税专用发票')
@@ -423,7 +472,6 @@ export default {
 		},
 		// 发票查验
 		invoiceComplianceCheckFn() {
-			console.log(90, this.localData);
 			this.axios({
 				url: httpApi.app.invoiceComplianceCheck,
 				data: this.localData
@@ -444,6 +492,12 @@ export default {
 		},
 		// 发票保存或更新
 		updateInvoiceFn(data) {
+			if (this.uploadfiles.length) {
+				this.uploadFileFn();
+			}
+			if (this.deleteFileList.length) {
+				this.deleteInvoiceFilesFn()
+			}
 			this.axios({
 				url: httpApi.app.updateInvoice,
 				data
@@ -466,13 +520,108 @@ export default {
 					this.$toast(reject.message);
 				}
 			});
+		},
+		// 
+		uploadFileFn() {
+			let data = new FormData();
+			data.append('uuid', this.localData.uuid);
+			this.uploadfiles.forEach(file => {
+				data.append('files', file);
+			})
+			this.axios({
+				url: httpApi.uploadFile,
+				file: true,
+				data
+			}).then(resolve => {
+				console.log(99, resolve);
+
+			}).catch(reject => {
+				console.log(98, isToString(reject), reject)
+
+			});
+		},
+		// 分享
+		onShareFn() {
+			this.shareDialogShow = true;
+			// this.showShare = true;
+		},
+		onShareSelectFn(option) {
+			console.log(option)
+			this.$toast(option.name);
+			this.showShare = false;
+		},
+		onQRCodeFn() {
+			this.QRCodeShow = true;
+			let href = window.location.href + '?uuid=' + this.localData.uuid;
+			console.log('href = ', href)
+			if (this.qrcode) {
+				this.qrcode.clear();
+				this.qrcode.makeCode(href); // 生成另外一个二维码
+			} else {
+				setTimeout(() => {
+					this.qrcode = new QRCode("QRCode-box", {
+						text: href,
+						width: 128,
+						height: 128,
+						colorDark: "#000000",
+						colorLight: "#ffffff",
+						correctLevel: QRCode.CorrectLevel.H
+					});
+				}, 500)
+			}
+
+
+		},
+		// 附件选择后的回调
+		onAfterFileFn({ file }) {
+			console.log(11, file);
+			if(isToString(file) == 'Array'){
+				file.forEach(item => {
+					this.uploadfiles.push(item.file)
+				})
+			}else{
+				this.uploadfiles.push(file)
+			}
+			
+
+		},
+		onSaveDelFileFn(file) {
+			this.deleteFileList.push(file.id);
+		},
+		// 删除附件接口
+		deleteInvoiceFilesFn(id) {
+			console.log(id)
+			let deleteFilePromise = [];
+
+			this.deleteFileList.forEach(item => {
+				deleteFilePromise.push(this._deleteInvoiceFilesFn(item))
+			});
+			this.$axios.all(deleteFilePromise.map(promiseItem => {
+				return promiseItem.catch(reject => {
+					return reject;
+				});
+			})).then(resolve=>{
+				console.log(resolve)
+			}).catch(rejcet=>{
+
+			})
+		},
+		// 删除附件接口
+		_deleteInvoiceFilesFn(id) {
+			return this.axios({
+				url: httpApi.app.deleteInvoiceFiles,
+				data: {
+					ids: id
+				}
+			})
 		}
 
 	},
 
 };
 </script>
-
+<style lang='less'>
+</style>
 <style scoped="scoped">
 .detail {
 	background: #F5F5F5;
@@ -495,15 +644,16 @@ export default {
 	position: relative;
 }
 
-.detail-thumbnail-image {
+/*.detail-thumbnail-image {
 	width: 60px;
 	height: 60px;
 }
 
-.detail-thumbnail-image+.detail-header-img {
+.detail-thumbnail-image+.detail-header-img */
+.detail-header-img {
 	position: absolute;
 	left: 0;
-	opacity: 0;
+	/*opacity: 0;*/
 }
 
 .select-invoice {
@@ -563,9 +713,15 @@ export default {
 
 .form-submit {
 	position: absolute;
+	height: 65px;
 	width: 100%;
 	bottom: 0;
+	padding: 10px;
+	box-sizing: border-box;
+}
 
+.form-submit button {
+	font-size: 16px
 }
 
 .detail-header-img {
@@ -576,5 +732,24 @@ export default {
 
 .my-swipe {
 	height: 100%;
+}
+
+.share-dialog {
+	border-radius: 6px;
+	padding: 20px 0;
+}
+
+.share-dialog button {
+	width: 70%;
+	border-radius: 5px
+}
+
+.share-dialog button:last-child {
+	margin-top: 20px;
+}
+
+.share-dialog-QRCode {
+	border-radius: 6px;
+	padding: 10px;
 }
 </style>

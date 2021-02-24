@@ -224,7 +224,21 @@ export let formDataConfig = {
         rules: [{ required: true, label: '乘坐人', message: '乘坐人不能为空' }],
         readonly: false,
     },
+    passenger: {
+        label: '乘坐人',
+        placeholder: '请输入乘坐人',
+        required: true,
+        rules: [{ required: true, label: '乘坐人', message: '乘坐人不能为空' }],
+        readonly: false,
+    },
     idNumber: {
+        label: '证件号',
+        placeholder: '请输入证件号后4位',
+        required: true,
+        rules: [{ required: true, label: '证件号', message: '证件号不能为空' }],
+        readonly: false,
+    },
+    identityNumber: {
         label: '证件号',
         placeholder: '请输入证件号后4位',
         required: true,

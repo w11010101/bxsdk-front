@@ -68,8 +68,6 @@ export default {
         checkInvoice: '/web/common/invoice/checkInvoice',
         //上传源文件
         collectBySourceFile: '/web/common/invoice/collectBySourceFile',
-        // 上传附件
-        uploadFile: '/web/common/invoice/uploadFile',
     },
     app: {
         //生产环境
@@ -85,13 +83,13 @@ export default {
         //获取发票类型列表
         getInvoiceType: '/app/common/invoice/invoiceTypeList',
         //获取发票图片
-        getInvoiceImg: '/app/common/invoice/getImg',
+        getImg: '/app/common/invoice/getImg',
         //图片方式归集发票
         appCollectByPic: '/app/common/invoice/collectByPic',
         //二维码方式归集发票
         collectByQrcode: '/app/common/invoice/collectByQrcode',
         //二维码上传发票图片
-        uploadImg1: '/app/common/invoice/uploadImg',
+        uploadImg: '/app/common/invoice/uploadImg',
         //二维码删除发票图片
         deleteImg: '/app/common/invoice/deleteImg',
         //手动录入发票保存接口
@@ -117,6 +115,11 @@ export default {
         updateDdidUserInfo: '/app/common/invoice/updateDdidUserInfo',
         // 修改存在状态
         getDDRuleState: '/app/common/invoice/getDDRuleState',
-    }
+        // 删除附件
+        deleteInvoiceFiles:'/app/common/invoice/deleteInvoiceFiles',
+        
+    },
+    previewFile:'/web/common/invoice/previewFile',
+    uploadFile: '/web/common/invoice/uploadFile',
 
 }

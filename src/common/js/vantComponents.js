@@ -56,10 +56,11 @@ import {
     Card,
     Tab, 
     Tabs,
-    ActionSheet
+    ActionSheet,
+    ShareSheet
 } from 'vant';
 
-
+Vue.use(ShareSheet);
 Vue.use(ActionSheet);
 Vue.use(Tab);
 Vue.use(Tabs);

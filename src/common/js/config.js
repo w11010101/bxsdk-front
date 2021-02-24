@@ -78,8 +78,8 @@ export default {
 		{ key: 'invoiceNo', }, // 发票号码
 		{ key: 'invoiceDate', type: 'date' }, // 开票日期
 
-		{ key: 'riderValue', }, // 乘坐人
-		{ key: 'idNumber', }, // 证件号
+		{ key: 'passenger', }, // 乘坐人
+		{ key: 'identityNumber', }, // 证件号
 		{ key: 'trainNumber', }, // 车次/班次
 
 		{ key: 'departCity', }, // 出发城市
