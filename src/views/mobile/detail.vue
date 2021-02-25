@@ -55,7 +55,7 @@
 			<van-picker show-toolbar :columns="localInvoiceType" @confirm="onConfirm" @cancel="onCancel" />
 		</van-popup>
 		<!-- 图片浏览 -->
-		<van-image-preview v-model="previewShow" :images="images" :showIndex="false">
+		<van-image-preview class='detial-preview-box' v-model="previewShow" :images="images" :showIndex="false">
 			<van-loading type="spinner" size="20" />
 		</van-image-preview>
 		<!-- 分享面板（旧） -->

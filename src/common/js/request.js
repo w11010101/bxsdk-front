@@ -78,12 +78,11 @@ export var _axios = function(option) {
             data: option.data,
             method: option.type || 'post',
             headers: { 'content-type': option.file ? 'application/x-www-form-urlencoded' : 'application/json' },
-            // timeout: option.timeout || 10000,
+            timeout: option.timeout || 30000,
             // cancelToken: source.token,
-            cancelToken: new axios.CancelToken(function executor(c) {
-               
-                _this.source = c;
-            })
+            // cancelToken: new axios.CancelToken(function executor(c) {
+            //     _this.source = c;
+            // })
         }).then(res => {
 
             console.log(999, res)
@@ -117,7 +116,7 @@ export var _axios = function(option) {
             if(_default.loading) toast.clear();
             if (option.isTips !== false) {
                 setTimeout(() => {
-                    _this.$toast(err.errMsg || '数据请求失败');
+                    _this.$toast(err.errMsg || '请求失败');
                 }, 300)
             }
         });

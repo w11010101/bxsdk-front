@@ -127,3 +127,6 @@
 	border-radius: 6px;
 	padding: 10px;
 }
+.detial-preview-box /deep/ .van-image-preview__image{
+	padding:20px;
+}

@@ -90,6 +90,7 @@ export function compressFn(img, Orientation = null) {
     ctx.fillRect(img, 0, 0, canvas.width, canvas.height);
 
     ctx.drawImage(img, 0, 0, width, height);
+    console.log(98,'Orientation = ',Orientation)
     //修复ios上传图片的时候 被旋转的问题
     if (Orientation != "" && Orientation != 1) {
         switch (Orientation) {

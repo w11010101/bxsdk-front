@@ -81,6 +81,7 @@
 				<van-uploader class='add-invoice-item upload-item' :name='item.value' :max-size="maxSize * 1024" v-else-if='item.value=="camera"' capture='camera' :after-read='onAfterReadFn' @oversize="onOversize" :multiple='item.multiple'>
 					<van-button block>{{item.name}}</van-button>
 				</van-uploader>
+				<!-- <van-button block v-else-if='item.value=="camera"' class='add-invoice-item' @click='onCameraFn'>{{item.name}}</van-button> -->
 				<van-uploader class='add-invoice-item upload-item' :name='item.value' :max-size="maxSize * 1024" v-else-if='item.value=="picture"' :after-read='onAfterReadFn' @oversize="onOversize" :multiple='item.multiple'>
 					<van-button block>{{item.name}}</van-button>
 				</van-uploader>
@@ -383,6 +384,33 @@ export default {
 				duration: 1500,
 			});
 		},
+		// onCameraFn(){
+		// 	console.log(navigator)
+		// 	if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  //              navigator.mediaDevices.getUserMedia({
+  //                  video: true,
+  //                  audio: true
+  //              }).then(function (stream) {
+  //                  console.log(stream);
+  //                  MediaStreamTrack=typeof stream.stop==='function'?stream:stream.getTracks()[1];
+  //                  video.src=(window.URL).createObjectURL(stream);
+  //                  video.play();
+  //              }).catch(function(err){
+  //                  console.log(err);
+  //              });
+  //          }else if(navigator.getMedia){
+  //              navigator.getMedia({
+  //                  video: true
+  //              }).then(function (stream) {
+  //                  console.log(stream);
+  //                  MediaStreamTrack=stream.getTracks()[1];
+  //                  video.src=(window.webkitURL).createObjectURL(stream);
+  //                  video.play();
+  //              }).catch(function(err){
+  //                  console.log(err);
+  //              });
+  //          }
+		// },
 		deleteInvoiceFn(item, index) {
 			this.axios({
 				url: httpApi.app.deleteInvoice,
