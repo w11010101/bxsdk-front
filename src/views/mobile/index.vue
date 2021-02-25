@@ -218,10 +218,8 @@ export default {
 				}
 			}).then(resolve => {
 				let activeListDate = 'listData_' + this.active;
-				console.log('isRefresh = ', isRefresh)
 				if (resolve.data.length) {
 					if (isRefresh) {
-
 						console.log('刷新 赋值');
 						this.$set(this.$data, activeListDate, resolve.data);
 					} else {
@@ -235,6 +233,7 @@ export default {
 					this.loading = false;
 				} else {
 					console.log('无数据')
+					this.$toast('无更多数据')
 					this.$set(this.$data, activeListDate, this[activeListDate].concat(resolve.data));
 					// 数据全部加载完成
 					this.loading = false;
@@ -243,11 +242,12 @@ export default {
 				}
 			}).catch(reject => {
 				console.log('reject = ', reject);
+				this.$toast('数据请求失败')
 				this.error = true;
 				// 数据全部加载完成
 				this.loading = false;
 				this.isLoading = true;
-				this.finished = false;
+				this.finished = true;
 				this.finishedText = '';
 			});
 		},
@@ -332,17 +332,17 @@ export default {
 				this.addInvoiceShow = false;
 				// resolve.file : 单张时是Object，多张时是Array 
 				// resolve.type : true：单张；false：多张
-				this.appCollectByPicFn(resolve);
+				this.collectInvoiceFn(resolve,'file');
 			});
 
 		},
 		/**
-		 * [appCollectByPicFn 图片归集接口]
+		 * [collectInvoiceFn 图片归集接口]
 		 * @param  {[type]} filesRes   [压缩后的图片对象，不仅仅是包含file对象，还有base64]
 		 * @param  {String} paramsType [上传方式：base、file]
 		 * @return {[type]}            []
 		 */
-		appCollectByPicFn(filesRes, paramsType = 'base64') {
+		collectInvoiceFn(filesRes, paramsType = 'base64') {
 			let fd = '',
 				data = {};
 			if (paramsType == 'base64') {
@@ -350,16 +350,16 @@ export default {
 			} else if (paramsType == 'file') {
 				data = new FormData();
 				if (filesRes.type) {
-					data.append('file', filesRes.file.file);
+					data.append('files', filesRes.file.file);
 				} else {
 					filesRes.file.forEach(file => {
-						data.append('file', filesRes.file.file);
+						data.append('files', filesRes.file.file);
 					})
 				}
 			}
 
 			this.axios({
-				url: httpApi.app.appCollectByPic,
+				url: httpApi.app.collectInvoice,
 				file: paramsType == 'base64' ? false : true,
 				data
 			}).then(resolve => {
@@ -369,7 +369,7 @@ export default {
 						this.goDetailFn(resolve.data, 0, true);
 					} else {
 						// 单张
-						this.goDetailFn(resolve.data[0], true);
+						this.goDetailFn(resolve.data.invoice[0], true);
 					}
 
 				}

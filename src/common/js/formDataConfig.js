@@ -69,7 +69,7 @@ export let formDataConfig = {
         required: true,
         rules: [
             { required: true, validator: valueValidator, label: '票价', message: '票价不能为空' },
-            { required: true, validator: numberValidator, label: '票价', message: '票价不能为0' }
+            { required: true, validator: numberValidator, label: '票价', message: '票价不能为0', trigger: 'blur' }
         ],
         maxLength: 12,
         reg: /^\D*(\d*(?:\.\d{0,2})?).*$/g,
@@ -99,7 +99,7 @@ export let formDataConfig = {
         required: true,
         rules: [
             { required: true, validator: valueValidator, label: '票面金额', message: '票面金额不能为空' },
-            { required: true, validator: numberValidator, label: '票价', message: '票价不能为0' }
+            { required: true, validator: numberValidator, label: '票面金额', message: '票面金额不能为0', trigger: 'onBlur' }
         ],
         maxLength: 12,
         reg: /^\D*(\d*(?:\.\d{0,2})?).*$/g,
@@ -111,7 +111,7 @@ export let formDataConfig = {
         required: true,
         rules: [
             { required: true, validator: valueValidator, label: '金额', message: '金额不能为空' },
-            { required: true, validator: numberValidator, label: '票价', message: '票价不能为0' }
+            { required: true, validator: numberValidator, label: '票价', message: '金额不能为0' }
         ],
         maxLength: 12,
         reg: /^\D*(\d*(?:\.\d{0,2})?).*$/g,
@@ -285,9 +285,9 @@ export let formDataConfig = {
 function valueValidator(value, item) {
     if (item.required) {
         if (value.length < item.maxLength) {
-            _Toast({
-                message: item.label + '长度不对'
-            });
+            // _Toast({
+            //     message: item.label + '长度不对'
+            // });
             return false;
         } else {
             return true;
@@ -298,13 +298,13 @@ function valueValidator(value, item) {
 function numberValidator(value, item) {
     if (item.required) {
         if (parseFloat(value) == 0) {
-            _Toast({
-                message: item.message
-            });
+            // _Toast({
+            //     message: item.message
+            // });
             return false;
         } else {
             return true;
         }
-        console.log(5, value, item)
+        
     }
 }

@@ -12,15 +12,10 @@ export default {
 
         }
     },
-    beforeRouteEnter(to,form,next){
-        console.log("to = ",to);
-        next();
-    },
     mounted() {
         if (IsPC()) {
             this.$router.replace('pcIndex');
         } else {
-            console.log(this.$route)
             if(this.$route.meta.main){
                 this.$router.replace('mobileIndex');
             }

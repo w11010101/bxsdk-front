@@ -55,7 +55,9 @@
 			<van-picker show-toolbar :columns="localInvoiceType" @confirm="onConfirm" @cancel="onCancel" />
 		</van-popup>
 		<!-- 图片浏览 -->
-		<van-image-preview v-model="previewShow" :images="images" :showIndex="false"></van-image-preview>
+		<van-image-preview v-model="previewShow" :images="images" :showIndex="false">
+			<van-loading type="spinner" size="20" />
+		</van-image-preview>
 		<!-- 分享面板（旧） -->
 		<van-dialog v-model="shareDialogShow" class='share-dialog' :show-confirm-button='false' :close-on-click-overlay='true' width='240'>
 			<van-button color='#229FFF' @click='onQRCodeFn'>二维码</van-button><br>
@@ -100,7 +102,7 @@ export default {
 			selectInvoiceShow: false,
 			// 图片预览图片
 			previewShow: false,
-			image: '',
+			image: null,
 			images: [],
 			uploadfiles: [], // 上传的附件base64
 			isReadOnly: false,
@@ -154,7 +156,6 @@ export default {
 	},
 	mounted() {
 		this.formatInvoiceOptionFn();
-
 		if (this.$route.query.uuid) {
 			this.appFindFn(this.$route.query.uuid);
 			return;
@@ -165,6 +166,10 @@ export default {
 		// require：是否是请求的（true/false）；
 		let { item, index, require } = { ...this.$route.params };
 		console.log(item, index, require)
+		if (!item ) {
+			this.$router.back()
+			return;
+		}
 		if (index != void 0) { // 如果index 不等于 undefined,表明是从详情进来的，就可以左右切换
 			console.log('混扫 或 详情', item);
 			this.swipteListUuids = [];
@@ -207,7 +212,7 @@ export default {
 
 			}
 		}
-		console.log(this.VATsAllClass)
+
 		if (this.VATsAllClass.includes(item.invoiceTypeCode) && item.checkState === "1") {
 			this.isReadOnly = true;
 		}
@@ -219,17 +224,7 @@ export default {
 		getCheckStateFn,
 		// 过滤当前发票属于哪种类
 		filterInvoiceClassFn,
-		setBase64Fn(base64) {
-			this.images = [];
-			if (base64) {
-				this.image = base64;
-				this.images.push(base64);
-			} else {
-				this.image = '';
-				this.images = [];
-			}
 
-		},
 		// 设置当前显示的发票信息
 		setDataFn(item) {
 			this.localData = {};
@@ -237,41 +232,30 @@ export default {
 			keys.forEach(key => {
 				this.$set(this.localData, key, item[key]);
 			});
-			if (this.localData.files.length) {
-				console.log(this.localData.files);
 
-			}
 			this.setShowOptionsFn(this.localData.invoiceTypeCode);
 			this.$nextTick().then(() => {
 				this.formDataInitValidateFn();
-				if (this.localData.uuid) this.getImg(this.localData.uuid);
+				if (this.localData.uuid) {
+
+					this.getImg(this.localData.uuid);
+				}
 			});
 
 		},
 		// 表单初始化验证
 		formDataInitValidateFn(key = '') {
-			// this.currentInvoiceClass = this.filterInvoiceClassFn(this.localData.invoiceTypeCode);
 			console.log('表单初始化验证', this.$refs.formData);
-			// let keys = Object.keys(this.resetFormDataConfig);
-			// keys.forEach(key => {
-			// 	if (this.resetFormDataConfig[key].required) {
-			// 		this.rules.push(this.resetFormDataConfig[key].rules[0])
-			// 	}
-			// });
 
 			this.$refs.formData.validate().then(state => {
-				// console.log('arguments = ', arguments);
-				console.log('state = ', state);
 				this.validateState = true;
 			}).catch(error => {
-				console.log('error = ', error);
 				if (isToString(error) == 'Array') {
 					if (error.length) {
 						this.validateState = false;
 					}
 				} else {
 					this.validateState = false;
-					// console.log()
 				}
 			});
 
@@ -319,19 +303,6 @@ export default {
 			if (this.validateState) {
 				this.invoiceComplianceCheckFn(this.localData)
 			}
-			// this.$refs.formData.validate().then(state=>{
-			// 	console.log('state = ',state)
-			// })
-			// if (this.isReadOnly) {
-			// 	_this.$router.back();
-			// } else {
-			// 	this.$toast({
-			// 		message: '保存成功',
-			// 		onClose() {
-			// 			_this.$router.back();
-			// 		}
-			// 	});
-			// }
 
 		},
 		// 表单验证失败
@@ -361,7 +332,6 @@ export default {
 					uuid,
 				}
 			}).then(resolve => {
-				// console.log('resolve = ', resolve.data);
 				this.setDataFn(resolve.data)
 				// 定位当前显示发票uuid的下标
 				this.swipteListUuids.forEach((item, index) => {
@@ -383,16 +353,30 @@ export default {
 				},
 				loading: false
 			}).then(resolve => {
-				// console.log('resolve = ', resolve);
 				if (resolve.status) {
-					this.setBase64Fn('data:image/png;base64,' + resolve.data);
+					if(uuid === this.localData.uuid){
+						this.setBase64InvoiceImgFn('data:image/png;base64,' + resolve.data);
+					}
 				} else {
-					this.setBase64Fn();
+					this.setBase64InvoiceImgFn();
 				}
 
 			}).catch(reject => {
-
+				this.$toast('发票图片加载失败');
+				this.image = '';
 			});
+		},
+		// 
+		setBase64InvoiceImgFn(base64) {
+			this.images = [];
+			if (base64) {
+				this.image = base64||'';
+				this.images.push(base64);
+			} else {
+				this.image = null;
+				this.images = [];
+			}
+
 		},
 		onInputFn(key, value) {
 			this.$set(this.localData, key, value);
@@ -418,7 +402,8 @@ export default {
 					if (!require) {
 						this.appFindFn(this.activeUuid);
 					}
-
+					this.image = null;
+					this.images = [];
 				} else {
 					this.$toast('已是最后一条');
 				}
@@ -433,7 +418,8 @@ export default {
 					if (!require) {
 						this.appFindFn(this.activeUuid);
 					}
-
+					this.image = null;
+					this.images = [];
 				} else {
 					this.$toast('已是第一条');
 				}
@@ -476,7 +462,6 @@ export default {
 				url: httpApi.app.invoiceComplianceCheck,
 				data: this.localData
 			}).then(resolve => {
-				console.log(99, resolve);
 				if (resolve.status) {
 					this.$toast('查验成功');
 					this.updateInvoiceFn(this.localData);
@@ -484,7 +469,6 @@ export default {
 					this.$toast(resolve.message);
 				}
 			}).catch(reject => {
-				console.log(98, isToString(reject), reject)
 				if (isToString(reject) === 'Object' && !reject.status) {
 					this.$toast(reject.message);
 				}
@@ -502,7 +486,6 @@ export default {
 				url: httpApi.app.updateInvoice,
 				data
 			}).then(resolve => {
-				console.log(99, resolve);
 				if (resolve.status) {
 					this.$toast({
 						message: '保存成功',
@@ -515,13 +498,12 @@ export default {
 					this.$toast(resolve.message);
 				}
 			}).catch(reject => {
-				console.log(98, isToString(reject), reject)
 				if (isToString(reject) === 'Object' && !reject.status) {
 					this.$toast(reject.message);
 				}
 			});
 		},
-		// 
+		// 上传附件接口
 		uploadFileFn() {
 			let data = new FormData();
 			data.append('uuid', this.localData.uuid);
@@ -533,11 +515,9 @@ export default {
 				file: true,
 				data
 			}).then(resolve => {
-				console.log(99, resolve);
 
 			}).catch(reject => {
-				console.log(98, isToString(reject), reject)
-
+				this.$toast(reject.message);
 			});
 		},
 		// 分享
@@ -546,14 +526,13 @@ export default {
 			// this.showShare = true;
 		},
 		onShareSelectFn(option) {
-			console.log(option)
 			this.$toast(option.name);
 			this.showShare = false;
 		},
+		// 生成二维码
 		onQRCodeFn() {
 			this.QRCodeShow = true;
 			let href = window.location.href + '?uuid=' + this.localData.uuid;
-			console.log('href = ', href)
 			if (this.qrcode) {
 				this.qrcode.clear();
 				this.qrcode.makeCode(href); // 生成另外一个二维码
@@ -574,25 +553,23 @@ export default {
 		},
 		// 附件选择后的回调
 		onAfterFileFn({ file }) {
-			console.log(11, file);
-			if(isToString(file) == 'Array'){
+			if (isToString(file) == 'Array') {
 				file.forEach(item => {
 					this.uploadfiles.push(item.file)
 				})
-			}else{
-				this.uploadfiles.push(file)
+			} else {
+				this.uploadfiles.push(file.file)
 			}
-			
-
 		},
+		// 删除附件时，过滤原本可能新增加的文件
 		onSaveDelFileFn(file) {
 			this.deleteFileList.push(file.id);
+			this.$set(this.$data, 'uploadfiles', this.uploadfiles.filter(item => !this.deleteFileList.includes(item.id)));
 		},
 		// 删除附件接口
 		deleteInvoiceFilesFn(id) {
-			console.log(id)
-			let deleteFilePromise = [];
 
+			let deleteFilePromise = [];
 			this.deleteFileList.forEach(item => {
 				deleteFilePromise.push(this._deleteInvoiceFilesFn(item))
 			});
@@ -600,10 +577,10 @@ export default {
 				return promiseItem.catch(reject => {
 					return reject;
 				});
-			})).then(resolve=>{
-				console.log(resolve)
-			}).catch(rejcet=>{
+			})).then(resolve => {
 
+			}).catch(rejcet => {
+				this.$toast(reject.message);
 			})
 		},
 		// 删除附件接口
@@ -620,136 +597,5 @@ export default {
 
 };
 </script>
-<style lang='less'>
-</style>
-<style scoped="scoped">
-.detail {
-	background: #F5F5F5;
-}
-
-.detail-header {
-	height: 110px;
-	background: #229FFF;
-	padding: 15px;
-	box-sizing: border-box;
-}
-
-.detail-header .detail-header-bg {
-	background: #fff;
-	height: 100%;
-	border-radius: 5px;
-}
-
-.detail-thumbnail-box {
-	position: relative;
-}
-
-/*.detail-thumbnail-image {
-	width: 60px;
-	height: 60px;
-}
-
-.detail-thumbnail-image+.detail-header-img */
-.detail-header-img {
-	position: absolute;
-	left: 0;
-	/*opacity: 0;*/
-}
-
-.select-invoice {
-	font-size: 16px;
-	line-height: 80px;
-	color: #595959;
-}
-
-.select-arrow-down {
-	transition: all .3s ease;
-}
-
-.select-arrow-down-focus {
-	transform: rotateX(180deg);
-}
-
-.van-form {
-	height: 100%;
-	position: relative;
-}
-
-.check-status {
-	height: 30px;
-	line-height: 30px;
-	text-align: center;
-	background: #fff;
-	font-size: 13px;
-	border-bottom: 1px solid #ddd;
-	box-sizing: border-box;
-}
-
-.check-status .van-icon {
-	vertical-align: middle;
-	margin-top: -4px;
-}
-
-.check-success {
-	color: #52C41A;
-}
-
-.check-fail {
-	color: #FF3737;
-}
-
-.detail-form {
-	position: absolute;
-	width: 100%;
-	top: 110px;
-	bottom: 0;
-	left: 0;
-	min-height: 50px;
-}
-
-.check-status+.detail-form {
-	top: 140px;
-}
-
-.form-submit {
-	position: absolute;
-	height: 65px;
-	width: 100%;
-	bottom: 0;
-	padding: 10px;
-	box-sizing: border-box;
-}
-
-.form-submit button {
-	font-size: 16px
-}
-
-.detail-header-img {
-	margin: 10px;
-	border-radius: 4px;
-	overflow: hidden;
-}
-
-.my-swipe {
-	height: 100%;
-}
-
-.share-dialog {
-	border-radius: 6px;
-	padding: 20px 0;
-}
-
-.share-dialog button {
-	width: 70%;
-	border-radius: 5px
-}
-
-.share-dialog button:last-child {
-	margin-top: 20px;
-}
-
-.share-dialog-QRCode {
-	border-radius: 6px;
-	padding: 10px;
-}
+<style scoped="scoped" src='../../common/css/detial.css'>
 </style>

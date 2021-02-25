@@ -11,7 +11,7 @@ export var _axios = function(option) {
         _default = {
             loading:true
         };
-    console.log('option = ',option)
+    
     for(let key in option){
         _default[key] = option[key];
     }
@@ -25,18 +25,27 @@ export var _axios = function(option) {
         }); 
     }
     
-    console.log('process = ', process.env.NODE_ENV)
+    // console.log('process = ', process.env.NODE_ENV)
     
     setBaseUrlFn();
-
+    // 取消请求
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
+    // axios.prototype.source = source
+    // this.source = source;
+    // console.log(this)
     // 添加请求拦截器
     axios.interceptors.request.use(function(config) {
         // 在发送请求之前做些什么
         let token = localStorage.getItem("token");
-
+        // 添加拦截条件
+        // console.log('config = ',config)
+        // if (config.url.includes('getImg')) {
+        //     console.log('拦截器将请求取消！');
+        //     source.cancel('拦截器将请求取消！');
+        // }
         if (token) {
             config.headers.token = token; //将token放到请求头发送给服务器
-
             return config;
         } else {
             _this.$toast('token为空')
@@ -56,14 +65,25 @@ export var _axios = function(option) {
         // 对响应错误做点什么
         return Promise.reject(error);
     });
+    
 
     return new Promise((resolve, reject) => {
+        
+        // if(typeof _this.source ==='function'){
+        //     _this.source('取消请求')
+        // }
+        
         axios({
             url: option.url,
             data: option.data,
             method: option.type || 'post',
             headers: { 'content-type': option.file ? 'application/x-www-form-urlencoded' : 'application/json' },
             // timeout: option.timeout || 10000,
+            // cancelToken: source.token,
+            cancelToken: new axios.CancelToken(function executor(c) {
+               
+                _this.source = c;
+            })
         }).then(res => {
 
             console.log(999, res)
@@ -88,6 +108,12 @@ export var _axios = function(option) {
         }).catch(err => {
             console.log('err = ', err);
             reject(err);
+            if (axios.isCancel(err)) {
+                console.log('Rquest canceled', err.message); //请求如果被取消，这里是返回取消的message
+            } else {
+                //handle error
+                console.log(err);
+            }
             if(_default.loading) toast.clear();
             if (option.isTips !== false) {
                 setTimeout(() => {

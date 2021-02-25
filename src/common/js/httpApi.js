@@ -85,7 +85,7 @@ export default {
         //获取发票图片
         getImg: '/app/common/invoice/getImg',
         //图片方式归集发票
-        appCollectByPic: '/app/common/invoice/collectByPic',
+        collectInvoice: '/app/common/invoice/collectInvoice',
         //二维码方式归集发票
         collectByQrcode: '/app/common/invoice/collectByQrcode',
         //二维码上传发票图片

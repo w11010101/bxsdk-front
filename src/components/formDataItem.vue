@@ -5,15 +5,15 @@
 			<template v-for='(item,index) in showOptions'>
 				<!-- 日期 -->
 				<template v-if='item.type == "date"'>
-					<van-field v-model="localItemData[item.key]" :name='item.key' label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' :readonly='formDataConfig[item.key].readonly' @click='selectDateFn(item.key)' :key='index' />
+					<van-field v-model="localItemData[item.key]" :name='item.key' label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' readonly @click='selectDateFn(item.key)' :key='index' />
 				</template>
+				<!-- formDataConfig[item.key].readonly -->
 				<!-- 附件 -->
 				<template v-else-if='item.type == "files"'>
 					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" title-class='cell-label-style' :key='index'>
 						<div class='preview-imgs' v-for='(file,index) in fileList'>
-							<!-- <div>{{JSON.stringify(file.file)}}</div> -->
 							<div class='preview-img-name' @click='onClickPreviewFn(file,index)'>
-								<van-icon name="photo" size='24' color='#595959' class='' /><span>{{file.file?file.file.name:file.fileName}}</span>
+								<van-icon name="photo" size='24' color='#595959' class='' /><span class='van-ellipsis'>{{file.file?file.file.name:file.fileName}}</span>
 							</div>
 							<van-button type='danger' size='mini' @click='onDeleteFileFn(file,index)'>删除</van-button>
 						</div>
@@ -65,10 +65,11 @@
 				<!-- 附件 -->
 				<template v-else-if='item.type == "files"'>
 					<van-cell label-width='100' :title="item.label||formDataConfig[item.key].label" title-class='cell-label-style' :key='index'>
-						<div class='preview-imgs' v-for='(file,index) in fileList' @click='onClickPreviewFn(file,index)'>
-							<div class='preview-img-name'>
-								<van-icon name="photo" size='24' color='#595959' class='' /><span>{{file.fileName}}</span></div>
-							<van-button type='danger' size='mini'>删除</van-button>
+						<div class='preview-imgs' v-for='(file,index) in fileList'>
+							<div class='preview-img-name' @click='onClickPreviewFn(file,index)'>
+								<van-icon name="photo" size='24' color='#595959' class='' /><span>{{file.file?file.file.name:file.fileName}}</span>
+							</div>
+							<van-button type='danger' size='mini' @click='onDeleteFileFn(file,index)'>删除</van-button>
 						</div>
 						<van-uploader v-model="fileList" class='upload-btn' :preview-image='false' :after-read='onAfterReadFn' multiple>
 							<van-button size='small'>
@@ -239,13 +240,7 @@ export default {
 				this.addInvoiceShow = false;
 				console.log(3, resolve);
 				this.fileList.forEach(file => {
-
-					if (file.fileName) {
-						this.previewFileList.push('')
-					} else {
-						if(!this.loadedPreviewName.includes(file.file.name)){
-
-						}
+					if (!file.fileName) {
 						this.loadedPreviewName.push(file.file.name)
 						this.previewFileList.push(file.content)
 					}
@@ -259,6 +254,7 @@ export default {
 				// resolve.file : 单张时是Object，多张时是Array 
 				// resolve.type : true：单张；false：多张
 				// this.appCollectByPicFn(resolve);
+				
 			});
 
 		},
@@ -269,6 +265,7 @@ export default {
 			this.fileList = [];
 			this.loadedPreviewName = []
 			this.previewFileList = []
+			if(!files) return ;
 			files.forEach(file => {
 				// this.pushPreviewFileFn(file, true, index)
 				let img = document.createElement("img");
@@ -284,37 +281,12 @@ export default {
 						filePath: file.filePath,
 						id: file.id
 					});
+					this.previewFileList.push(file.content)
 				}, 1000);
 
 			});
 
 		},
-		// _previewFileFn(data, file, index) {
-		// 	console.log(92, data, file);
-		// 	this.previewShow = true;
-		// 	if (this.loadedPreviewName.includes(file.fileName)) {
-		// 		return;
-		// 	} else {
-		// 		this.previewFileList = [];
-		// 		this.previewFileList.push('');
-		// 	}
-		// 	let fd = new FormData();
-		// 	fd.append('filePath', file.filePath);
-		// 	fd.append('fileName', file.fileName);
-		// 	this.previewIndex = index
-		// 	console.log(this.loadedPreviewName)
-		// 	return this.axios({
-		// 		url: httpApi.previewFile,
-		// 		file: true,
-		// 		data
-		// 	}).then(resolve => {
-		// 		console.log(resolve);
-		// 		this.loadedPreviewName.push(file.fileName);
-		// 		this.$set(this.previewFileList, index, resolve.data)
-		// 		this.fileList.push(resolve);
-
-		// 	})
-		// },
 		// 点击查看预览图
 		onClickPreviewFn(file, index, type = 'click') {
 			console.log('查看预览图', arguments);
@@ -322,15 +294,16 @@ export default {
 				console.log(8, 'click')
 				this.previewShow = true;
 				this.previewIndex = index;
+				console.log(5.2,this.fileList)
 				console.log(6.2,this.loadedPreviewName)
 				console.log(7.2,this.previewFileList)
 			}
 
 			if (this.loadedPreviewName.includes(file.file.name)) {
 				console.log('有')
+				console.log(5.1,this.fileList)
 				console.log(6.1, this.loadedPreviewName);
-				console.log(7.1, this.previewFileList)
-				// this.$set(this.previewFileList, index, file.content)
+				console.log(7.1, this.previewFileList);
 				return;
 			} else {
 				// this.previewFileList = [];
@@ -342,7 +315,7 @@ export default {
 			fd.append('fileName', file.fileName);
 
 			
-			return this.axios({
+			this.axios({
 				url: httpApi.previewFile,
 				file: true,
 				data: fd
@@ -372,16 +345,20 @@ export default {
 		// 	})
 		// },
 		onDeleteFileFn(file, index) {
-			console.log(file, index)
+			console.log(file, index);
 			if (this.loadedPreviewName.length) {
 				this.loadedPreviewName = this.loadedPreviewName.filter(item => item.fileName == file.fileName);
 				this.loadedPreviewName.splice(index, 1);
 
 				console.log(1, this.loadedPreviewName)
 				console.log(1, this.previewFileList)
+				console.log(1, this.fileList)
+				this.fileList.splice(index, 1);
+
 			} else {
 				this.fileList.splice(index, 1);
-				console.log(2, this.fileList)
+				console.log(2, this.fileList);
+
 			}
 			this.$emit('deleteFile', file)
 		},
@@ -419,7 +396,9 @@ export default {
 	text-align: left;
 	color: #595959;
 }
-
+.cell-label-style + div{
+	flex:2;
+}
 .cell-label-style {
 	width: 100px;
 	position: relative;
@@ -457,6 +436,7 @@ export default {
 }
 
 .preview-imgs .preview-img-name {
+	width:calc(100% - 50px);
 	display: inline-block;
 	line-height: 24px;
 	vertical-align: bottom;
@@ -468,7 +448,11 @@ export default {
 	margin-right: 5px
 }
 
-.preview-imgs .preview-img-name span {}
+.preview-imgs .preview-img-name span {
+	display: inline-block;
+	max-width:calc(100% - 50px);
+	vertical-align: middle;
+}
 
 .upload-btn button {
 	border: 0;

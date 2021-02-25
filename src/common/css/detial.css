@@ -1,0 +1,129 @@
+.detail {
+	background: #F5F5F5;
+}
+
+.detail-header {
+	height: 110px;
+	background: #229FFF;
+	padding: 15px;
+	box-sizing: border-box;
+}
+
+.detail-header .detail-header-bg {
+	background: #fff;
+	height: 100%;
+	border-radius: 5px;
+}
+
+.detail-thumbnail-box {
+	position: relative;
+}
+
+/*.detail-thumbnail-image {
+	width: 60px;
+	height: 60px;
+}
+
+.detail-thumbnail-image+.detail-header-img */
+.detail-header-img {
+	position: absolute;
+	left: 0;
+	/*opacity: 0;*/
+}
+
+.select-invoice {
+	font-size: 16px;
+	line-height: 80px;
+	color: #595959;
+}
+
+.select-arrow-down {
+	transition: all .3s ease;
+}
+
+.select-arrow-down-focus {
+	transform: rotateX(180deg);
+}
+
+.van-form {
+	height: 100%;
+	position: relative;
+}
+
+.check-status {
+	height: 30px;
+	line-height: 30px;
+	text-align: center;
+	background: #fff;
+	font-size: 13px;
+	border-bottom: 1px solid #ddd;
+	box-sizing: border-box;
+}
+
+.check-status .van-icon {
+	vertical-align: middle;
+	margin-top: -4px;
+}
+
+.check-success {
+	color: #52C41A;
+}
+
+.check-fail {
+	color: #FF3737;
+}
+
+.detail-form {
+	position: absolute;
+	width: 100%;
+	top: 110px;
+	bottom: 0;
+	left: 0;
+	min-height: 50px;
+}
+
+.check-status+.detail-form {
+	top: 140px;
+}
+
+.form-submit {
+	position: absolute;
+	height: 65px;
+	width: 100%;
+	bottom: 0;
+	padding: 10px;
+	box-sizing: border-box;
+}
+
+.form-submit button {
+	font-size: 16px
+}
+
+.detail-header-img {
+	margin: 10px;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.my-swipe {
+	height: 100%;
+}
+
+.share-dialog {
+	border-radius: 6px;
+	padding: 20px 0;
+}
+
+.share-dialog button {
+	width: 70%;
+	border-radius: 5px
+}
+
+.share-dialog button:last-child {
+	margin-top: 20px;
+}
+
+.share-dialog-QRCode {
+	border-radius: 6px;
+	padding: 10px;
+}
