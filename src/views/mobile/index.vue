@@ -1,21 +1,24 @@
 <template>
-	<div class="mobile-index">
+	<div class="mobile-index container-flex">
+		<!-- <div class='insert-box container-part'>
+			<van-button>自定义</van-button>
+		</div> -->
 		<!-- 头部搜索框 和 筛选条件 -->
-		<SearchTool :hide='searchToolShow' @onSearchCallBack='onSearchCallBackFn'></SearchTool>
+		<SearchTool class='container-part' :hide='searchToolShow' @onSearchCallBack='onSearchCallBackFn'></SearchTool>
 		<!-- 内容 -->
-		<div class="content">
+		<div class="content container-part">
 			<!-- 列表或tabs -->
 			<div class='container'>
 				<van-tabs v-model="active" color='#229FFF' title-active-color='#229FFF' class='container-tabs' @change='tabChangeFn'>
 					<van-tab :title="tab.name" v-for='(tab,index) in tabs' :name='tab.active' :key='index'>
 						<van-list class='list' v-model="loading" :finished="finished" :finished-text="finishedText" :error.sync="error" error-text="请求失败，点击重新加载" @load="pullUpFn" :immediate-check='false' :offset='0'>
 							<van-pull-refresh v-model="isLoading" @refresh="pullDownFn">
-								<!-- 多选容器 -->
+								<!-- 多选容器 备份-->
 								<!-- <van-checkbox-group v-model="checkboxGroup" ref='checkboxGroup' @change='checkChangeFn'> -->
 								<van-swipe-cell v-for="(item,i) in $data['listData_'+active]" :key="i" :title="item">
 									<div class='list-item'>
 										<van-row type="flex">
-											<!-- 多选框 -->
+											<!-- 多选框 备份-->
 											<!-- <van-col span='4' class='checkbox-box'>
 													<van-checkbox :name='i' class='checkbox-btn' shape="square"></van-checkbox>
 												</van-col> -->
@@ -56,11 +59,12 @@
 					</van-tab>
 				</van-tabs>
 			</div>
-			<!-- 底部按钮 原版 -->
-			<div class="floor-old">
-				<van-button class='floor-btn' block  color='#229FFF' @click='addInvoiceShow=true'>添加发票</van-button>
-			</div>
-			<!-- <div class="floor">
+		</div>
+		<!-- 底部按钮 原版 -->
+		<div class="floor-old container-part">
+			<van-button class='floor-btn' block color='#229FFF' @click='addInvoiceShow=true'>添加发票</van-button>
+		</div>
+		<!-- <div class="floor">
 				<van-row gutter="10">
 					<van-col span='4'>
 						<van-checkbox class='checkbox-btn' shape="square" v-model="allChecked" @click='allCheckedChangeFn'></van-checkbox>
@@ -73,7 +77,6 @@
 					</van-col>
 				</van-row>
 			</div> -->
-		</div>
 		<!-- 添加发票 -->
 		<van-action-sheet :round='false' v-model="addInvoiceShow" @select="onSelect" cancel-text="取消">
 			<template v-for='item in addInvoiceType'>
@@ -187,7 +190,7 @@ export default {
 		}
 	},
 	created() {
-		
+
 		let mobileCss = require('@/common/css/mobile.css');
 		let listCss = require('@/common/css/list.css');
 	},
@@ -202,7 +205,10 @@ export default {
 		compressFilesFn,
 		appSelectFn(isRefresh = false) {
 			this.loading = true;
+			let activeListDate = 'listData_' + this.active;
+			console.log(isRefresh, activeListDate)
 			if (isRefresh) {
+				this.$set(this.$data, activeListDate, []);
 				this.page = 1;
 			}
 			this.axios({
@@ -218,7 +224,7 @@ export default {
 					rows: this.rows //条数
 				}
 			}).then(resolve => {
-				let activeListDate = 'listData_' + this.active;
+
 				if (resolve.data.length) {
 					if (isRefresh) {
 						console.log('刷新 赋值');
@@ -234,7 +240,7 @@ export default {
 					this.loading = false;
 				} else {
 					console.log('无数据')
-					this.$toast('无更多数据')
+					// this.$toast('无更多数据');
 					this.$set(this.$data, activeListDate, this[activeListDate].concat(resolve.data));
 					// 数据全部加载完成
 					this.loading = false;
@@ -243,7 +249,7 @@ export default {
 				}
 			}).catch(reject => {
 				console.log('reject = ', reject);
-				this.$toast('数据请求失败')
+				this.$toast('数据请求失败');
 				this.error = true;
 				// 数据全部加载完成
 				this.loading = false;
@@ -256,6 +262,7 @@ export default {
 		pullUpFn() {
 			// 异步更新数据
 			this.appSelectFn();
+			console.log('上划加载')
 		},
 		// 下划刷新
 		pullDownFn() {
@@ -279,11 +286,10 @@ export default {
 		},
 		// 选项卡切换
 		tabChangeFn(index) {
-			
+
 			this.finished = false;
-			if (!this['listData_' + this.active].length) {
-				this.appSelectFn(true);
-			}
+			console.log(this['listData_' + this.active])
+			this.appSelectFn(true);
 		},
 		/**
 		 * [goDetailFn 跳转详情页面方法]
@@ -305,7 +311,10 @@ export default {
 		},
 
 		onSearchCallBackFn(obj) {
+			let activeListDate = 'listData_' + this.active;
+			console.log(activeListDate);
 			this.searchObj = obj;
+			this[activeListDate] = [];
 			this.appSelectFn(true);
 		},
 		onSelect(item, index) {
@@ -328,13 +337,17 @@ export default {
 		},
 		// 添加图片后，返回图片压缩结果，类型是file
 		onAfterReadFn(file, item) {
-
-			this.compressFilesFn(file).then(resolve => {
-				this.addInvoiceShow = false;
-				// resolve.file : 单张时是Object，多张时是Array 
-				// resolve.type : true：单张；false：多张
-				this.collectInvoiceFn(resolve,'file');
-			});
+			console.log(file, item);
+			if (file.file.type === 'application/pdf') {
+				this.collectByPdfFn(file)
+			} else {
+				this.compressFilesFn(file).then(resolve => {
+					this.addInvoiceShow = false;
+					// resolve.file : 单张时是Object，多张时是Array 
+					// resolve.type : true：单张；false：多张
+					this.collectInvoiceFn(resolve, 'file');
+				});
+			}
 
 		},
 		/**
@@ -364,8 +377,9 @@ export default {
 				file: paramsType == 'base64' ? false : true,
 				data
 			}).then(resolve => {
+				console.log(99,resolve);
 				if (!resolve.code) {
-					if (resolve.data.length > 1) {
+					if (resolve.data.invoice.length > 1) {
 						// 混扫
 						this.goDetailFn(resolve.data, 0, true);
 					} else {
@@ -377,40 +391,29 @@ export default {
 
 			})
 		},
+		// pdf归集
+		collectByPdfFn({ file }) {
+			let fd = new FormData();
+			fd.append("files", file); // 文件对象
+			fd.append("filetype", file.type); //文件类型
+			fd.append("fileName", file.name); //文件名
 
+			this.axios({
+				url: httpApi.app.collectByPdf,
+				file: true,
+				data: fd
+			}).then(resolve => {
+				console.log(resolve);
+
+			})
+		},
 		onOversize() {
 			this.$toast({
 				message: `文件大小不能超过 ${this.maxSize/1000}M`,
 				duration: 1500,
 			});
 		},
-		// onCameraFn(){
-		// 	console.log(navigator)
-		// 	if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-  //              navigator.mediaDevices.getUserMedia({
-  //                  video: true,
-  //                  audio: true
-  //              }).then(function (stream) {
-  //                  console.log(stream);
-  //                  MediaStreamTrack=typeof stream.stop==='function'?stream:stream.getTracks()[1];
-  //                  video.src=(window.URL).createObjectURL(stream);
-  //                  video.play();
-  //              }).catch(function(err){
-  //                  console.log(err);
-  //              });
-  //          }else if(navigator.getMedia){
-  //              navigator.getMedia({
-  //                  video: true
-  //              }).then(function (stream) {
-  //                  console.log(stream);
-  //                  MediaStreamTrack=stream.getTracks()[1];
-  //                  video.src=(window.webkitURL).createObjectURL(stream);
-  //                  video.play();
-  //              }).catch(function(err){
-  //                  console.log(err);
-  //              });
-  //          }
-		// },
+		// 删除发票接口 
 		deleteInvoiceFn(item, index) {
 			this.axios({
 				url: httpApi.app.deleteInvoice,

@@ -117,6 +117,8 @@ export default {
         getDDRuleState: '/app/common/invoice/getDDRuleState',
         // 删除附件
         deleteInvoiceFiles:'/app/common/invoice/deleteInvoiceFiles',
+        // pdf
+        collectByPdf: "/app/common/invoice/collectByPdf",
         
     },
     previewFile:'/web/common/invoice/previewFile',

@@ -5,9 +5,9 @@ export let formDataConfig = {
         placeholder: '请输入发票代码',
         required: true,
         rules: [
-            { required: true, validator: valueValidator, label: '发票代码', message: '发票代码不能为空', maxLength: 12, }
+            { required: true, validator: valueValidator, label: '发票代码', message: '发票代码不能为空', }
         ],
-        maxLength: 12,
+        // maxLength: 12,
         reg: /\D/g,
         readonly: false,
     },

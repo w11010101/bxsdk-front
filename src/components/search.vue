@@ -2,18 +2,19 @@
 	<div class="search-tools">
 		<div class='search-box'>
 			<div class='search-input'>
-				<van-search v-model="searchVal" placeholder="请输入搜索关键词" clearable />
+				<van-search v-model="searchVal" placeholder="请输入搜索关键词" clearable :show-action='showAction' @input='onInputFn' @clear='onSearchFn'>
+					<template #action>
+						<div @click="onSearchFn">搜索</div>
+					</template>
+				</van-search>
 			</div>
-			<div class='search-btns'>
+			<div class='search-btns' v-show='!showAction'>
 				<van-button class='search-filter-btn' type="default" plain @click='filterShow=true'>
-					<van-icon name="filter-o" size='24' />
+					<van-icon name="filter-o" size='24' :color='isSearchState?"#229FFF":"#595959"' />
 				</van-button>
-				<van-button class='search-filter-btn' type="default" plain @click='filterShow=true'>
+				<van-button class='search-filter-btn' type="default" plain>
 					<van-icon name="share-o" size='24' />
 				</van-button>
-				<!-- <van-button class='search-filter-btn' type="default" plain @click='deleteFn'>
-					<van-icon name="delete-o" size='24' />
-				</van-button> -->
 			</div>
 		</div>
 		<!-- 弹出层 -->
@@ -47,7 +48,7 @@
 			<div class="search-floor-btn">
 				<van-row justify='space-around' type="flex" gutter="10">
 					<van-col span='12'>
-						<van-button type="default" block size='small'>重置</van-button>
+						<van-button type="default" block size='small' @click='onRefreshFn'>重置</van-button>
 					</van-col>
 					<van-col span='12'>
 						<van-button type="info" block size='small' @click='onSureFn'>确定</van-button>
@@ -68,11 +69,12 @@ export default {
 				label: '全部',
 				value: 'all'
 			}],
-
+			showAction: false,
 			activeDate: '',
 			activeDateIndex: 0,
 			activeDateMonth: "1",
 			activeInvoiceType: [],
+			isSearchState: false, // 控制筛选图标颜色，表示是否有筛选条件，在选项卡切换时给予参考
 		}
 	},
 
@@ -81,10 +83,11 @@ export default {
 
 	},
 	mounted() {
-		this.getYears();
+		this.setYears();
 	},
 	methods: {
-		getYears() {
+		// 根据当前日期设置年数组
+		setYears() {
 			let year = parseInt(new Date().getFullYear());
 			for (var i = 0; i < 3; i++) {
 				this.years.unshift({
@@ -96,29 +99,45 @@ export default {
 			this.activeDate = this.years[this.activeDateIndex].value;
 			return this.years;
 		},
+		// 弹窗容器
 		getContainer() {
 			return document.querySelector('.search-getContainer');
 		},
 		onCancel() {
 			this.filterShow = false;
 		},
+		// 下拉筛选条件确定按钮
 		onSureFn() {
-			this.$emit('onSearchCallBack', {
+			let searchContainer = {
 				searchVal: this.searchVal,
 				searchStartDate: this.transformDate('start', this.activeDateMonth),
 				searchEndDate: this.transformDate('end', parseInt(this.activeDateMonth) + 1),
 				searchInvoiceType: this.activeInvoiceType.join(',')
-			});
+			}
+			console.log(searchContainer)
+			this.$emit('onSearchCallBack', searchContainer);
 			this.filterShow = false;
+
+			if (searchContainer.searchInvoiceType || searchContainer.searchStartDate) {
+				this.isSearchState = true;
+			} else {
+				this.isSearchState = false;
+			}
+
+
+
 		},
+		// 切换开票日期 年
 		onChangeYearFn(item, index) {
 			this.activeDate = item.value;
 			this.activeDateIndex = index;
 			this.activeDateMonth = 1;
 		},
+		// 切换开票日期 月
 		onChangeMonthFn(item) {
 			this.activeDateMonth = item;
 		},
+		// 切换发票类型
 		onChangeTypeFn(item, index) {
 			if (!this.activeInvoiceType.includes(item.invoiceTypeCode)) {
 				this.activeInvoiceType.push(item.invoiceTypeCode);
@@ -126,6 +145,7 @@ export default {
 				this.activeInvoiceType = this.activeInvoiceType.filter(code => item.invoiceTypeCode != code)
 			}
 		},
+		// 时间转换
 		transformDate(type, month) {
 			if (this.activeDate !== 'all') {
 				if (type == 'start') {
@@ -138,9 +158,21 @@ export default {
 			}
 
 		},
-
-		deleteFn() {
-
+		// 搜索框内如果有值时显示搜索按钮
+		onInputFn(value) {
+			this.showAction = !value ? false : true;
+		},
+		// 搜索按钮
+		onSearchFn() {
+			console.log('搜索按钮')
+			this.onSureFn()
+		},
+		// 重置按钮
+		onRefreshFn() {
+			console.log('重置')
+			this.activeDate = 'all';
+			this.activeDateIndex = this.years.length - 1;
+			this.activeInvoiceType = [];
 		}
 	}
 }

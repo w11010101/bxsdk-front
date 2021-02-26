@@ -171,9 +171,9 @@ export default {
 			return;
 		}
 		if (index != void 0) { // 如果index 不等于 undefined,表明是从详情进来的，就可以左右切换
-			console.log('混扫 或 详情', item);
+			console.log('混扫 或 详情', item.invoice);
 			this.swipteListUuids = [];
-			if (isToString(item) == 'Array') {
+			// if (isToString(item) == 'Array') {
 
 				if (!require) { // 非归集
 					this.appFindFn(item[index].uuid);
@@ -181,21 +181,20 @@ export default {
 						this.swipteListUuids.push(item);
 					})
 				} else {
-					item.forEach(item => {
-						this.swipteListUuids.push(item.uuid);
+					item.invoice.forEach(invoice => {
+						this.swipteListUuids.push(invoice.uuid);
 					});
 					// 归集发票的混扫情况，默认去第一条信息
-					this.setDataFn(item[0]);
+					this.setDataFn(item.invoice[0]);
 				}
 
-			} else {
-				this.detailListUuid.forEach(item => {
-					this.swipteListUuids.push(item);
-				});
-				this.activeUuid = item.uuid;
-				this.appFindFn(item.uuid);
-
-			}
+			// } else {
+			// 	this.detailListUuid.forEach(item => {
+			// 		this.swipteListUuids.push(item);
+			// 	});
+			// 	this.activeUuid = item.uuid;
+			// 	this.appFindFn(item.uuid);
+			// }
 			this.onZeptoEventFn(require);
 
 		} else {
@@ -458,6 +457,7 @@ export default {
 		},
 		// 发票查验
 		invoiceComplianceCheckFn() {
+			this.localData.invoiceDate = this.localData.invoiceDate.replace(/\-/g,'')
 			this.axios({
 				url: httpApi.app.invoiceComplianceCheck,
 				data: this.localData

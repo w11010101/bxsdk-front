@@ -107,12 +107,12 @@ export var _axios = function(option) {
         }).catch(err => {
             console.log('err = ', err);
             reject(err);
-            if (axios.isCancel(err)) {
-                console.log('Rquest canceled', err.message); //请求如果被取消，这里是返回取消的message
-            } else {
-                //handle error
-                console.log(err);
-            }
+            // if (axios.isCancel(err)) {
+            //     console.log('Rquest canceled', err.message); //请求如果被取消，这里是返回取消的message
+            // } else {
+            //     //handle error
+            //     console.log(err);
+            // }
             if(_default.loading) toast.clear();
             if (option.isTips !== false) {
                 setTimeout(() => {

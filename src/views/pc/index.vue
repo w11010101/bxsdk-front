@@ -54,7 +54,8 @@ export default {
 		}
 	},
 	created() {
-		console.log(require)
+		console.log(96,require)
+		console.dir(require)
 		let iviewCss = require('iview/dist/styles/iview.css');
 		this.$router.push({
 			name: 'invoice'
@@ -63,6 +64,7 @@ export default {
 	components: {}
 }
 </script>
+
 <style scoped="scoped">
 
 .ivu-menu-item {

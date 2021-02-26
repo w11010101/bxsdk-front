@@ -1,3 +1,10 @@
+.van-list {
+	height:100%;
+	overflow-x: hidden;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
 .list-item {
 	position: relative;
 	font-size: 12px;
@@ -5,6 +12,7 @@
 	padding: 10px 20px;
 	background: #fff;
 	height: 65px;
+	box-sizing: content-box;
 }
 
 .list-item>.van-row {
@@ -77,3 +85,46 @@
 	width: calc(100% - 80px);
 	vertical-align: middle;
 }
+/**/
+.insert-box{
+	padding:5px;
+	height:54px;
+	box-sizing: border-box;
+}
+.container-flex{
+	display: flex;
+	flex-flow: column;
+
+}
+.container-part{
+	flex:1;
+}
+.content.container-part{
+	flex:auto;
+}
+.floor-old.container-part{
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
