@@ -22,8 +22,8 @@
 											<!-- <van-col span='4' class='checkbox-box'>
 													<van-checkbox :name='i' class='checkbox-btn' shape="square"></van-checkbox>
 												</van-col> -->
-											<van-col span='24' @click='goDetailFn(item,i)'>
-												<h2><label class='van-ellipsis'>{{getInvoiceTypeTextFn(item.invoiceTypeCode)}}</label><span>￥{{item.totalAmount}}</span></h2>
+											<van-col span='24' @click='goDetailFn(item,false,false,i)'>
+												<h2><label class='van-ellipsis'>{{transformInvoiceTypeTextFn(item.invoiceTypeCode)}}</label><span>￥{{item.totalAmount}}</span></h2>
 												<template v-if='VATsAllClass.includes(item.invoiceTypeCode)'>
 													<div class='list-detial'>
 														<div>
@@ -102,7 +102,7 @@
 <script>
 // @ is an alias to /src
 import SearchTool from '@/components/search'
-import { getInvoiceTypeTextFn, getCheckStateFn, formatDate, invoiceCodeClass, compressFilesFn, isToString } from '@/common/js/common';
+import { getCheckStateFn, formatDate, invoiceCodeClass, compressFilesFn, isToString } from '@/common/js/common';
 import { mapState, mapMutations } from 'vuex';
 import httpApi from '@/common/js/httpApi.js';
 
@@ -112,7 +112,7 @@ export default {
 		SearchTool
 	},
 	computed: {
-
+		...mapState(['invoiceType']),
 	},
 	data() {
 		return {
@@ -198,11 +198,14 @@ export default {
 		this.appSelectFn();
 	},
 	methods: {
-		...mapMutations(['getDetailListUuidFn']),
-		getInvoiceTypeTextFn,
+		...mapMutations(['getDetailListUuidFn', 'saveInvoiceTypeFn']),
 		getCheckStateFn,
 		formatDate,
 		compressFilesFn,
+		// 发票类型转换
+		transformInvoiceTypeTextFn(code) {
+			return this.invoiceType.filter(item => item.invoiceTypeCode == code)[0].invoiceTypeName;
+		},
 		appSelectFn(isRefresh = false) {
 			this.loading = true;
 			let activeListDate = 'listData_' + this.active;
@@ -291,25 +294,27 @@ export default {
 			console.log(this['listData_' + this.active])
 			this.appSelectFn(true);
 		},
+		
 		/**
 		 * [goDetailFn 跳转详情页面方法]
 		 * @param  {[type]}  item    [发票信息]
-		 * @param  {[type]}  index   [发票下标]
-		 * @param  {Boolean} require [是请求信息（true），还是详情信息（false）]
+		 * @param  {[type]}  require [是归集信息（true），还是详情信息（false）]
+		 * @param  {[type]}  multiple[单张（false）,混扫（true）]
+		 * @param  {Boolean} index   [发票下标]
 		 * @return {[type]}          []
 		 */
-		goDetailFn(item, index, require = false) {
+		goDetailFn(item, require = false, multiple = false, index) {
 			this.$router.push({
 				name: 'detail',
 				params: {
 					type: 'detail',
-					index: isToString(arguments[1]) == 'Number' ? index : void 0,
 					item,
-					require: isToString(arguments[1]) == 'Number' ? arguments[2] === void 0 ? false : arguments[2] : arguments[1],
+					multiple,
+					require,
+					index
 				}
 			})
 		},
-
 		onSearchCallBackFn(obj) {
 			let activeListDate = 'listData_' + this.active;
 			console.log(activeListDate);
@@ -377,14 +382,14 @@ export default {
 				file: paramsType == 'base64' ? false : true,
 				data
 			}).then(resolve => {
-				console.log(99,resolve);
+				console.log(99, resolve);
 				if (!resolve.code) {
 					if (resolve.data.invoice.length > 1) {
 						// 混扫
-						this.goDetailFn(resolve.data, 0, true);
+						this.goDetailFn(resolve.data, true, true, 0)
 					} else {
 						// 单张
-						this.goDetailFn(resolve.data.invoice[0], true);
+						this.goDetailFn(resolve.data.invoice[0], true, false)
 					}
 
 				}
@@ -429,7 +434,7 @@ export default {
 				console.log(98, reject);
 			});
 
-		}
+		},
 
 	},
 

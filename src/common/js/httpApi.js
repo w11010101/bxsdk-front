@@ -81,7 +81,7 @@ export default {
         //发票内容更新
         updateInvoice: '/app/common/invoice/update',
         //获取发票类型列表
-        getInvoiceType: '/app/common/invoice/invoiceTypeList',
+        invoiceTypeList: '/app/common/invoice/invoiceTypeList',
         //获取发票图片
         getImg: '/app/common/invoice/getImg',
         //图片方式归集发票

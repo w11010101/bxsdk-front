@@ -189,42 +189,8 @@ export function base64ToFileFn(base, filename) {
     return _file;
 }
 
-// 发票类型转换
-export function getInvoiceTypeTextFn(invoiceType) {
-    if (invoiceType == "01") return "增值税专用发票";
-    if (invoiceType == "02") return "货运运输业增值税专用发票";
-    if (invoiceType == "03") return "机动车销售统一发票";
-    if (invoiceType == "14") return "增值税电子普通发票(通行费)";
-    if (invoiceType == "04") return "增值税普通发票";
-    if (invoiceType == "10") return "增值税普通发票(电子)";
-    if (invoiceType == "11") return "增值税普通发票(卷式)";
-    if (invoiceType == "87") return "其他运输客票(实名)";
-    if (invoiceType == "88") return "水路运输客票(实名)";
-    if (invoiceType == "89") return "公路运输客票(实名)";
-    if (invoiceType == "90") return "航空客运电子客票行程单";
-    if (invoiceType == "92") return "火车票";
-    if (invoiceType == "91") return "出租车票";
-    if (invoiceType == "94") return "汽车票";
-    if (invoiceType == "95") return "定额发票";
-    if (invoiceType == "96") return "长途汽车票";
-    if (invoiceType == "97") return "通用机打发票";
-    if (invoiceType == "98") return "政府非税收收入一般缴款书";
-    if (invoiceType == "00") return "其他";
-}
-// 发票分类
+// 发票分类 (按字段分类)
 export let invoiceCodeClass = {
-
-    majioAddTaxValue: ['01', '03'], // 专用增值税类型、机动车销售统一发票
-
-    trainAndAirRoadWater: ['90', '93', '92', '87', '88', '89'], // 火车票、飞机行程单、公路、水路、其他客票
-
-    normalAddTaxValue: ['04', '10', '11', '14'], // 普通增值税类型
-
-    taxiAndQuota: ['51', '91', '94', '95', '97', '98'], // 出租车、定额发票等其他发票
-
-    transportAddTaxValue: ["02"], // 货物运输业增值税普通发票
-
-    otherValue: ['00'], // 其他
 
     VATsAllClass: ['01', '02', '03', '04', '10', '11', '14'], // 所有增值税
 
@@ -238,6 +204,12 @@ export let invoiceCodeClass = {
     trainAndRealNameClass: ['92', '87', '88', '89'],
     // 定额发票、通用、政府非税收
     QCGClass: ['95', '97', '98'],
+    // 汽车票
+    carClass:['94','101'],
+    // 出租车
+    taxiClass:['91'],
+    // 航空票
+    aviationClass:['90'],
     // 其他
     otherClass: ['00'],
 }
@@ -288,8 +260,8 @@ export function isToString(obj) {
 export function getCheckStateFn(value) {
     switch (value) {
         case "0":
-            return '—';
-            // return '未查验'; 
+            // return '—';
+            return '查验失败'; 
             break;
         case "1":
             return '查验成功';
@@ -297,8 +269,6 @@ export function getCheckStateFn(value) {
         case "2":
             return '查验失败';
             break;
-        default:
-            return '查验成功'
     }
 }
 // 报销状态

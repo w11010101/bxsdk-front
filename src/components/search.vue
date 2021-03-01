@@ -38,8 +38,8 @@
 			<div class="search-invoiceType">
 				<h2>发票类型</h2>
 				<div class='search-invoiceType-list'>
-					<van-row justify='space-around' type="flex" gutter="10">
-						<van-col v-for='(item,index) in invoiceType' span='12'>
+					<van-row justify="space-between" type="flex" gutter="10">
+						<van-col v-for='(item,index) in invoiceType' span='12' :index='index%2 == 1?"odd":"even"'>
 							<van-button :type="activeInvoiceType.includes(item.invoiceTypeCode)?'info':'default'" block size='small' @click='onChangeTypeFn(item,index)'>{{item.invoiceTypeName}}</van-button>
 						</van-col>
 					</van-row>
@@ -244,5 +244,9 @@ export default {
 
 .search-month .item-month {
 	margin: 5px 0;
+}
+
+.search-invoiceType /deep/ .van-col--12:last-child[index="even"] {
+	padding-right: 5px;
 }
 </style>
