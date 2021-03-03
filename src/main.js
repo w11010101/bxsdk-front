@@ -30,30 +30,20 @@ let VM = new Vue({
 }).$mount('#app');
 
 // 防抖
-function debounce(delay) {
+function debounce(fn, delay) {
 	let timer = null;
 	return function() {
 		if (timer) clearTimeout(timer);
-		timer = setTimeout(function() {
-			console.log(5,VM.$route.meta.parent)
-			if(IsPC()){
-				if(VM.$route.meta.parent !== 'pc'){
-					VM.$router.replace('pcIndex');
-				}
-			}else{
-				if(VM.$route.meta.parent !== 'app'){
-					VM.$router.replace('mobileIndex');
-				}
-			}
-		}, delay);
+		timer = setTimeout(fn, delay);
 	}
 }
 
 // 节流
 function throttle(delay) {
-	let timer = null,state = true;
+	let timer = null,
+		state = true;
 	return function() {
-		if(!state) return;
+		if (!state) return;
 		state = false;
 		timer = setTimeout(function() {
 			console.log(delay, VM.$route)
@@ -61,5 +51,16 @@ function throttle(delay) {
 		}, delay)
 	}
 }
-window.onresize = debounce(500);
+window.onresize = debounce(function() {
+	console.log(5, VM.$route.meta.parent)
+	if (IsPC()) {
+		if (VM.$route.meta.parent !== 'pc') {
+			VM.$router.replace('pcIndex');
+		}
+	} else {
+		if (VM.$route.meta.parent !== 'app') {
+			VM.$router.replace('mobileIndex');
+		}
+	}
+}, 500);
 // window.onresize = throttle(1000)

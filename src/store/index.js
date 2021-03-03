@@ -31,7 +31,9 @@ export default new Vuex.Store({
 		// 供详情页面左右滑动的列表
 		detailListUuid:[],
 		// 根据发票类型重置必填项后的
-		resetFormDataConfig:{}
+		resetFormDataConfig:{},
+		// 左右滑动状态提示，默认只显示一次
+		tipsShowState:true
 	},
 	mutations: {
 		saveInvoiceTypeFn(state,data){
@@ -51,6 +53,10 @@ export default new Vuex.Store({
 		// 
 		setResetFormDataConfig(state,object){
 			state.resetFormDataConfig = object;
+		},
+		// 修改提示左右滑动切换状态
+		setTipsShowStateFn(state,isShow){
+			state.tipsShowState = isShow;
 		}
 	},
 	actions: {},

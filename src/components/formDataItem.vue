@@ -30,7 +30,7 @@
 				</template>
 				<!-- 其他 -->
 				<template v-else>
-					<van-field v-model="localItemData[item.key]" :name='item.key' label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' :readonly='formDataConfig[item.key].readonly' :maxLength='formDataConfig[item.key].maxLength' :type='formDataConfig[item.key].type||"text"' :key='index' @input='onInputFn(item.key)' @blur='onBlurFn(item.key)' />
+					<van-field v-model="localItemData[item.key]" :name='item.key' label-width='100' :label="item.label||formDataConfig[item.key].label" :placeholder="formDataConfig[item.key].placeholder" :rules="formDataConfig[item.key].rules" clearable :required='formDataConfig[item.key].required' input-align='right' :readonly='formDataConfig[item.key].readonly' :maxLength='formDataConfig[item.key].maxLength' :type='formDataConfig[item.key].type||"text"' :key='index' @focus='onFocusFn(item.key)' @input='onInputFn(item.key)' @blur='onBlurFn(item.key)' />
 				</template>
 			</template>
 		</template>
@@ -99,6 +99,7 @@ import { mapState, mapMutations } from 'vuex';
 import { isToString, compressFn, base64ToFileFn, formatDate, getCheckStateFn, getReimburseStateFn, inputDebounce, compressFilesFn } from '@/common/js/common';
 import { formDataConfig } from '@/common/js/formDataConfig';
 import httpApi from '@/common/js/httpApi.js'
+let _VM;
 export default {
 	name: 'formDataItem',
 	mixins: [],
@@ -118,7 +119,7 @@ export default {
 		},
 		uuid: {
 			type: String,
-			default: 0,
+			default: '0',
 		},
 	},
 
@@ -144,7 +145,8 @@ export default {
 			activeCollapse: [1],
 			previewShow: false,
 			loadedPreviewName: [],
-			previewIndex: 0
+			previewIndex: 0,
+			activeFormKey: ''
 		}
 	},
 	computed: {
@@ -162,7 +164,9 @@ export default {
 	},
 	mounted() {
 		console.log('调用', this.showOptions);
-
+		console.log('调用', this.isReadOnly);
+		
+		_VM = this;
 		this.resetLocalDataFn();
 		this.initFormDataItem();
 	},
@@ -175,6 +179,7 @@ export default {
 		// 初始化表单参数
 		initFormDataItem() {
 			let keys = Object.keys(this.formDataConfig);
+
 			keys.forEach(k => {
 				this.showOptions.forEach(item => {
 					if (item.key == k) {
@@ -217,18 +222,33 @@ export default {
 		onCancelFn() {
 			this.calendarShow = false;
 		},
-		// 表单正则输入验证 ,表单数据（data）、表单配置（ formDataConfig ）
-		onInputFn(key) {
-			if (this.formDataConfig[key].reg) {
-				if (this.localItemData[key]) {
-					this.localItemData[key] = this.localItemData[key].replace(this.formDataConfig[key].reg, '$1');
+		onFocusFn(key) {
+			this.activeFormKey = key;
+		},
+		// 表单正则输入验证 ,表单数据（data）、表单配置（ formDataConfig ） 调用输入防抖方法，当中的this无法使用，只能创建_VM
+		onInputFn: inputDebounce(() => {
+			let key = _VM.activeFormKey;
+			if (_VM.formDataConfig[key].reg) {
+				if (_VM.localItemData[key]) {
+					_VM.localItemData[key] = _VM.localItemData[key].replace(_VM.formDataConfig[key].reg, '$1');
 				}
 			}
-			inputDebounce(() => {
-				this.$emit('onInputFn', key, this.localItemData[key])
-			}, this.localItemData[key], 1000);
-
-		},
+			console.log(_VM.localItemData[key])
+			_VM.$emit('onInputFn', key, _VM.localItemData[key]);
+		}, 1000),
+		// // 表单正则输入验证 ,表单数据（data）、表单配置（ formDataConfig ）
+		// onInputFn(key) {
+		// 	if (this.formDataConfig[key].reg) {
+		// 		if (this.localItemData[key]) {
+		// 			this.localItemData[key] = this.localItemData[key].replace(this.formDataConfig[key].reg, '$1');
+		// 		}
+		// 	}
+		// 	// 输入防抖
+		// 	inputDebounce(() => {
+		// 		console.log(this.localItemData[key])
+		// 		this.$emit('onInputFn', key, this.localItemData[key])
+		// 	}, 1000)();
+		// },
 		onBlurFn(key) {
 			this.$emit('onBlurFn', key, this.formDataConfig[key])
 		},
@@ -254,18 +274,17 @@ export default {
 				// resolve.file : 单张时是Object，多张时是Array 
 				// resolve.type : true：单张；false：多张
 				// this.appCollectByPicFn(resolve);
-				
+
 			});
 
 		},
 		// 提前 获取附件预览图片
 		previewFilesFn(files) {
-			console.log(4, files)
 			// 图片图片先用假图片做展示，当点击查看时，再用接口获取查看原图
 			this.fileList = [];
 			this.loadedPreviewName = []
 			this.previewFileList = []
-			if(!files) return ;
+			if (!files) return;
 			files.forEach(file => {
 				// this.pushPreviewFileFn(file, true, index)
 				let img = document.createElement("img");
@@ -294,14 +313,14 @@ export default {
 				console.log(8, 'click')
 				this.previewShow = true;
 				this.previewIndex = index;
-				console.log(5.2,this.fileList)
-				console.log(6.2,this.loadedPreviewName)
-				console.log(7.2,this.previewFileList)
+				console.log(5.2, this.fileList)
+				console.log(6.2, this.loadedPreviewName)
+				console.log(7.2, this.previewFileList)
 			}
 
 			if (this.loadedPreviewName.includes(file.file.name)) {
 				console.log('有')
-				console.log(5.1,this.fileList)
+				console.log(5.1, this.fileList)
 				console.log(6.1, this.loadedPreviewName);
 				console.log(7.1, this.previewFileList);
 				return;
@@ -314,17 +333,17 @@ export default {
 			fd.append('filePath', file.filePath);
 			fd.append('fileName', file.fileName);
 
-			
+
 			this.axios({
 				url: httpApi.previewFile,
 				file: true,
 				data: fd
 			}).then(resolve => {
 				console.log(resolve);
-				if(!this.loadedPreviewName.includes(file.fileName)){
+				if (!this.loadedPreviewName.includes(file.fileName)) {
 					this.loadedPreviewName.push(file.fileName);
 				}
-				
+
 				this.$set(this.previewFileList, index, resolve.data)
 			})
 		},
@@ -396,9 +415,11 @@ export default {
 	text-align: left;
 	color: #595959;
 }
-.cell-label-style + div{
-	flex:2;
+
+.cell-label-style+div {
+	flex: 2;
 }
+
 .cell-label-style {
 	width: 100px;
 	position: relative;
@@ -436,7 +457,7 @@ export default {
 }
 
 .preview-imgs .preview-img-name {
-	width:calc(100% - 50px);
+	width: calc(100% - 50px);
 	display: inline-block;
 	line-height: 24px;
 	vertical-align: bottom;
@@ -450,7 +471,7 @@ export default {
 
 .preview-imgs .preview-img-name span {
 	display: inline-block;
-	max-width:calc(100% - 50px);
+	max-width: calc(100% - 50px);
 	vertical-align: middle;
 }
 

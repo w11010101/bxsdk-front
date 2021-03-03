@@ -90,7 +90,7 @@ export function compressFn(img, Orientation = null) {
     ctx.fillRect(img, 0, 0, canvas.width, canvas.height);
 
     ctx.drawImage(img, 0, 0, width, height);
-    console.log(98,'Orientation = ',Orientation)
+    console.log(98, 'Orientation = ', Orientation)
     //修复ios上传图片的时候 被旋转的问题
     if (Orientation != "" && Orientation != 1) {
         switch (Orientation) {
@@ -205,11 +205,11 @@ export let invoiceCodeClass = {
     // 定额发票、通用、政府非税收
     QCGClass: ['95', '97', '98'],
     // 汽车票
-    carClass:['94','101'],
+    carClass: ['94', '101'],
     // 出租车
-    taxiClass:['91'],
+    taxiClass: ['91'],
     // 航空票
-    aviationClass:['90'],
+    aviationClass: ['90'],
     // 其他
     otherClass: ['00'],
 }
@@ -251,7 +251,8 @@ export function isToString(obj) {
         case "[object Function]":
             return 'Function';
             break;
-        default: return undefined;
+        default:
+            return undefined;
 
     }
 
@@ -261,7 +262,7 @@ export function getCheckStateFn(value) {
     switch (value) {
         case "0":
             // return '—';
-            return '查验失败'; 
+            return '查验失败';
             break;
         case "1":
             return '查验成功';
@@ -310,10 +311,10 @@ export function randomFn() {
 }
 
 // 输入防抖
-export function inputDebounce(fn, value, delay) {
+export function inputDebounce(fn, delay) {
     let timer = null;
-    return (function() {
+    return function() {
         if (timer) clearTimeout(timer);
-        timer = setTimeout(fn, !value ? 0 : delay);
-    })()
+        timer = setTimeout(fn, delay);
+    }
 }

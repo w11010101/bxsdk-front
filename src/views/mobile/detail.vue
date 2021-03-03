@@ -25,30 +25,42 @@
 		<div class='check-status' :class='localData.checkState=="1"?"check-success":"check-fail"' v-if='VATsAllClass.includes(localData.invoiceTypeCode)'>
 			<van-icon name="checked" v-if='localData.checkState=="1"' />
 			<van-icon name="clear" v-else />
-			查验结果(<span>{{getCheckStateFn(localData.checkState)}}</span>)
+			查验结果(<span>{{getCheckStateFn(localData.checkState)}}{{validateState}}{{localDataList.length}}</span>)
 		</div>
 		<!-- 表单 -->
 		<div class='detail-form'>
+			<!--  -->
 			<van-form @failed='onFailedFn' ref='formData' :show-error-message='false' :show-error='false'>
 				<FormDataItem ref='formDataItem' v-if='showOptions.length' :showOptions='showOptions' :uuid='localData.uuid' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn' @onDateConfirmFn='onDateConfirmFn' @afterFileFn='onAfterFileFn' @deleteFile='onSaveDelFileFn'></FormDataItem>
-				<!--  -->
 				<div class='form-submit'>
 					<van-row gutter='10'>
 						<van-col span='6'>
 							<van-button block color='#229FFF' @click='onShareFn'>分享</van-button>
 						</van-col>
-						<van-col span='18'>
-							<template v-if='localData.checkState ==="1"'>
+						<van-col :span='localDataList.length?12:18'>
+							<!-- <template v-if='!localDataList.length && !requireState && validateState'>
 								<van-button block color='#229FFF' @click='goBackFn'>返回</van-button>
 							</template>
-							<template v-else>
+							<template v-else> -->
 								<van-button block color='#229FFF' @click='onSubmitFn' v-if='validateState'>保存</van-button>
 								<van-button block color='#ccc' @click='onSubmitFn' v-else>保存</van-button>
-							</template>
+							<!-- </template> -->
+						</van-col>
+						<van-col span='6' v-if='localDataList.length'>
+							<van-button block type='danger' @click='onDeleteFn'>删除</van-button>
 						</van-col>
 					</van-row>
 				</div>
 			</van-form>
+		</div>
+		<!-- 多张发票的表单（隐藏状态） -->
+		<div class='detail-multiple-form' v-if='requireState'>
+			<!-- {{localDataListShowOptions}} -->
+			<div v-for='(item,index) in localDataList'>
+				<van-form @failed='onFailedFn' :ref='"multipleFormData"+item.uuid' :show-error-message='false' :show-error='false'>
+					<FormDataItem ref='formDataItem' :showOptions='localDataListShowOptions[index].showOption' :uuid='item.uuid' :data='item' :isReadOnly='isReadOnly'></FormDataItem>
+				</van-form>
+			</div>
 		</div>
 		<!-- 发票选择 -->
 		<van-popup v-model="selectInvoiceShow" position="bottom" get-container="body">
@@ -69,6 +81,10 @@
 		</van-dialog>
 		<!-- 分享面板（新） -->
 		<van-share-sheet v-model="showShare" title="立即分享给好友" :options="shareOptions" @select="onShareSelectFn" />
+		<!-- 详情提示 -->
+		<div class='multiple-tips' v-if='tipsShowState' @click='changeTipsShowFn'>
+			<img src="../../assets/tips.png" alt="">
+		</div>
 	</div>
 </template>
 <script>
@@ -93,7 +109,10 @@ export default {
 			localData: {
 
 			},
-			loadDataList:[],
+			localDataList: [], // 归集多张时的数据集合
+			localDataListValidateState: [], // 归集多张时，记录各个发票的校验状态
+			localDataListShowOptions: [], // 归集多张时，记录各个发票类型的配置
+
 			// 当前选择的发票类型
 			activeInvoiceType: "01",
 			localInvoiceType: [],
@@ -120,7 +139,7 @@ export default {
 			swipteListUuids: [], // 从vuex（首页列表数据）或混扫归集的列表中提取
 			currentInvoiceClass: '', // 当前发票分类
 			random: '',
-			showOptions: [],
+			showOptions: [], // 发票类型的配置
 			shareDialogShow: false,
 			showShare: false,
 			shareOptions: [
@@ -139,19 +158,46 @@ export default {
 			],
 			QRCodeShow: false,
 			qrcode: null,
-			deleteFileList: []
+			deleteFileList: [],
+			multipleTips: false, // 混扫的提示
+			requireState: false, // 是否是归集状态
+
 		}
 	},
 	computed: {
-		...mapState(['invoiceType', 'detailListUuid', 'resetFormDataConfig']),
+		...mapState(['invoiceType', 'detailListUuid', 'resetFormDataConfig', 'tipsShowState']),
 	},
 	watch: {
 		selectInvoiceShow(newVal, oldVal) {
 			this.selectState = newVal;
+		},
+		initialSwipe(newVal,oldVal){
+			document.title = ++newVal+'/'+this.localDataList.length;
 		}
 	},
 	created() {
 
+	},
+	beforeRouteLeave(to, from, next) {
+		console.log(6, this.requireState);
+		if (this.requireState) {
+			this.$dialog.confirm({
+				width: 300,
+				message: '发票未保存，确定返回吗？',
+				showCancelButton: true,
+				closeOnPopstate: false,
+				className: 'back-tips'
+			}).then(() => {
+				// on confirm
+				next();
+			}).catch(() => {
+				// on cancel
+				next(false);
+			});
+
+		} else {
+			next();
+		}
 	},
 	mounted() {
 		this.formatInvoiceOptionFn();
@@ -159,7 +205,6 @@ export default {
 			this.appFindFn(this.$route.query.uuid);
 			return;
 		}
-		
 		// item：发票信息；
 		// index：发票对应下标；
 		// require：是否是归集的（true/false）；
@@ -170,24 +215,54 @@ export default {
 			return;
 		}
 
-		if(require){
+		if (require) {
+			this.requireState = require;
 			// 归集
-			if(multiple){
+			if (multiple) {
+				this.setTipsShowStateFn(true);
 				// 多张
+				this.multipleTips = true;
 				item.invoice.forEach(invoice => {
 					this.swipteListUuids.push(invoice.uuid);
 				});
 				// 归集发票的混扫情况，默认去第一条信息
 				this.setDataFn(item.invoice[0]);
 				this.onZeptoEventFn(require);
-				this.loadDataList = item.invoice;
-			}else{
+				// this.localDataList = item.invoice;
+				// 归集多张时的状态存储，用于点击保存时的标点校验判断
+				item.invoice.forEach(even => {
+					console.log(2, even);
+					this.localDataList.push(even);
+					this.localDataListShowOptions.push({
+						uuid: even.uuid,
+						showOption: this.setShowOptionsFn(even.invoiceTypeCode)
+					});
+					console.log(3, "multipleFormData" + even.uuid)
+					console.log(this.$refs["multipleFormData" + even.uuid])
+					this.formDataInitValidateFn("multipleFormData" + even.uuid, (state) => {
+						this.localDataListValidateState.push({
+							uuid: even.uuid,
+							validateState: state
+						})
+					})
+
+
+				});
+				document.title = '1/'+this.localDataList.length;
+				console.log(4, this.$refs)
+				this.$nextTick().then(() => {
+					console.log(4, this.localDataListShowOptions)
+					console.log(4, this.localDataListValidateState)
+				});
+
+			} else {
 				// 单张
-				
+
 				this.setDataFn(item);
 			}
-		}else{
+		} else {
 			// 非归集
+			this.multipleTips = true;
 			this.appFindFn(item.uuid);
 			this.detailListUuid.forEach(item => {
 				this.swipteListUuids.push(item);
@@ -195,13 +270,12 @@ export default {
 			this.onZeptoEventFn(require);
 		}
 
-
 		if (this.VATsAllClass.includes(item.invoiceTypeCode) && item.checkState === "1") {
 			this.isReadOnly = true;
 		}
 	},
 	methods: {
-
+		...mapMutations(['setTipsShowStateFn']),
 		// 获取查验结果
 		getCheckStateFn,
 		// 过滤当前发票属于哪种类
@@ -218,7 +292,9 @@ export default {
 				this.$set(this.localData, key, item[key]);
 			});
 			this.activeInvoiceType = item.invoiceTypeCode;
-			this.setShowOptionsFn(this.localData.invoiceTypeCode);
+
+			this.showOptions = this.setShowOptionsFn(this.localData.invoiceTypeCode);
+
 			this.$nextTick().then(() => {
 				this.formDataInitValidateFn();
 				if (this.localData.uuid) {
@@ -229,27 +305,39 @@ export default {
 
 		},
 		// 表单初始化验证
-		formDataInitValidateFn(key = '') {
-			console.log('表单初始化验证', this.$refs.formData);
-
-			this.$refs.formData.validate().then(state => {
-				this.validateState = true;
-			}).catch(error => {
-				if (isToString(error) == 'Array') {
-					if (error.length) {
+		formDataInitValidateFn(refName = 'formData', callback) {
+			let cb = callback || function() {};
+			this.$nextTick().then(() => {
+				console.log('表单初始化验证', refName, this.$refs[refName]);
+				let ref = isToString(this.$refs[refName]) === 'Array' ? this.$refs[refName][0] : this.$refs[refName];
+				console.log(5, refName,ref)
+				ref.validate().then(state => {
+					console.log(1);
+					this.validateState = true;
+					cb(true);
+				}).catch(error => {
+					console.log(2);
+					if (isToString(error) == 'Array') {
+						if (error.length) {
+							this.validateState = false;
+							cb(false);
+						}
+					} else {
 						this.validateState = false;
+						cb(false);
 					}
-				} else {
-					this.validateState = false;
-				}
-			});
+				});
+			})
+
 
 		},
 		// 格式化发票类型(下拉选择)
 		formatInvoiceOptionFn() {
 			this.invoiceType.forEach(item => {
+				console.log(item)
 				this.localInvoiceType.push({
-					text: item.invoiceTypeName
+					text: item.invoiceTypeName,
+					code: item.invoiceTypeCode
 				});
 			})
 		},
@@ -260,9 +348,11 @@ export default {
 		},
 		// 修改发票类型的弹窗确定方法
 		onConfirm(item) {
-			this.$set(this.localData, 'invoiceTypeCode', item.invoiceTypeCode);
+			this.$set(this.localData, 'invoiceTypeCode', item.code);
 			this.selectInvoiceShow = false;
-			this.setShowOptionsFn(this.localData.invoiceTypeCode);
+			console.log(item)
+			this.showOptions = this.setShowOptionsFn(item.code);
+			this.activeInvoiceType = item.code;
 			this.onResetFormDataFn();
 
 		},
@@ -279,11 +369,13 @@ export default {
 			this.$nextTick().then(() => {
 				this.$refs.formDataItem.initFormDataItem();
 				this.$refs.formData.resetValidation();
+				this.formDataInitValidateFn();
 			});
 		},
 		// 提交表单
 		onSubmitFn() {
 			let _this = this;
+			console.log(this.localDataList)
 			this.formDataInitValidateFn();
 			console.log('onSubmitFn', arguments);
 			if (this.validateState) {
@@ -291,13 +383,16 @@ export default {
 			}
 
 		},
+		// 多张归集时，删除方法
+		onDeleteFn() {
+			console.log('多张归集时，删除方法');
+		},
 		// 表单验证失败
 		onFailedFn(item) {
 			console.log('表单验证失败', item);
 			if (item.errors.length) {
 				this.$toast(item.errors[0].message);
 			}
-
 		},
 		// // vant上传组件
 		// beforeRead(files) {
@@ -308,7 +403,7 @@ export default {
 		// },
 		// 返回
 		goBackFn() {
-			this.$router.back()
+			this.$router.go(-1);
 		},
 		// 查询详情
 		appFindFn(uuid) {
@@ -365,9 +460,12 @@ export default {
 			}
 
 		},
+		// 表单输入后赋值
 		onInputFn(key, value) {
+			console.log(7, key, value)
 			this.$set(this.localData, key, value);
-			this.formDataInitValidateFn(key);
+
+			this.formDataInitValidateFn();
 		},
 		onBlurFn(key, config) {
 			// this.formDataInitValidateFn();
@@ -382,17 +480,19 @@ export default {
 			zeptoEvent.on('swipeLeft', (event) => {
 
 				if (this.initialSwipe < this.swipteListUuids.length - 1) {
-					
+
 					this.activeUuid = this.swipteListUuids[++this.initialSwipe];
-					console.log('left = ', this.initialSwipe, require, this.activeUuid,this.activeInvoiceType);
-					
+					console.log('left = ', this.initialSwipe, require, this.activeUuid, this.activeInvoiceType);
+
 					if (!require) {
+
 						this.appFindFn(this.activeUuid);
-					}else{
-						this.activeInvoiceType = this.loadDataList[this.initialSwipe].invoiceTypeCode;
-						this.setDataFn(this.loadDataList[this.initialSwipe]);
+					} else {
+						this.activeInvoiceType = this.localDataList[this.initialSwipe].invoiceTypeCode;
+						this.setDataFn(this.localDataList[this.initialSwipe]);
+						
 					}
-					this.setShowOptionsFn(this.localData.invoiceTypeCode);
+					this.showOptions = this.setShowOptionsFn(this.localData.invoiceTypeCode);
 					this.image = null;
 					this.images = [];
 				} else {
@@ -404,16 +504,16 @@ export default {
 				if (this.initialSwipe > 0) {
 
 					this.activeUuid = this.swipteListUuids[--this.initialSwipe];
-					
-					console.log('right = ', this.initialSwipe, require, this.activeUuid,this.activeInvoiceType);
-					
+
+					console.log('right = ', this.initialSwipe, require, this.activeUuid, this.activeInvoiceType);
+
 					if (!require) {
 						this.appFindFn(this.activeUuid);
-					}else{
-						this.activeInvoiceType = this.loadDataList[this.initialSwipe].invoiceTypeCode;
-						this.setDataFn(this.loadDataList[this.initialSwipe]);
+					} else {
+						this.activeInvoiceType = this.localDataList[this.initialSwipe].invoiceTypeCode;
+						this.setDataFn(this.localDataList[this.initialSwipe]);
 					}
-					this.setShowOptionsFn(this.localData.invoiceTypeCode);
+					this.showOptions = this.setShowOptionsFn(this.localData.invoiceTypeCode);
 					this.image = null;
 					this.images = [];
 				} else {
@@ -424,32 +524,34 @@ export default {
 		// 根据类型区分表单显示字段
 		setShowOptionsFn(invoiceTypeCode) {
 			this.isReadOnly = this.localData.checkState === '1' ? true : false;
-			this.showOptions = [];
+			console.log(invoiceTypeCode)
+			// this.showOptions = [];
 			if (this.VATGClass.includes(invoiceTypeCode)) {
 				// console.log('增值税专用发票、机动车销售统一发票、货运运输业增值税专用发票')
-				this.showOptions = this.VATGOptions;
+				return this.VATGOptions;
 			} else if (this.VATSElectcClass.includes(invoiceTypeCode)) {
 				// console.log('增值税普通发票、增值税普通发票(电子)、增值税普通发票(卷式)、增值税电子普通发票(通行费)')
-				this.showOptions = this.VATSElectcOption;
+				return this.VATSElectcOption;
 			} else if (this.aviationClass.includes(invoiceTypeCode)) {
 				// console.log('航空')
-				this.showOptions = this.aviationShowOptions;
+				return this.aviationShowOptions;
 			} else if (this.taxiClass.includes(invoiceTypeCode)) {
 				// console.log('出租车票')
-				this.showOptions = this.taxiShowOptions;
+				return this.taxiShowOptions;
 			} else if (this.trainAndRealNameClass.includes(invoiceTypeCode)) {
 				// console.log('火车票、公路、水路、其他（实名）')
-				this.showOptions = this.trainAndRealNameShowOptions;
+				return this.trainAndRealNameShowOptions;
 			} else if (this.carClass.includes(invoiceTypeCode)) {
 				// console.log('汽车票')
-				this.showOptions = this.carShowOptions;
+				return this.carShowOptions;
 			} else if (this.QCGClass.includes(invoiceTypeCode)) {
 				// console.log('定额发票、通用、政府非税收')
-				this.showOptions = this.QCGShowOptions;
+				return this.QCGShowOptions;
 			} else if (invoiceTypeCode === "00") {
 				// console.log('其他')
-				this.showOptions = this.otherShowOptions;
-			}else{
+				return this.otherShowOptions;
+			} else {
+				return [];
 				// console.log('匹配失败',invoiceTypeCode)
 			}
 
@@ -590,6 +692,10 @@ export default {
 					ids: id
 				}
 			})
+		},
+		// 隐藏全局状态的左右滑动提示
+		changeTipsShowFn() {
+			this.setTipsShowStateFn(false);
 		}
 
 	},

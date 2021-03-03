@@ -1,9 +1,9 @@
 .detail {
-	background: #F5F5F5;
+	background: #fff;
 }
 
 .detail-header {
-	height: 110px;
+	height: 80px;
 	background: #229FFF;
 	padding: 15px;
 	box-sizing: border-box;
@@ -11,8 +11,10 @@
 
 .detail-header .detail-header-bg {
 	background: #fff;
-	height: 100%;
+	/*height: 100%;*/
+	height:80px;
 	border-radius: 5px;
+	box-shadow: 0 5px 10px 0 #ccc;
 }
 
 .detail-thumbnail-box {
@@ -58,6 +60,7 @@
 	font-size: 13px;
 	border-bottom: 1px solid #ddd;
 	box-sizing: border-box;
+	margin-top:30px;
 }
 
 .check-status .van-icon {
@@ -93,6 +96,8 @@
 	bottom: 0;
 	padding: 10px;
 	box-sizing: border-box;
+
+	border-top: 1px solid #eee;
 }
 
 .form-submit button {
@@ -129,4 +134,23 @@
 }
 .detial-preview-box /deep/ .van-image-preview__image{
 	padding:20px;
+}
+.detail-multiple-form{
+	height:0;
+	overflow: hidden;
+}
+.multiple-tips{
+	position: absolute;
+	z-index: 9999;
+	width:100%;
+	top:0;
+	bottom:0;
+	background: rgba(0,0,0,0.7)
+}
+.multiple-tips img{
+	width: 90%;
+	position: absolute;
+	top:50%;
+	left:50%;
+	transform: translate(-50%,-50%);
 }

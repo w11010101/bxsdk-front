@@ -105,7 +105,10 @@
 .floor-old.container-part{
 	
 }
-
+.back-tips /deep/ .van-dialog__message{
+	font-size: 16px;
+	padding:15px;
+}
 
 
 
