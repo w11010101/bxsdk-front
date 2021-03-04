@@ -4,7 +4,7 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-	token:'',
+	token: '',
 	state: {
 		invoiceType: [
 			// { "invoiceTypeName": "增值税专用发票", "invoiceTypeCode": "01" },
@@ -14,7 +14,6 @@ export default new Vuex.Store({
 			// { "invoiceTypeName": "增值税电子普通发票(通行费)", "invoiceTypeCode": "14" },
 			// { "invoiceTypeName": "机动车销售统一发票", "invoiceTypeCode": "03" },
 			// { "invoiceTypeName": "货运运输业增值税专用发票", "invoiceTypeCode": "02" },
-
 			// { "invoiceTypeName": "出租车票", "invoiceTypeCode": "91" },
 			// { "invoiceTypeName": "火车票", "invoiceTypeCode": "92" },
 			// { "invoiceTypeName": "航空客运电子客票行程单", "invoiceTypeCode": "90" },
@@ -27,36 +26,41 @@ export default new Vuex.Store({
 			// { "invoiceTypeName": "政府非税收收入一般缴款书", "invoiceTypeCode": "98" },
 			// { "invoiceTypeName": "其他", "invoiceTypeCode": "00" }
 		],
-		
-		// 供详情页面左右滑动的列表
-		detailListUuid:[],
-		// 根据发票类型重置必填项后的
-		resetFormDataConfig:{},
-		// 左右滑动状态提示，默认只显示一次
-		tipsShowState:true
+
+		detailListUuid: [], // 供详情页面左右滑动的列表
+
+		resetFormDataConfig: {}, // 根据发票类型重置必填项后的
+
+		tipsShowState: true, // 左右滑动状态提示，默认只显示一次
+
+		listDateImgs: [], // 列表详情的发票图片
 	},
 	mutations: {
-		saveInvoiceTypeFn(state,data){
-			console.log(66,data)
+		saveInvoiceTypeFn(state, data) {
+			console.log(66, data)
 			state.invoiceType = data;
-			
+
 		},
 		// 保存token
-		saveToken(state,token){
+		saveToken(state, token) {
 			state.token = token;
-			localStorage.setItem('token',token);
+			localStorage.setItem('token', token);
 		},
 		// 保存当前列表的uuid
-		getDetailListUuidFn(state,list){
+		getDetailListUuidFn(state, list) {
 			state.detailListUuid = list;
 		},
 		// 
-		setResetFormDataConfig(state,object){
+		setResetFormDataConfig(state, object) {
 			state.resetFormDataConfig = object;
 		},
 		// 修改提示左右滑动切换状态
-		setTipsShowStateFn(state,isShow){
+		setTipsShowStateFn(state, isShow) {
 			state.tipsShowState = isShow;
+		},
+		// 保存列表详情的发票图片
+		saveListDataImgsFn(state, base64) {
+			state.listDateImgs.push(base64||[])
 		}
 	},
 	actions: {},

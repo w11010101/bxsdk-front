@@ -42,8 +42,8 @@
 								<van-button block color='#229FFF' @click='goBackFn'>返回</van-button>
 							</template>
 							<template v-else> -->
-								<van-button block color='#229FFF' @click='onSubmitFn' v-if='validateState'>保存</van-button>
-								<van-button block color='#ccc' @click='onSubmitFn' v-else>保存</van-button>
+							<van-button block color='#229FFF' @click='onSubmitFn' v-if='validateState'>保存</van-button>
+							<van-button block color='#ccc' @click='onSubmitFn' v-else>保存</van-button>
 							<!-- </template> -->
 						</van-col>
 						<van-col span='6' v-if='localDataList.length'>
@@ -165,14 +165,14 @@ export default {
 		}
 	},
 	computed: {
-		...mapState(['invoiceType', 'detailListUuid', 'resetFormDataConfig', 'tipsShowState']),
+		...mapState(['invoiceType', 'detailListUuid', 'resetFormDataConfig', 'tipsShowState', 'listDateImgs']),
 	},
 	watch: {
 		selectInvoiceShow(newVal, oldVal) {
 			this.selectState = newVal;
 		},
-		initialSwipe(newVal,oldVal){
-			document.title = ++newVal+'/'+this.localDataList.length;
+		initialSwipe(newVal, oldVal) {
+			document.title = ++newVal + '/' + this.localDataList.length;
 		}
 	},
 	created() {
@@ -248,7 +248,7 @@ export default {
 
 
 				});
-				document.title = '1/'+this.localDataList.length;
+				document.title = '1/' + this.localDataList.length;
 				console.log(4, this.$refs)
 				this.$nextTick().then(() => {
 					console.log(4, this.localDataListShowOptions)
@@ -275,7 +275,7 @@ export default {
 		}
 	},
 	methods: {
-		...mapMutations(['setTipsShowStateFn']),
+		...mapMutations(['setTipsShowStateFn', 'saveListDataImgsFn']),
 		// 获取查验结果
 		getCheckStateFn,
 		// 过滤当前发票属于哪种类
@@ -310,7 +310,7 @@ export default {
 			this.$nextTick().then(() => {
 				console.log('表单初始化验证', refName, this.$refs[refName]);
 				let ref = isToString(this.$refs[refName]) === 'Array' ? this.$refs[refName][0] : this.$refs[refName];
-				console.log(5, refName,ref)
+				console.log(5, refName, ref)
 				ref.validate().then(state => {
 					console.log(1);
 					this.validateState = true;
@@ -334,7 +334,6 @@ export default {
 		// 格式化发票类型(下拉选择)
 		formatInvoiceOptionFn() {
 			this.invoiceType.forEach(item => {
-				console.log(item)
 				this.localInvoiceType.push({
 					text: item.invoiceTypeName,
 					code: item.invoiceTypeCode
@@ -419,6 +418,7 @@ export default {
 				this.swipteListUuids.forEach((item, index) => {
 					if (item == this.localData.uuid) {
 						this.initialSwipe = index;
+
 					}
 				});
 				// this.onResetFormDataFn();
@@ -428,6 +428,11 @@ export default {
 		},
 		// 获取发票图片
 		getImg(uuid) {
+			let baseImObj = this.listDateImgs.filter(item=>item.uuid == uuid);
+			if(baseImObj.length){
+				this.setBase64InvoiceImgFn(baseImObj[0].base64);
+				return;
+			}
 			this.axios({
 				url: httpApi.app.getImg,
 				data: {
@@ -438,6 +443,10 @@ export default {
 				if (resolve.status) {
 					if (uuid === this.localData.uuid) {
 						this.setBase64InvoiceImgFn('data:image/png;base64,' + resolve.data);
+						this.saveListDataImgsFn({
+							uuid,
+							base64: 'data:image/png;base64,' + resolve.data
+						});
 					}
 				} else {
 					this.setBase64InvoiceImgFn();
@@ -490,7 +499,7 @@ export default {
 					} else {
 						this.activeInvoiceType = this.localDataList[this.initialSwipe].invoiceTypeCode;
 						this.setDataFn(this.localDataList[this.initialSwipe]);
-						
+
 					}
 					this.showOptions = this.setShowOptionsFn(this.localData.invoiceTypeCode);
 					this.image = null;

@@ -14,6 +14,7 @@ export default {
         }
     },
     mounted() {
+        console.log(95,IsPC())
         if (IsPC()) {
             this.$router.replace('pcIndex');
         } else {
