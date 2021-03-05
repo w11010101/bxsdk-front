@@ -76,8 +76,7 @@ export default {
         appFind: '/app/common/invoice/find',
         //删除发票信息
         deleteInvoice: '/app/common/invoice/delete',
-        //其他发票保存接口
-        collectByOther1: '/app/common/invoice/collectByOther',
+        
         //发票内容更新
         updateInvoice: '/app/common/invoice/update',
         //获取发票类型列表
@@ -92,33 +91,41 @@ export default {
         uploadImg: '/app/common/invoice/uploadImg',
         //二维码删除发票图片
         deleteImg: '/app/common/invoice/deleteImg',
-        //手动录入发票保存接口
-        collectByHand: '/app/common/invoice/collectByHand',
+        
         //H5票夹接口url
         //获取费用类型
         selectExpenseList1: '/app/common/invoice/selectExpenseList',
         //混扫保存发票接口
         updateList: '/app/common/invoice/updateList',
-        //混扫保存发票接口 web
-        updateListWeb: '/web/common/invoice/updateList',
+        
         //据用户名称，用户证件号码后四位匹配完整证件号码
         getIdentity: '/app/common/invoice/getIdentityNumberByNameAndFourID',
         // 发票规则校验接口
         invoiceComplianceCheck: '/app/common/invoice/invoiceComplianceCheck',
         // 发票规则校验接口(混扫)
         invoiceComplianceCheckList: '/app/common/invoice/invoiceComplianceCheckList',
-        // 发票规则校验接口(混扫)
-        invoiceComplianceCheckListWeb: '/web/common/invoice/invoiceComplianceCheckList',
-        // 获取滴滴信息
-        getDDInfo: '/app/common/invoice/getDDInfo',
-        // 修改授权状态
-        updateDdidUserInfo: '/app/common/invoice/updateDdidUserInfo',
-        // 修改存在状态
-        getDDRuleState: '/app/common/invoice/getDDRuleState',
+        
         // 删除附件
         deleteInvoiceFiles:'/app/common/invoice/deleteInvoiceFiles',
         // pdf
         collectByPdf: "/app/common/invoice/collectByPdf",
+        // 废弃 ------------------------------
+        // 发票规则校验接口(混扫)
+        invoiceComplianceCheckListWeb: '/web/common/invoice/invoiceComplianceCheckList',// 废弃
+        // //混扫保存发票接口 web
+        // updateListWeb: '/web/common/invoice/updateList', // 废弃
+        // //手动录入发票保存接口
+        // collectByHand: '/app/common/invoice/collectByHand',// 废弃
+        // //其他发票保存接口
+        // collectByOther1: '/app/common/invoice/collectByOther', // 废弃
+        // 第三方 ------------------------------
+        // // 获取滴滴信息
+        // getDDInfo: '/app/common/invoice/getDDInfo',
+        // // 修改授权状态
+        // updateDdidUserInfo: '/app/common/invoice/updateDdidUserInfo',
+        // // 修改存在状态
+        // getDDRuleState: '/app/common/invoice/getDDRuleState',
+        
         
     },
     previewFile:'/web/common/invoice/previewFile',

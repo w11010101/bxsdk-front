@@ -31,11 +31,11 @@
 		<div class='detail-form'>
 			<!--  -->
 			<van-form @failed='onFailedFn' ref='formData' :show-error-message='false' :show-error='false'>
-				<FormDataItem ref='formDataItem' v-if='showOptions.length' :showOptions='showOptions' :uuid='localData.uuid' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn' @onBlurFn='onBlurFn' @onDateConfirmFn='onDateConfirmFn' @afterFileFn='onAfterFileFn' @deleteFile='onSaveDelFileFn'></FormDataItem>
+				<FormDataItem ref='formDataItem' v-if='showOptions.length' :showOptions='showOptions' :uuid='localData.uuid' :data='localData' :isReadOnly='isReadOnly' @onInputFn='onInputFn'  @onDateConfirmFn='onDateConfirmFn' @afterFileFn='onAfterFileFn' @deleteFile='onSaveDelFileFn'></FormDataItem>
 				<div class='form-submit'>
 					<van-row gutter='10'>
 						<van-col span='6'>
-							<van-button block color='#229FFF' @click='onShareFn'>分享</van-button>
+							<van-button block color='#229FFF' native-type="button" @click='onShareFn'>分享</van-button>
 						</van-col>
 						<van-col :span='localDataList.length?12:18'>
 							<!-- <template v-if='!localDataList.length && !requireState && validateState'>
@@ -47,7 +47,7 @@
 							<!-- </template> -->
 						</van-col>
 						<van-col span='6' v-if='localDataList.length'>
-							<van-button block type='danger' @click='onDeleteFn'>删除</van-button>
+							<van-button block type='danger' native-type="button" @click='onDeleteFn'>删除</van-button>
 						</van-col>
 					</van-row>
 				</div>
@@ -172,7 +172,7 @@ export default {
 			this.selectState = newVal;
 		},
 		initialSwipe(newVal, oldVal) {
-			document.title = ++newVal + '/' + this.localDataList.length;
+			document.title = ++newVal + '/' + (this.localDataList.length||this.detailListUuid.length);
 		}
 	},
 	created() {
@@ -262,6 +262,7 @@ export default {
 			}
 		} else {
 			// 非归集
+			// document.title = ++newVal + '/' + (this.localDataList.length||this.detailListUuid.length);
 			this.multipleTips = true;
 			this.appFindFn(item.uuid);
 			this.detailListUuid.forEach(item => {
@@ -384,7 +385,9 @@ export default {
 		},
 		// 多张归集时，删除方法
 		onDeleteFn() {
-			console.log('多张归集时，删除方法');
+			
+			let uuid = this.localData.uuid;
+			console.log('多张归集时，删除方法',uuid);
 		},
 		// 表单验证失败
 		onFailedFn(item) {
@@ -476,9 +479,7 @@ export default {
 
 			this.formDataInitValidateFn();
 		},
-		onBlurFn(key, config) {
-			// this.formDataInitValidateFn();
-		},
+		// 日期类型选择
 		onDateConfirmFn(key, value) {
 			this.$set(this.localData, key, value);
 			this.formDataInitValidateFn();
@@ -635,6 +636,7 @@ export default {
 			this.shareDialogShow = true;
 			// this.showShare = true;
 		},
+		// 分享类型选择
 		onShareSelectFn(option) {
 			this.$toast(option.name);
 			this.showShare = false;
@@ -658,8 +660,6 @@ export default {
 					});
 				}, 500)
 			}
-
-
 		},
 		// 附件选择后的回调
 		onAfterFileFn({ file }) {
@@ -676,7 +676,7 @@ export default {
 			this.deleteFileList.push(file.id);
 			this.$set(this.$data, 'uploadfiles', this.uploadfiles.filter(item => !this.deleteFileList.includes(item.id)));
 		},
-		// 删除附件接口
+		// 删除附件
 		deleteInvoiceFilesFn(id) {
 
 			let deleteFilePromise = [];

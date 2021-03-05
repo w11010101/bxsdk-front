@@ -12,7 +12,7 @@
 				<van-button class='search-filter-btn' type="default" plain @click='filterShow=true'>
 					<van-icon name="filter-o" size='24' :color='isSearchState?"#229FFF":"#595959"' />
 				</van-button>
-				<van-button class='search-filter-btn' type="default" plain>
+				<van-button class='search-filter-btn' type="default" plain @click='onShareFn'>
 					<van-icon name="share-o" size='24' />
 				</van-button>
 			</div>
@@ -173,6 +173,10 @@ export default {
 			this.activeDate = 'all';
 			this.activeDateIndex = this.years.length - 1;
 			this.activeInvoiceType = [];
+		},
+		// 分享
+		onShareFn(){
+			this.$toast('暂时关闭分享功能')
 		}
 	}
 }

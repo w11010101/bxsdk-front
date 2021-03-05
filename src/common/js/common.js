@@ -261,8 +261,7 @@ export function isToString(obj) {
 export function getCheckStateFn(value) {
     switch (value) {
         case "0":
-            // return '—';
-            return '查验失败';
+            return '——';
             break;
         case "1":
             return '查验成功';
